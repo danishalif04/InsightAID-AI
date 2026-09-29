@@ -16,4 +16,5 @@ export const SocialIntelligence = lazy(() => import('@/pages/SocialIntelligence'
 export const Reports = lazy(() => import('@/pages/Reports'))
 export const DatasetManagement = lazy(() => import('@/pages/DatasetManagement'))
 export const SettingsPage = lazy(() => import('@/pages/SettingsPage'))
+export const Onboarding = lazy(() => import('@/pages/Onboarding'))
 export const NotFound = lazy(() => import('@/pages/NotFound'))

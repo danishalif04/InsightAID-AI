@@ -38,4 +38,5 @@ export const PAGE_TITLES = {
   [PATHS.reports]: 'Reports and Export',
   [PATHS.datasets]: 'Dataset Management',
   [PATHS.settings]: 'Settings',
+  [PATHS.onboarding]: 'Business Planning',
 }

@@ -11,4 +11,5 @@ export const PATHS = {
   reports: '/reports',
   datasets: '/datasets',
   settings: '/settings',
+  onboarding: '/onboarding',
 }
