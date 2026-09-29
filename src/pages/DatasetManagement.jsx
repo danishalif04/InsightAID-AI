@@ -1,46 +1,145 @@
-import { useRef, useState } from 'react'
-import { CheckCircle2, HardDrive, RefreshCw, UploadCloud, Wifi } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { AlertCircle, CheckCircle2, Database, HardDrive, RefreshCw, UploadCloud, Wifi, WifiOff } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
 import Table from '@/components/ui/Table'
 import ProgressBar from '@/components/ui/ProgressBar'
+import Dialog from '@/components/ui/Dialog'
 import { useNotifications } from '@/hooks/useNotifications'
-import { apiConnections, recentImports as initialImports, storageUsage } from '@/data/datasetData'
+import { useMode } from '@/hooks/useMode'
+import { storageUsage } from '@/data/datasetData'
+import { parseCsv } from '@/utils/csvParser'
+import { inferTemplateId } from '@/utils/datasetValidation'
+import { ingestRows, seedFixtureSample } from '@/services/dataPipelineService'
+import { getAllSourceStatuses } from '@/adapters/registry'
+import { SOURCE_STATUS } from '@/adapters/sourceStatus'
 
 const STATUS_TONE = { success: 'success', warning: 'warning', error: 'danger' }
-const LANGUAGE_COLORS = ['#22c55e', '#60a5fa', '#a8a29e']
+
+// Mirrors FYP2.md §39's supported API status vocabulary — never render a fake "Connected".
+const CONNECTION_STATUS_META = {
+  [SOURCE_STATUS.CONNECTED]: { label: 'Connected', tone: 'success', icon: Wifi },
+  [SOURCE_STATUS.NOT_CONFIGURED]: { label: 'Not Configured', tone: 'neutral', icon: WifiOff },
+  [SOURCE_STATUS.AUTH_REQUIRED]: { label: 'Auth Required', tone: 'warning', icon: AlertCircle },
+  [SOURCE_STATUS.RATE_LIMITED]: { label: 'Rate Limited', tone: 'warning', icon: AlertCircle },
+  [SOURCE_STATUS.ERROR]: { label: 'Error', tone: 'danger', icon: AlertCircle },
+  [SOURCE_STATUS.DISABLED]: { label: 'Disabled', tone: 'neutral', icon: WifiOff },
+}
+
+function formatTimestamp(value) {
+  if (!value) return 'Never synced'
+  return `Last sync: ${new Date(value).toLocaleString('en-MY')}`
+}
 
 function formatBytes(bytes) {
   if (bytes >= 1_000_000) return `${(bytes / 1_000_000).toFixed(1)} MB`
   return `${(bytes / 1_000).toFixed(0)} KB`
 }
 
+function readFileAsText(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(String(reader.result ?? ''))
+    reader.onerror = () => reject(reader.error)
+    reader.readAsText(file)
+  })
+}
+
+/** Parses an uploaded file into { headers, records } — CSV and JSON (array of objects) only; .xlsx is not supported yet. */
+async function parseUploadedFile(file) {
+  const isJson = file.name.toLowerCase().endsWith('.json')
+  const isCsv = file.name.toLowerCase().endsWith('.csv')
+
+  if (!isJson && !isCsv) {
+    throw new Error(`${file.name}: only .csv and .json are supported right now — .xlsx support is planned but not built yet.`)
+  }
+
+  const text = await readFileAsText(file)
+
+  if (isJson) {
+    const parsed = JSON.parse(text)
+    const records = Array.isArray(parsed) ? parsed : [parsed]
+    const headers = records.length > 0 ? Object.keys(records[0]) : []
+    return { headers, records }
+  }
+
+  return parseCsv(text)
+}
+
 export default function DatasetManagement() {
   const { notify } = useNotifications()
+  const { mode } = useMode()
   const fileInputRef = useRef(null)
   const [dragActive, setDragActive] = useState(false)
-  const [imports, setImports] = useState(initialImports)
+  const [imports, setImports] = useState([])
+  const [sources, setSources] = useState([])
+  const [loadingSources, setLoadingSources] = useState(true)
   const [syncingId, setSyncingId] = useState(null)
+  const [seeding, setSeeding] = useState(false)
+  const [reportDialog, setReportDialog] = useState(null)
 
-  const handleFiles = (files) => {
-    Array.from(files).forEach((file) => {
-      const id = `imp-${Date.now()}-${file.name}`
-      setImports((current) => [
-        { id, file: file.name, size: file.size, records: 0, quality: 0, status: 'processing' },
-        ...current,
-      ])
-      setTimeout(() => {
-        setImports((current) =>
-          current.map((row) =>
-            row.id === id
-              ? { ...row, records: Math.floor(Math.random() * 20000) + 500, quality: Math.floor(Math.random() * 15) + 85, status: 'success' }
-              : row
-          )
-        )
-        notify(`${file.name} imported successfully.`)
-      }, 1200)
-    })
+  const refreshSources = async () => {
+    try {
+      setSources(await getAllSourceStatuses())
+    } catch {
+      notify('Could not load data source statuses.', 'error')
+    } finally {
+      setLoadingSources(false)
+    }
+  }
+
+  useEffect(() => {
+    refreshSources()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const visibleSources = useMemo(() => sources.filter((source) => source.modes.includes(mode)), [sources, mode])
+
+  const recordImportResult = ({ file, size, templateId, result }) => {
+    const { validation, rawCount, processedCount } = result
+    const status = !validation.readyForProcessing ? 'error' : validation.warnings.length > 0 ? 'warning' : 'success'
+    setImports((current) => [
+      {
+        id: `imp-${Date.now()}-${file}`,
+        file,
+        size,
+        templateId,
+        records: rawCount,
+        processedCount,
+        quality: validation.warnings.length === 0 ? 100 : Math.max(0, 100 - validation.warnings.length * 10),
+        status,
+        validation,
+      },
+      ...current,
+    ])
+  }
+
+  const handleFiles = async (files) => {
+    for (const file of Array.from(files)) {
+      try {
+        const { headers, records } = await parseUploadedFile(file)
+        const templateId = inferTemplateId(headers)
+
+        if (!templateId) {
+          notify(`${file.name}: couldn't match its columns to any known template — check the column headers.`, 'error')
+          continue
+        }
+
+        const source = file.name.toLowerCase().endsWith('.json') ? 'json_upload' : 'csv_upload'
+        const result = await ingestRows(templateId, records, source, file.name)
+        recordImportResult({ file: file.name, size: file.size, templateId, result })
+
+        if (result.validation.readyForProcessing) {
+          notify(`${file.name} imported as "${templateId}" — ${result.rawCount} row(s), ${result.validation.warnings.length} warning(s).`)
+        } else {
+          notify(`${file.name} could not be fully processed — see the validation report.`, 'error')
+        }
+      } catch (error) {
+        notify(error.message ?? `Could not read ${file.name}.`, 'error')
+      }
+    }
+    refreshSources()
   }
 
   const handleDrop = (event) => {
@@ -49,17 +148,40 @@ export default function DatasetManagement() {
     if (event.dataTransfer.files.length) handleFiles(event.dataTransfer.files)
   }
 
-  const handleSync = (connection) => {
-    setSyncingId(connection.id)
-    setTimeout(() => {
+  const handleSync = async (source) => {
+    setSyncingId(source.id)
+    try {
+      const result = await source.sync()
+      notify(result.message, result.status === SOURCE_STATUS.CONNECTED ? 'success' : 'info')
+    } catch (error) {
+      notify(error.message ?? `Could not sync ${source.name}.`, 'error')
+    } finally {
       setSyncingId(null)
-      notify(`${connection.name} synced successfully.`)
-    }, 900)
+      refreshSources()
+    }
+  }
+
+  const handleSeedSample = async () => {
+    setSeeding(true)
+    try {
+      const { reviews, social } = await seedFixtureSample()
+      recordImportResult({ file: 'sample_reviews.csv', size: 0, templateId: 'reviews', result: reviews })
+      recordImportResult({ file: 'sample_social.csv', size: 0, templateId: 'social', result: social })
+      notify('Sample dataset loaded through the real pipeline (validation, preprocessing, feature engineering).')
+    } catch {
+      notify('Could not load the sample dataset — please try again.', 'error')
+    } finally {
+      setSeeding(false)
+      refreshSources()
+    }
   }
 
   return (
     <div className="space-y-6">
-      <Card title="Upload Dataset" description="CSV, JSON, or XLSX — up to 100 MB per file">
+      <Card
+        title="Upload Dataset"
+        description="CSV or JSON — up to 100 MB per file. Columns must match one of the 5 downloadable templates (Sales, Reviews, Social, Product, Expenses)."
+      >
         <div
           onDragOver={(event) => {
             event.preventDefault()
@@ -77,51 +199,64 @@ export default function DatasetManagement() {
           <p className="mt-3 text-sm font-medium text-slate-700 dark:text-slate-200">
             Drag and drop files here, or click to browse
           </p>
-          <p className="mt-1 text-xs text-slate-400">CSV, JSON, XLSX up to 100 MB</p>
-          <Button
-            variant="secondary"
-            size="sm"
-            className="mt-4"
-            onClick={() => fileInputRef.current?.click()}
-          >
-            Browse Files
-          </Button>
+          <p className="mt-1 text-xs text-slate-400">CSV or JSON — .xlsx is not supported yet</p>
+          <div className="mt-4 flex flex-wrap justify-center gap-2">
+            <Button variant="secondary" size="sm" onClick={() => fileInputRef.current?.click()}>
+              Browse Files
+            </Button>
+            <Button variant="secondary" size="sm" icon={Database} loading={seeding} onClick={handleSeedSample}>
+              Load Sample Dataset
+            </Button>
+          </div>
           <input
             ref={fileInputRef}
             type="file"
             multiple
-            accept=".csv,.json,.xlsx"
+            accept=".csv,.json"
             className="hidden"
             onChange={(event) => event.target.files && handleFiles(event.target.files)}
           />
         </div>
       </Card>
 
-      <Card title="API Connection Status" description="Live data sources feeding this workspace">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          {apiConnections.map((connection) => (
-            <div key={connection.id} className="rounded-lg border border-line p-4 dark:border-line-dark">
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-2 text-sm font-medium text-slate-800 dark:text-slate-100">
-                  <Wifi className="size-4 text-accent-500" aria-hidden="true" />
-                  {connection.name}
-                </span>
-                <Badge tone="success">Connected</Badge>
-              </div>
-              <p className="mt-2 text-xs text-slate-400">Last sync: {connection.lastSync}</p>
-              <Button
-                variant="secondary"
-                size="sm"
-                icon={RefreshCw}
-                loading={syncingId === connection.id}
-                className="mt-3 w-full"
-                onClick={() => handleSync(connection)}
-              >
-                Sync
-              </Button>
-            </div>
-          ))}
-        </div>
+      <Card title="Data Source Status" description="Every source is checked independently — one failing never affects the others (FYP2.md §66)">
+        {loadingSources ? (
+          <p className="text-sm text-slate-500 dark:text-slate-400">Checking source status…</p>
+        ) : (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            {visibleSources.map((source) => {
+              const meta = CONNECTION_STATUS_META[source.status]
+              const StatusIcon = meta.icon
+              return (
+                <div key={source.id} className="rounded-lg border border-line p-4 dark:border-line-dark">
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-2 text-sm font-medium text-slate-800 dark:text-slate-100">
+                      <StatusIcon
+                        className={`size-4 ${source.status === SOURCE_STATUS.CONNECTED ? 'text-accent-500' : 'text-slate-400'}`}
+                        aria-hidden="true"
+                      />
+                      {source.name}
+                    </span>
+                    <Badge tone={meta.tone}>{meta.label}</Badge>
+                  </div>
+                  <p className="mt-2 text-xs text-slate-400">{formatTimestamp(source.lastSync)}</p>
+                  <p className="text-xs text-slate-400">{source.recordCount ?? 0} record(s)</p>
+                  {source.detail && <p className="mt-1 text-xs text-warning">{source.detail}</p>}
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    icon={RefreshCw}
+                    loading={syncingId === source.id}
+                    className="mt-3 w-full"
+                    onClick={() => handleSync(source)}
+                  >
+                    Sync
+                  </Button>
+                </div>
+              )
+            })}
+          </div>
+        )}
       </Card>
 
       <Card title="Storage Usage" description="Workspace storage and detected language mix">
@@ -142,7 +277,7 @@ export default function DatasetManagement() {
               <div className="h-2 w-full overflow-hidden rounded-full bg-line dark:bg-line-dark">
                 <div
                   className="h-full rounded-full"
-                  style={{ width: `${item.percent}%`, backgroundColor: LANGUAGE_COLORS[index] }}
+                  style={{ width: `${item.percent}%`, backgroundColor: ['#22c55e', '#60a5fa', '#a8a29e'][index] }}
                 />
               </div>
             </div>
@@ -150,37 +285,72 @@ export default function DatasetManagement() {
         </div>
       </Card>
 
-      <Card title="Recent Imports" description="History of uploaded datasets and data quality">
+      <Card title="Recent Imports" description="Real uploads and sample data run through the pipeline this session">
         <Table
           columns={[
             { key: 'file', label: 'File' },
-            { key: 'size', label: 'Size', align: 'right', render: (row) => formatBytes(row.size) },
-            { key: 'records', label: 'Records', align: 'right', render: (row) => row.records.toLocaleString() },
-            {
-              key: 'quality',
-              label: 'Quality',
-              align: 'right',
-              render: (row) => (row.status === 'processing' ? '—' : `${row.quality}%`),
-            },
+            { key: 'size', label: 'Size', align: 'right', render: (row) => (row.size ? formatBytes(row.size) : '—') },
+            { key: 'records', label: 'Rows', align: 'right', render: (row) => row.records.toLocaleString() },
+            { key: 'quality', label: 'Quality', align: 'right', render: (row) => `${row.quality}%` },
             {
               key: 'status',
               label: 'Status',
               align: 'right',
-              render: (row) =>
-                row.status === 'processing' ? (
-                  <Badge tone="info">Processing…</Badge>
-                ) : (
-                  <Badge tone={STATUS_TONE[row.status]}>
-                    {row.status === 'success' && <CheckCircle2 className="size-3" />}
-                    {row.status}
-                  </Badge>
-                ),
+              render: (row) => (
+                <Badge tone={STATUS_TONE[row.status]}>
+                  {row.status === 'success' && <CheckCircle2 className="size-3" />}
+                  {row.status}
+                </Badge>
+              ),
+            },
+            {
+              key: 'report',
+              label: '',
+              align: 'right',
+              render: (row) => (
+                <button
+                  type="button"
+                  onClick={() => setReportDialog(row)}
+                  className="text-xs font-medium text-accent-600 hover:underline dark:text-accent-400"
+                >
+                  View report
+                </button>
+              ),
             },
           ]}
           data={imports}
           getRowKey={(row) => row.id}
+          emptyMessage="No datasets imported yet this session — upload a file or load the sample dataset above."
         />
       </Card>
+
+      <Dialog open={Boolean(reportDialog)} onClose={() => setReportDialog(null)} title={`Validation report — ${reportDialog?.file ?? ''}`}>
+        {reportDialog && (
+          <div className="space-y-3 text-sm">
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Template: {reportDialog.templateId} · {reportDialog.records} row(s) · {reportDialog.processedCount} processed
+              into the normalized schema
+            </p>
+            <ul className="space-y-1.5">
+              {reportDialog.validation.checks.map((check) => (
+                <li key={check} className="flex items-start gap-2 text-slate-700 dark:text-slate-200">
+                  <CheckCircle2 className="mt-0.5 size-3.5 shrink-0 text-accent-500" aria-hidden="true" />
+                  {check}
+                </li>
+              ))}
+              {reportDialog.validation.warnings.map((warning) => (
+                <li key={warning} className="flex items-start gap-2 text-slate-700 dark:text-slate-200">
+                  <AlertCircle className="mt-0.5 size-3.5 shrink-0 text-warning" aria-hidden="true" />
+                  {warning}
+                </li>
+              ))}
+            </ul>
+            <p className="border-t border-line pt-3 text-xs font-medium dark:border-line-dark">
+              Ready for processing: {reportDialog.validation.readyForProcessing ? 'YES' : 'NO'}
+            </p>
+          </div>
+        )}
+      </Dialog>
     </div>
   )
 }
