@@ -19,10 +19,12 @@ import {
   AlertTriangle,
   ArrowDown,
   ArrowUp,
+  ClipboardList,
   Info,
   Lightbulb,
   RefreshCw,
   Sparkles,
+  X,
 } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
@@ -32,9 +34,12 @@ import ProgressBar from '@/components/ui/ProgressBar'
 import Skeleton from '@/components/ui/Skeleton'
 import ChartTooltip from '@/components/ui/ChartTooltip'
 import { useNotifications } from '@/hooks/useNotifications'
+import { useMode } from '@/hooks/useMode'
 import { PATHS } from '@/routes/paths'
 import { CHART_COLORS } from '@/theme/chartTheme'
 import { formatDelta } from '@/utils/formatters'
+import { getProfile } from '@/services/businessProfileService'
+import BusinessPlanningPanel from '@/components/common/BusinessPlanningPanel'
 import {
   dailyMentionVolume,
   executiveSummary,
@@ -79,15 +84,67 @@ function KpiCard({ label, display, delta, forecast, confidence, invertDelta }) {
 
 export default function Dashboard() {
   const { notify } = useNotifications()
+  const { mode, modeConfig } = useMode()
   const [loading, setLoading] = useState(true)
+  const [businessProfile, setBusinessProfile] = useState(null)
+  const [dismissedBanner, setDismissedBanner] = useState(false)
 
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 500)
     return () => clearTimeout(timer)
   }, [])
 
+  useEffect(() => {
+    getProfile()
+      .then(setBusinessProfile)
+      .catch(() => {})
+  }, [])
+
+  const showOnboardingBanner = businessProfile && !businessProfile.exists && !dismissedBanner
+  const showPlanningPanel = businessProfile?.exists && businessProfile.dataAvailabilityPath === 'no_data'
+
   return (
     <div className="space-y-6">
+      {showPlanningPanel && (
+        <div>
+          <p className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">Business Planning Mode</p>
+          <BusinessPlanningPanel
+            values={businessProfile.values}
+            provenance={businessProfile.provenance}
+            dataAvailabilityPath={businessProfile.dataAvailabilityPath}
+          />
+        </div>
+      )}
+
+      {showOnboardingBanner && (
+        <Card bodyClassName="p-5">
+          <div className="flex flex-wrap items-center gap-4">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-accent-100 dark:bg-accent-600/15">
+              <ClipboardList className="size-4 text-accent-600 dark:text-accent-400" aria-hidden="true" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Set up your business profile</p>
+              <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                Tell us about your business — with or without existing data — so InsightAid can tailor this dashboard to you.
+              </p>
+            </div>
+            <div className="flex shrink-0 items-center gap-2">
+              <Link to={PATHS.onboarding}>
+                <Button size="sm">Get started</Button>
+              </Link>
+              <button
+                type="button"
+                onClick={() => setDismissedBanner(true)}
+                aria-label="Dismiss"
+                className="rounded-lg p-1.5 text-slate-400 hover:bg-canvas hover:text-slate-700 dark:hover:bg-canvas-dark dark:hover:text-slate-200"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+          </div>
+        </Card>
+      )}
+
       <Card className="border-brand-900 bg-brand-950" bodyClassName="p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex gap-3">
@@ -95,9 +152,14 @@ export default function Dashboard() {
               <Sparkles className="size-4 text-accent-400" aria-hidden="true" />
             </span>
             <div>
-              <p className="text-sm font-semibold text-white">AI Executive Summary</p>
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="text-sm font-semibold text-white">AI Executive Summary</p>
+                <span className="rounded-full bg-white/10 px-2.5 py-1 text-xs font-medium text-accent-300">
+                  {modeConfig.label}
+                </span>
+              </div>
               <p className="mt-1 max-w-3xl text-sm leading-relaxed text-brand-200">
-                {executiveSummary.headline}
+                {executiveSummary[mode].headline}
               </p>
             </div>
           </div>

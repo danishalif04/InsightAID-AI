@@ -1,17 +1,24 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { FileSpreadsheet, FileText, Presentation, Sparkles, Table } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Dialog from '@/components/ui/Dialog'
 import { useNotifications } from '@/hooks/useNotifications'
+import { useMode } from '@/hooks/useMode'
 import { exportFormats, executiveSummaryPreview, reportTemplates } from '@/data/reportsData'
 
 const FORMAT_ICONS = { pdf: FileText, excel: FileSpreadsheet, csv: Table, powerpoint: Presentation }
 
 export default function Reports() {
   const { notify } = useNotifications()
+  const { mode } = useMode()
   const [generating, setGenerating] = useState(null)
   const [activeReport, setActiveReport] = useState(null)
+
+  const visibleTemplates = useMemo(
+    () => reportTemplates.filter((template) => template.modes.includes(mode)),
+    [mode]
+  )
 
   const handleGenerate = (template) => {
     setGenerating(template.id)
@@ -59,7 +66,7 @@ export default function Reports() {
       </Card>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {reportTemplates.map((template) => (
+        {visibleTemplates.map((template) => (
           <Card key={template.id} bodyClassName="p-5">
             <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{template.name}</p>
             <p className="mt-1.5 text-xs leading-relaxed text-slate-500 dark:text-slate-400">{template.description}</p>

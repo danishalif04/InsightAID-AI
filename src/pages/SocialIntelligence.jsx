@@ -6,24 +6,29 @@ import Badge from '@/components/ui/Badge'
 import Table from '@/components/ui/Table'
 import ChartTooltip from '@/components/ui/ChartTooltip'
 import { CHART_COLORS } from '@/theme/chartTheme'
+import { useMode } from '@/hooks/useMode'
 import { mentionVolume7d, platformComparison, topInfluencers, topPosts, trendingHashtags } from '@/data/socialData'
 
 const SENTIMENT_TONE = { positive: 'success', neutral: 'neutral', negative: 'danger' }
 
 export default function SocialIntelligence() {
+  const { mode } = useMode()
   const [platform, setPlatform] = useState('tiktok')
   const platformColor = platform === 'tiktok' ? CHART_COLORS.tiktok : CHART_COLORS.x
   const platformLabel = platform === 'tiktok' ? 'TikTok' : 'X'
 
   const filteredHashtags = useMemo(
-    () => trendingHashtags.filter((item) => item.platform === platform),
-    [platform]
+    () => trendingHashtags.filter((item) => item.platform === platform && item.mode === mode),
+    [platform, mode]
   )
   const filteredInfluencers = useMemo(
-    () => topInfluencers.filter((item) => item.platform === platform),
-    [platform]
+    () => topInfluencers.filter((item) => item.platform === platform && item.mode === mode),
+    [platform, mode]
   )
-  const filteredPosts = useMemo(() => topPosts.filter((item) => item.platform === platform), [platform])
+  const filteredPosts = useMemo(
+    () => topPosts.filter((item) => item.platform === platform && item.mode === mode),
+    [platform, mode]
+  )
   const maxHashtag = Math.max(...filteredHashtags.map((item) => item.mentions), 1)
 
   return (

@@ -27,29 +27,32 @@ export const mentionVolume7d = {
 }
 
 export const trendingHashtags = [
-  { hashtag: 'productlaunch', mentions: 3240, platform: 'tiktok' },
-  { hashtag: 'insightaid', mentions: 2680, platform: 'tiktok' },
-  { hashtag: 'customerservice', mentions: 2110, platform: 'x' },
-  { hashtag: 'pricing', mentions: 1870, platform: 'x' },
-  { hashtag: 'delivery', mentions: 1420, platform: 'tiktok' },
-  { hashtag: 'newfeature', mentions: 1180, platform: 'x' },
+  { hashtag: 'productlaunch', mentions: 3240, platform: 'tiktok', mode: 'startup' },
+  { hashtag: 'insightaid', mentions: 2680, platform: 'tiktok', mode: 'startup' },
+  { hashtag: 'customerservice', mentions: 2110, platform: 'x', mode: 'startup' },
+  { hashtag: 'newfeature', mentions: 1180, platform: 'x', mode: 'startup' },
+  { hashtag: 'pricing', mentions: 1870, platform: 'x', mode: 'ecommerce' },
+  { hashtag: 'delivery', mentions: 1420, platform: 'tiktok', mode: 'ecommerce' },
+  { hashtag: 'unboxing', mentions: 2360, platform: 'tiktok', mode: 'ecommerce' },
+  { hashtag: 'shopeefinds', mentions: 1540, platform: 'tiktok', mode: 'ecommerce' },
 ]
 
 export const topInfluencers = [
-  { handle: '@fatinreviews', platform: 'tiktok', followers: 482000, virality: 8.9, engagement: 12.4, sentiment: 'positive' },
-  { handle: '@klsavvy', platform: 'x', followers: 156000, virality: 6.1, engagement: 5.8, sentiment: 'neutral' },
-  { handle: '@growthwithzul', platform: 'tiktok', followers: 298000, virality: 7.4, engagement: 9.7, sentiment: 'positive' },
-  { handle: '@marketwatchmy', platform: 'x', followers: 91000, virality: 4.2, engagement: 3.9, sentiment: 'negative' },
-  { handle: '@dailyunbox', platform: 'tiktok', followers: 214000, virality: 6.8, engagement: 8.2, sentiment: 'positive' },
+  { handle: '@klsavvy', platform: 'x', followers: 156000, virality: 6.1, engagement: 5.8, sentiment: 'neutral', mode: 'startup' },
+  { handle: '@growthwithzul', platform: 'tiktok', followers: 298000, virality: 7.4, engagement: 9.7, sentiment: 'positive', mode: 'startup' },
+  { handle: '@marketwatchmy', platform: 'x', followers: 91000, virality: 4.2, engagement: 3.9, sentiment: 'negative', mode: 'startup' },
+  { handle: '@fatinreviews', platform: 'tiktok', followers: 482000, virality: 8.9, engagement: 12.4, sentiment: 'positive', mode: 'ecommerce' },
+  { handle: '@dailyunbox', platform: 'tiktok', followers: 214000, virality: 6.8, engagement: 8.2, sentiment: 'positive', mode: 'ecommerce' },
 ]
 
 export const topPosts = [
   {
     id: 'sp-1',
     platform: 'tiktok',
-    text: 'This dashboard literally caught our sentiment dip before I even noticed complaints coming in 🙌',
+    text: 'This dashboard literally caught our sentiment dip before I even noticed complaints coming in.',
     likes: 24800,
     shares: 3600,
+    mode: 'startup',
   },
   {
     id: 'sp-2',
@@ -57,6 +60,7 @@ export const topPosts = [
     text: 'Refund processed in under an hour after I flagged it. Customer service actually reads the feed apparently.',
     likes: 9100,
     shares: 1400,
+    mode: 'startup',
   },
   {
     id: 'sp-3',
@@ -64,6 +68,7 @@ export const topPosts = [
     text: 'Unboxing the new packaging — still think the price is a bit steep for students but quality is solid.',
     likes: 15600,
     shares: 2100,
+    mode: 'ecommerce',
   },
   {
     id: 'sp-4',
@@ -71,5 +76,6 @@ export const topPosts = [
     text: 'Delivery delay again this week. Third time this month, need a real fix not just an apology tweet.',
     likes: 4200,
     shares: 2800,
+    mode: 'ecommerce',
   },
 ]

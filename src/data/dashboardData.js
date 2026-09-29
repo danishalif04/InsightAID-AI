@@ -1,9 +1,16 @@
 /** Mock fixtures for the Executive Dashboard (Phase 4). Replace with API data in the backend-integration phase. */
 
 export const executiveSummary = {
-  headline:
-    'Overall sentiment is trending positive at 74.2% (+6.3% WoW), driven by strong TikTok reception of the new product launch. Crisis risk has eased to 18%, but market opportunity softened slightly as a competitor entered the mid-market segment.',
-  generatedAt: '2026-07-10T08:00:00+08:00',
+  startup: {
+    headline:
+      'Overall sentiment is trending positive at 74.2% (+6.3% WoW), driven by strong TikTok reception of the new product launch. Crisis risk has eased to 18%, but market opportunity softened slightly as a competitor entered the mid-market segment.',
+    generatedAt: '2026-07-10T08:00:00+08:00',
+  },
+  ecommerce: {
+    headline:
+      'Shopee and TikTok Shop mentions are up 21% this week, led by positive reviews of the new packaging. Delivery-related complaints across marketplace reviews remain the top negative driver — worth prioritizing before the next restock cycle.',
+    generatedAt: '2026-07-10T08:00:00+08:00',
+  },
 }
 
 export const kpis = [

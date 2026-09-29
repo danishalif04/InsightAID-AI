@@ -34,6 +34,7 @@ export const influentialPosts = [
     sentiment: 'positive',
     confidence: 0.94,
     engagement: 18200,
+    mode: 'startup',
   },
   {
     id: 'post-2',
@@ -43,6 +44,7 @@ export const influentialPosts = [
     sentiment: 'negative',
     confidence: 0.87,
     engagement: 6400,
+    mode: 'ecommerce',
   },
   {
     id: 'post-3',
@@ -52,6 +54,7 @@ export const influentialPosts = [
     sentiment: 'neutral',
     confidence: 0.71,
     engagement: 4100,
+    mode: 'ecommerce',
   },
   {
     id: 'post-4',
@@ -61,6 +64,7 @@ export const influentialPosts = [
     sentiment: 'positive',
     confidence: 0.91,
     engagement: 9800,
+    mode: 'startup',
   },
   {
     id: 'post-5',
@@ -70,6 +74,7 @@ export const influentialPosts = [
     sentiment: 'positive',
     confidence: 0.89,
     engagement: 15300,
+    mode: 'ecommerce',
   },
   {
     id: 'post-6',
@@ -79,6 +84,17 @@ export const influentialPosts = [
     sentiment: 'negative',
     confidence: 0.82,
     engagement: 3200,
+    mode: 'startup',
+  },
+  {
+    id: 'post-7',
+    platform: 'tiktok',
+    language: 'en',
+    text: 'Ordered via our Shopee store and it arrived a day early with a handwritten thank-you note — small touches like this keep me coming back.',
+    sentiment: 'positive',
+    confidence: 0.9,
+    engagement: 11400,
+    mode: 'ecommerce',
   },
 ]
 

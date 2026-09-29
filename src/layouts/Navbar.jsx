@@ -1,7 +1,8 @@
 import { Bell, Menu, Moon, Search, Sun } from 'lucide-react'
+import ModeSwitcher from '@/components/common/ModeSwitcher'
 
-/** App shell topbar — mobile menu trigger, page title, search, theme toggle, notifications, avatar. */
-export default function Navbar({ pageTitle, isDark, onToggleTheme, onOpenMobileSidebar }) {
+/** App shell topbar — mobile menu trigger, page title, mode switch, search, theme toggle, notifications, avatar. */
+export default function Navbar({ pageTitle, isDark, onToggleTheme, onOpenMobileSidebar, mode, onModeChange }) {
   return (
     <header className="flex items-center justify-between gap-4 border-b border-line bg-surface px-4 py-4 dark:border-line-dark dark:bg-surface-dark md:px-6">
       <div className="flex min-w-0 items-center gap-3">
@@ -19,6 +20,8 @@ export default function Navbar({ pageTitle, isDark, onToggleTheme, onOpenMobileS
       </div>
 
       <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+        <ModeSwitcher mode={mode} onChange={onModeChange} />
+
         <label className="relative hidden items-center sm:flex">
           <Search className="pointer-events-none absolute left-3 size-4 text-slate-400" aria-hidden="true" />
           <input

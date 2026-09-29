@@ -12,6 +12,7 @@ export const recommendations = [
     confidence: 88,
     roi: 34,
     timeframe: '1–2 weeks',
+    modes: ['startup', 'ecommerce'],
     reasoning:
       'Sentiment analysis shows 68% of negative mentions this week reference delivery delays, concentrated on TikTok. A direct, visible response from the brand has historically reduced negative sentiment velocity by 40% within 72 hours in similar cases.',
     actionChecklist: [
@@ -29,6 +30,7 @@ export const recommendations = [
     confidence: 91,
     roi: 21,
     timeframe: '3–5 days',
+    modes: ['startup', 'ecommerce'],
     reasoning:
       'Mention volume for "late delivery" is 3.2x baseline in the Klang Valley region specifically, correlating with a known 3rd-party courier outage. Forecast models project continued order volume growth, making capacity the binding constraint.',
     actionChecklist: [
@@ -45,6 +47,7 @@ export const recommendations = [
     confidence: 73,
     roi: 18,
     timeframe: '4–6 weeks',
+    modes: ['ecommerce'],
     reasoning:
       'A recurring request for a smaller packaging size appears in 12% of neutral/positive posts, primarily from students citing price sensitivity. Estimated addressable segment: ~8,000 mentions/month.',
     actionChecklist: [
@@ -61,6 +64,7 @@ export const recommendations = [
     confidence: 80,
     roi: 14,
     timeframe: '2–3 weeks',
+    modes: ['startup', 'ecommerce'],
     reasoning:
       'Mandarin-language mentions show the lowest average sentiment (61%) of the three tracked languages, with recurring complaints about response clarity. No current agent is tagged as a Mandarin speaker in support logs.',
     actionChecklist: [
@@ -77,6 +81,7 @@ export const recommendations = [
     confidence: 66,
     roi: 27,
     timeframe: '3–4 weeks',
+    modes: ['startup', 'ecommerce'],
     reasoning:
       'Organic mentions from creators with 50K–200K followers show 2.1x higher engagement-to-sentiment conversion than macro-influencer posts, at a fraction of typical campaign cost.',
     actionChecklist: [
@@ -93,6 +98,7 @@ export const recommendations = [
     confidence: 70,
     roi: 12,
     timeframe: '1–2 months',
+    modes: ['startup'],
     reasoning:
       'The last three crisis events took an average of 3.5 hours to detect manually before this dashboard was in place. Automating the initial response draft could reduce time-to-acknowledgement, which is the single strongest lever on crisis sentiment recovery.',
     actionChecklist: [
@@ -113,6 +119,7 @@ export const recommendationReserve = [
     confidence: 77,
     roi: 16,
     timeframe: '1 week',
+    modes: ['ecommerce'],
     reasoning:
       'Refund-related questions appear in 9% of comments across both English and Bahasa Melayu posts, most going unanswered publicly. A pinned FAQ reduces repeat questions and support load.',
     actionChecklist: [
@@ -129,8 +136,23 @@ export const recommendationReserve = [
     confidence: 68,
     roi: 11,
     timeframe: '3 weeks',
+    modes: ['ecommerce'],
     reasoning:
       'Proactive delivery updates correlate with a 22% reduction in "where is my order" mentions in comparable markets, easing pressure on both sentiment and support volume.',
     actionChecklist: [{ id: 'h1', label: 'Evaluate WhatsApp Business API integration', done: false }],
+  },
+  {
+    id: 'rec-9',
+    category: 'Growth',
+    priority: 'medium',
+    title: 'Set up a lightweight weekly metrics review with your co-founders',
+    impactScore: 52,
+    confidence: 72,
+    roi: 15,
+    timeframe: '1 week',
+    modes: ['startup'],
+    reasoning:
+      'Businesses that review sentiment, forecast, and crisis signals together on a fixed weekly cadence catch emerging issues earlier than ad-hoc reviews, based on the alert-to-resolution times already logged this quarter.',
+    actionChecklist: [{ id: 'i1', label: 'Block a recurring 30-minute weekly review slot', done: false }],
   },
 ]

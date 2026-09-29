@@ -5,6 +5,7 @@ import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
 import ProgressBar from '@/components/ui/ProgressBar'
 import { useNotifications } from '@/hooks/useNotifications'
+import { useMode } from '@/hooks/useMode'
 import { CATEGORIES, recommendationReserve, recommendations as initialRecommendations } from '@/data/recommendationsData'
 
 const PRIORITY_TONE = { high: 'danger', medium: 'warning', low: 'info' }
@@ -80,12 +81,15 @@ function RecommendationCard({ recommendation, onToggleAction }) {
 
 export default function AiRecommendations() {
   const { notify } = useNotifications()
+  const { mode } = useMode()
   const [category, setCategory] = useState('All')
   const [items, setItems] = useState(initialRecommendations)
   const [reserve, setReserve] = useState(recommendationReserve)
   const [generating, setGenerating] = useState(false)
 
-  const filtered = category === 'All' ? items : items.filter((item) => item.category === category)
+  const filtered = items
+    .filter((item) => item.modes.includes(mode))
+    .filter((item) => category === 'All' || item.category === category)
 
   const toggleAction = (recommendationId, actionId) => {
     setItems((current) =>
@@ -106,13 +110,14 @@ export default function AiRecommendations() {
     setGenerating(true)
     setTimeout(() => {
       setGenerating(false)
-      if (reserve.length === 0) {
+      const nextIndex = reserve.findIndex((item) => item.modes.includes(mode))
+      if (nextIndex === -1) {
         notify('No new signals detected — recommendations are already up to date.', 'info')
         return
       }
-      const [next, ...rest] = reserve
+      const next = reserve[nextIndex]
       setItems((current) => [next, ...current])
-      setReserve(rest)
+      setReserve((current) => current.filter((_, index) => index !== nextIndex))
       notify('1 new recommendation generated from the latest signals.')
     }, 800)
   }

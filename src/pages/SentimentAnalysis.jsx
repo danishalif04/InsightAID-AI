@@ -15,6 +15,7 @@ import Button from '@/components/ui/Button'
 import { Input, Select } from '@/components/ui/Input'
 import ChartTooltip from '@/components/ui/ChartTooltip'
 import { useNotifications } from '@/hooks/useNotifications'
+import { useMode } from '@/hooks/useMode'
 import { CHART_COLORS } from '@/theme/chartTheme'
 import { formatDelta } from '@/utils/formatters'
 import {
@@ -35,20 +36,22 @@ const SCORE_TONE = {
 
 export default function SentimentAnalysis() {
   const { notify } = useNotifications()
+  const { mode } = useMode()
   const [keyword, setKeyword] = useState('')
   const [language, setLanguage] = useState('all')
   const [platform, setPlatform] = useState('all')
 
   const filteredPosts = useMemo(() => {
     return influentialPosts.filter((post) => {
+      const matchesMode = post.mode === mode
       const matchesKeyword = keyword.trim()
         ? post.text.toLowerCase().includes(keyword.trim().toLowerCase())
         : true
       const matchesLanguage = language === 'all' || post.language === language
       const matchesPlatform = platform === 'all' || post.platform === platform
-      return matchesKeyword && matchesLanguage && matchesPlatform
+      return matchesMode && matchesKeyword && matchesLanguage && matchesPlatform
     })
-  }, [keyword, language, platform])
+  }, [mode, keyword, language, platform])
 
   const maxMentions = Math.max(...regionBreakdown.map((r) => r.mentions))
   const maxEmotion = Math.max(...emotionAnalysis.map((e) => e.value))
