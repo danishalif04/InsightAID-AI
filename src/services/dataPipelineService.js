@@ -1,10 +1,29 @@
 import { supabase } from '@/config/supabaseClient'
-import { validateDataset } from '@/utils/datasetValidation'
+import { CUSTOM_TEMPLATE_ID, validateDataset } from '@/utils/datasetValidation'
+import { matchColumnsForTemplate, remapRecordToCanonicalColumns } from '@/utils/csvTemplates'
 import { preprocessText } from '@/utils/textPreprocessing'
 import { aggregateDaily, computeReviewFeatures, computeTextFeatures } from '@/utils/featureEngineering'
 import { RATING_HEURISTIC_MODEL_NAME, classifyByRating } from '@/utils/ratingSentimentHeuristic'
-import { influentialPosts } from '@/data/sentimentData'
-import { topPosts } from '@/data/socialData'
+
+// Demo text for seedFixtureSample() below — real, human-written sample
+// posts (not fetched, not fabricated data pretending to be live), used only
+// to prove the ingestion pipeline works end-to-end. Previously lived in
+// src/data/sentimentData.js / socialData.js alongside displayed mock
+// numbers; moved inline once those pages went real (Phase 10) so this
+// demo-seeding capability doesn't depend on files that no longer exist.
+const FIXTURE_REVIEW_POSTS = [
+  { platform: 'tiktok', text: 'Just tried the new InsightAid dashboard demo and honestly the crisis detection alerts are a game changer for my small business.' },
+  { platform: 'x', text: 'Penghantaran lambat minggu ni, harap boleh diperbaiki secepat mungkin sebab pelanggan dah mula merungut.' },
+  { platform: 'tiktok', text: '这个产品的包装设计很好看,但是价格对学生党来说有点贵。' },
+  { platform: 'x', text: 'Customer support resolved my refund in under an hour. Genuinely impressed with the response time.' },
+]
+
+const FIXTURE_SOCIAL_POSTS = [
+  { platform: 'tiktok', text: 'This dashboard literally caught our sentiment dip before I even noticed complaints coming in.', likes: 24800, shares: 3600 },
+  { platform: 'x', text: 'Refund processed in under an hour after I flagged it. Customer service actually reads the feed apparently.', likes: 9100, shares: 1400 },
+  { platform: 'tiktok', text: 'Unboxing the new packaging — still think the price is a bit steep for students but quality is solid.', likes: 15600, shares: 2100 },
+  { platform: 'x', text: 'Delivery delay again this week. Third time this month, need a real fix not just an apology tweet.', likes: 4200, shares: 2800 },
+]
 
 /**
  * Ties the pure pipeline utilities to real Supabase writes. Pages never call
@@ -20,7 +39,7 @@ function sumEngagement(record) {
   return values.length > 0 ? values.reduce((sum, value) => sum + value, 0) : null
 }
 
-function toIsoDate(value) {
+export function toIsoDate(value) {
   if (!value) return null
   const date = new Date(value)
   return Number.isNaN(date.getTime()) ? null : date.toISOString()
@@ -29,7 +48,18 @@ function toIsoDate(value) {
 /**
  * Validates, preprocesses (for text-bearing templates), feature-engineers,
  * and stores one uploaded (or fixture-seeded) dataset.
- * @param {string} templateId one of CSV_TEMPLATES' ids
+ *
+ * `records`' own headers/keys are stored byte-for-byte in raw_data.payload
+ * no matter what they're named — "preserve raw" (FYP2.md §44) means never
+ * rewriting what was uploaded, even to fix a header name. Recognizing that
+ * a real-world header like "Order Date" means the same thing as the
+ * canonical "date" column (FYP2.md §35 — any real file format should be
+ * usable) happens on a SEPARATE normalized copy used only for
+ * validation/feature-engineering, built via
+ * src/utils/csvTemplates.js's matchColumnsForTemplate()/
+ * remapRecordToCanonicalColumns().
+ *
+ * @param {string} templateId one of CSV_TEMPLATES' ids, or CUSTOM_TEMPLATE_ID
  * @param {Array<Record<string,string>>} records parsed rows (string cells)
  * @param {'csv_upload'|'json_upload'|'fixture_seed'} source
  * @param {string|null} filename
@@ -52,11 +82,19 @@ export async function ingestRows(templateId, records, source, filename = null) {
 
   let processedCount = 0
 
-  if (TEXT_BEARING_TEMPLATES.has(templateId)) {
+  // Custom/unrecognized-format imports are preserved in raw_data for
+  // review/export, but there's no canonical column mapping to safely guess
+  // which field (if any) is review text, a rating, a date, etc. — so no
+  // processed_data/feature-engineering step runs for them. This matches
+  // CUSTOM_TEMPLATE_ID's own validation report, which says the same thing.
+  if (templateId !== CUSTOM_TEMPLATE_ID && TEXT_BEARING_TEMPLATES.has(templateId)) {
     const textColumn = TEXT_COLUMN[templateId]
+    const headers = records.length > 0 ? Object.keys(records[0]) : []
+    const { mapping } = matchColumnsForTemplate(templateId, headers)
 
     const processedRows = records
-      .map((record, index) => {
+      .map((originalRecord, index) => {
+        const record = remapRecordToCanonicalColumns(originalRecord, mapping)
         const rawText = record[textColumn] ?? ''
         if (!rawText.trim()) return null
 
@@ -140,7 +178,7 @@ export async function ingestRows(templateId, records, source, filename = null) {
 export async function seedFixtureSample() {
   const today = new Date().toISOString().slice(0, 10)
 
-  const reviewRows = influentialPosts.slice(0, 4).map((post) => ({
+  const reviewRows = FIXTURE_REVIEW_POSTS.map((post) => ({
     date: today,
     product: 'Sample Product',
     review_text: post.text,
@@ -148,7 +186,7 @@ export async function seedFixtureSample() {
     platform: post.platform === 'tiktok' ? 'TikTok' : 'X',
   }))
 
-  const socialRows = topPosts.map((post) => ({
+  const socialRows = FIXTURE_SOCIAL_POSTS.map((post) => ({
     date: today,
     platform: post.platform === 'tiktok' ? 'TikTok' : 'X',
     content: post.text,

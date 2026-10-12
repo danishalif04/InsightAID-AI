@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { inferTemplateId, validateDataset } from './datasetValidation'
+import { CUSTOM_TEMPLATE_ID, inferTemplateId, validateDataset } from './datasetValidation'
 
 describe('inferTemplateId', () => {
   it('picks the template with the most matching column headers', () => {
@@ -8,8 +8,17 @@ describe('inferTemplateId', () => {
     expect(inferTemplateId(['date', 'expense_category', 'amount', 'description'])).toBe('expenses')
   })
 
-  it('returns null instead of a low-confidence guess when nothing matches', () => {
-    expect(inferTemplateId(['foo', 'bar', 'baz'])).toBeNull()
+  it('falls back to the custom template instead of a low-confidence guess when nothing matches', () => {
+    expect(inferTemplateId(['foo', 'bar', 'baz'])).toBe(CUSTOM_TEMPLATE_ID)
+  })
+
+  it('recognizes real-world synonym headers, not just the exact canonical names', () => {
+    expect(inferTemplateId(['Order Date', 'Product Name', 'Qty', 'Selling Price', 'Total Price'])).toBe('sales')
+    expect(inferTemplateId(['Review Date', 'Item', 'Comment', 'Stars', 'Channel'])).toBe('reviews')
+  })
+
+  it('is case- and spacing-insensitive', () => {
+    expect(inferTemplateId(['  ORDER_DATE ', 'product-name', 'QTY'])).toBe('sales')
   })
 })
 
@@ -88,5 +97,18 @@ describe('validateDataset', () => {
     const report = validateDataset('unknown', [])
     expect(report.readyForProcessing).toBe(false)
     expect(report.warnings[0]).toMatch(/Unknown template/)
+  })
+
+  it('never blocks a custom/unrecognized-format import — stores it, with an honest "not deeply analyzed" note', () => {
+    const records = [{ foo: '1', bar: 'x' }, { foo: '2', bar: 'y' }]
+    const report = validateDataset(CUSTOM_TEMPLATE_ID, records)
+    expect(report.readyForProcessing).toBe(true)
+    expect(report.missingColumns).toEqual([])
+    expect(report.rowCount).toBe(2)
+    expect(report.warnings[0]).toMatch(/didn't match a known template/i)
+  })
+
+  it('handles an empty custom import without throwing', () => {
+    expect(() => validateDataset(CUSTOM_TEMPLATE_ID, [])).not.toThrow()
   })
 })

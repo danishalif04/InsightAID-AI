@@ -12,6 +12,7 @@ describe('computeTextFeatures', () => {
       hasRepeatedChars: false,
     })
     expect(features.hashtagCount).toBe(1)
+    expect(features.hashtags).toEqual(['skincare'])
     expect(features.mentionCount).toBe(1)
     expect(features.language).toBe('en')
     expect(features.tokenCount).toBeGreaterThan(0)

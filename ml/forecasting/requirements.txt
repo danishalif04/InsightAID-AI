@@ -1,0 +1,16 @@
+# Core (needed for every pure/classical module and the full test suite:
+# data_loader, rolling_split, baselines, metrics, arima_model, prophet_model,
+# xgboost_model, evaluate). All confirmed installable and working in this
+# repo's dev environment — the tests actually run these, not just import them.
+pandas>=2.0
+numpy>=1.26
+scikit-learn>=1.4
+statsmodels>=0.14
+prophet>=1.1
+xgboost>=2.0
+pytest>=8.0
+
+# Only needed if lstm_model.should_train_lstm() actually returns True for
+# your dataset (see lstm_model.py's docstring for the 730-day threshold and
+# why). Not required to run everything else in this package.
+tensorflow>=2.16

@@ -11,5 +11,10 @@ export default defineConfig({
   },
   test: {
     environment: 'node',
+    // e2e/**/*.spec.js are Playwright specs (`npm run test:e2e`), not
+    // Vitest ones — Playwright's `test`/`test.describe` aren't Vitest's
+    // globals, so letting Vitest's default glob pick them up produces
+    // confusing failures, not real test results.
+    exclude: ['**/node_modules/**', '**/dist/**', 'e2e/**'],
   },
 })

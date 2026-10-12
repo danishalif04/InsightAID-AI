@@ -18,6 +18,10 @@ export function computeTextFeatures({ cleanedText, rawText, language, hashtags =
     textLength: text.length,
     tokenCount: tokens.length,
     hashtagCount: hashtags.length,
+    // The tags themselves (lowercased), not just a count — needed for a real
+    // "trending hashtags" aggregate (Phase 10). Previously only the count was
+    // kept; the tags textPreprocessing.js already extracted were discarded.
+    hashtags: hashtags.map((tag) => tag.toLowerCase()),
     mentionCount: mentions.length,
     hasUrl: Boolean(hasUrl),
     punctuationCount,

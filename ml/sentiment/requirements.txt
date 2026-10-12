@@ -1,0 +1,17 @@
+# Core (needed to run the pure-logic modules and their tests: weak_labels,
+# clean, split, metrics). Install these first if you only want to run
+# `pytest tests/` without any of the heavy ML training dependencies below.
+pandas>=2.0
+numpy>=1.26
+scikit-learn>=1.4
+pytest>=8.0
+
+# Training (only needed inside Colab / a GPU environment to actually run
+# train_xlmr.py / train_mbert.py / the notebook - not needed for the tests).
+torch>=2.2
+transformers>=4.40
+datasets>=2.19
+accelerate>=0.30
+sentencepiece>=0.2  # required by XLM-R's tokenizer
+sacremoses>=0.1      # required by the Helsinki-NLP opus-mt translation models
+huggingface_hub>=0.23

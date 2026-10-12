@@ -1,0 +1,19 @@
+{
+  "_note": "PLACEHOLDER. No training run has produced this file's real counterpart yet. Every value below is null because no model has been trained or evaluated on real data. Do not fill this in by hand or estimate plausible-looking numbers — only src/evaluate.py, run against a real trained model and a real test set, should ever produce a populated metrics JSON. See ../README.md and docs/SENTIMENT_MODEL.md for current status.",
+  "model_name": null,
+  "model_version": null,
+  "model_type": null,
+  "eval_path": null,
+  "trained_at": null,
+  "dataset_version": null,
+  "training_samples": null,
+  "validation_samples": null,
+  "test_samples": null,
+  "accuracy": null,
+  "precision": null,
+  "recall": null,
+  "f1": null,
+  "per_language_metrics": null,
+  "confusion_matrix": null,
+  "notes": null
+}

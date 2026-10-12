@@ -26,6 +26,7 @@ export const router = createBrowserRouter([
           { path: child(PATHS.datasets), element: <Pages.DatasetManagement /> },
           { path: child(PATHS.settings), element: <Pages.SettingsPage /> },
           { path: child(PATHS.onboarding), element: <Pages.Onboarding /> },
+          { path: child(PATHS.modelPerformance), element: <Pages.ModelPerformance /> },
           { path: '*', element: <Pages.NotFound /> },
         ],
       },

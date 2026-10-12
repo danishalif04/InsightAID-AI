@@ -1,80 +1,61 @@
-import { useState } from 'react'
-import { ChevronDown, Sparkles } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { ChevronDown, RefreshCw, SaveAll } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
-import ProgressBar from '@/components/ui/ProgressBar'
 import { useNotifications } from '@/hooks/useNotifications'
 import { useMode } from '@/hooks/useMode'
-import { CATEGORIES, recommendationReserve, recommendations as initialRecommendations } from '@/data/recommendationsData'
+import { CATEGORIES } from '@/utils/recommendationRules'
+import { getRecommendations, saveRecommendations } from '@/services/recommendationService'
 
 const PRIORITY_TONE = { high: 'danger', medium: 'warning', low: 'info' }
 
-function RecommendationCard({ recommendation, onToggleAction }) {
+function RecommendationCard({ recommendation }) {
   const [expanded, setExpanded] = useState(false)
-  const doneCount = recommendation.actionChecklist.filter((item) => item.done).length
 
   return (
     <Card bodyClassName="p-5">
       <div className="flex flex-wrap items-center gap-2">
         <Badge tone="brand">{recommendation.category}</Badge>
         <Badge tone={PRIORITY_TONE[recommendation.priority]}>{recommendation.priority} priority</Badge>
-        <span className="ml-auto text-xs text-slate-400">{recommendation.timeframe}</span>
       </div>
 
       <p className="mt-3 text-sm font-semibold leading-relaxed text-slate-900 dark:text-slate-100">
         {recommendation.title}
       </p>
 
-      <div className="mt-4 grid grid-cols-3 gap-3">
-        <div>
-          <p className="text-xs text-slate-500 dark:text-slate-400">Impact Score</p>
-          <ProgressBar value={recommendation.impactScore} className="mt-1.5" />
-        </div>
-        <div>
-          <p className="text-xs text-slate-500 dark:text-slate-400">Confidence</p>
-          <ProgressBar value={recommendation.confidence} tone="info" className="mt-1.5" />
-        </div>
-        <div>
-          <p className="text-xs text-slate-500 dark:text-slate-400">Est. ROI</p>
-          <p className="mt-1.5 text-sm font-semibold text-accent-600 dark:text-accent-400">+{recommendation.roi}%</p>
-        </div>
-      </div>
+      <ul className="mt-3 space-y-1">
+        {recommendation.evidence.map((line) => (
+          <li key={line} className="text-xs leading-relaxed text-slate-600 dark:text-slate-300">
+            • {line}
+          </li>
+        ))}
+      </ul>
 
       <button
         type="button"
         onClick={() => setExpanded((value) => !value)}
         className="mt-4 flex w-full items-center justify-between rounded-lg border border-line px-3 py-2 text-xs font-medium text-slate-600 hover:bg-canvas dark:border-line-dark dark:text-slate-300 dark:hover:bg-canvas-dark"
       >
-        Why did the AI make this?
+        Why this recommendation?
         <ChevronDown className={`size-4 transition-transform ${expanded ? 'rotate-180' : ''}`} />
       </button>
       {expanded && (
-        <p className="mt-2 rounded-lg bg-canvas p-3 text-xs leading-relaxed text-slate-600 dark:bg-canvas-dark dark:text-slate-300">
-          {recommendation.reasoning}
-        </p>
+        <div className="mt-2 rounded-lg bg-canvas p-3 text-xs leading-relaxed text-slate-600 dark:bg-canvas-dark dark:text-slate-300">
+          {recommendation.explainedBy === 'gemini' ? (
+            <>
+              <p>{recommendation.rationale}</p>
+              {recommendation.context && <p className="mt-2">{recommendation.context}</p>}
+              <p className="mt-2 text-[11px] text-slate-400">Explained by Gemini, from the evidence above only.</p>
+            </>
+          ) : (
+            <p className="text-slate-500 dark:text-slate-400">
+              Gemini explanation unavailable right now — this recommendation is shown from the rule engine's
+              evidence above, which is always real regardless of Gemini's availability (FYP2.md §55).
+            </p>
+          )}
+        </div>
       )}
-
-      <div className="mt-4 border-t border-line pt-3 dark:border-line-dark">
-        <p className="mb-2 text-xs font-medium text-slate-500 dark:text-slate-400">
-          Action Checklist ({doneCount}/{recommendation.actionChecklist.length})
-        </p>
-        <ul className="space-y-2">
-          {recommendation.actionChecklist.map((action) => (
-            <li key={action.id}>
-              <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
-                <input
-                  type="checkbox"
-                  checked={action.done}
-                  onChange={() => onToggleAction(recommendation.id, action.id)}
-                  className="size-4 rounded border-line text-accent-500 focus:ring-accent-400 dark:border-line-dark"
-                />
-                <span className={action.done ? 'text-slate-400 line-through' : ''}>{action.label}</span>
-              </label>
-            </li>
-          ))}
-        </ul>
-      </div>
     </Card>
   )
 }
@@ -83,44 +64,44 @@ export default function AiRecommendations() {
   const { notify } = useNotifications()
   const { mode } = useMode()
   const [category, setCategory] = useState('All')
-  const [items, setItems] = useState(initialRecommendations)
-  const [reserve, setReserve] = useState(recommendationReserve)
-  const [generating, setGenerating] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [recommendations, setRecommendations] = useState([])
+  const [businessContext, setBusinessContext] = useState([])
+  const [geminiAvailable, setGeminiAvailable] = useState(true)
 
-  const filtered = items
-    .filter((item) => item.modes.includes(mode))
-    .filter((item) => category === 'All' || item.category === category)
-
-  const toggleAction = (recommendationId, actionId) => {
-    setItems((current) =>
-      current.map((rec) =>
-        rec.id !== recommendationId
-          ? rec
-          : {
-              ...rec,
-              actionChecklist: rec.actionChecklist.map((action) =>
-                action.id === actionId ? { ...action, done: !action.done } : action
-              ),
-            }
-      )
-    )
+  const load = async () => {
+    setLoading(true)
+    try {
+      const result = await getRecommendations(mode)
+      setRecommendations(result.recommendations)
+      setBusinessContext(result.businessContext)
+      setGeminiAvailable(result.geminiAvailable)
+    } catch (error) {
+      notify(`Could not generate recommendations: ${error.message}`)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const handleGenerate = () => {
-    setGenerating(true)
-    setTimeout(() => {
-      setGenerating(false)
-      const nextIndex = reserve.findIndex((item) => item.modes.includes(mode))
-      if (nextIndex === -1) {
-        notify('No new signals detected — recommendations are already up to date.', 'info')
-        return
-      }
-      const next = reserve[nextIndex]
-      setItems((current) => [next, ...current])
-      setReserve((current) => current.filter((_, index) => index !== nextIndex))
-      notify('1 new recommendation generated from the latest signals.')
-    }, 800)
+  useEffect(() => {
+    load()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode])
+
+  const handleSave = async () => {
+    setSaving(true)
+    try {
+      await saveRecommendations(recommendations, `run-${Date.now()}`)
+      notify('Recommendations saved.')
+    } catch (error) {
+      notify(`Could not save recommendations: ${error.message}`)
+    } finally {
+      setSaving(false)
+    }
   }
+
+  const filtered = recommendations.filter((item) => category === 'All' || item.category === category)
 
   return (
     <div className="space-y-6">
@@ -142,20 +123,52 @@ export default function AiRecommendations() {
               </button>
             ))}
           </div>
-          <Button icon={Sparkles} loading={generating} onClick={handleGenerate}>
-            Generate New
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button icon={RefreshCw} loading={loading} onClick={load}>
+              Regenerate
+            </Button>
+            <Button icon={SaveAll} loading={saving} disabled={recommendations.length === 0} onClick={handleSave} variant="secondary">
+              Save
+            </Button>
+          </div>
         </div>
+        {!loading && !geminiAvailable && recommendations.length > 0 && (
+          <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+            Gemini explanations are unavailable right now — recommendations below are still real, rule-based
+            results (FYP2.md §55: rule-based recommendations must still work without Gemini).
+          </p>
+        )}
+      </Card>
+
+      <Card
+        title="Business Context (FYP2.md §56)"
+        description="Factors these recommendations may consider. Anything not on file reads exactly as such — never guessed."
+      >
+        <dl className="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2">
+          {businessContext.map((factor) => (
+            <div key={factor.id}>
+              <dt className="text-xs font-medium text-slate-500 dark:text-slate-400">{factor.label}</dt>
+              <dd className={`mt-0.5 text-sm ${factor.insufficient ? 'italic text-slate-400 dark:text-slate-500' : 'text-slate-800 dark:text-slate-100'}`}>
+                {factor.value}
+              </dd>
+            </div>
+          ))}
+        </dl>
       </Card>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        {filtered.map((recommendation) => (
-          <RecommendationCard key={recommendation.id} recommendation={recommendation} onToggleAction={toggleAction} />
-        ))}
-        {filtered.length === 0 && (
+        {loading ? (
           <p className="col-span-full py-10 text-center text-sm text-slate-500 dark:text-slate-400">
-            No recommendations in this category yet.
+            Running the rule engine…
           </p>
+        ) : filtered.length === 0 ? (
+          <p className="col-span-full py-10 text-center text-sm text-slate-500 dark:text-slate-400">
+            {recommendations.length === 0
+              ? 'No analytical conditions currently justify a recommendation — nothing is fabricated to fill this space.'
+              : 'No recommendations in this category right now.'}
+          </p>
+        ) : (
+          filtered.map((recommendation) => <RecommendationCard key={recommendation.id} recommendation={recommendation} />)
         )}
       </div>
     </div>

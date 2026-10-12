@@ -1,32 +1,21 @@
 import { useMemo, useState } from 'react'
-import {
-  CartesianGrid,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts'
+import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { ArrowDown, ArrowUp, Download, Search } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
+import Chip from '@/components/ui/Chip'
 import { Input, Select } from '@/components/ui/Input'
 import ChartTooltip from '@/components/ui/ChartTooltip'
+import AsyncSection from '@/components/common/AsyncSection'
+import { useAsyncData } from '@/hooks/useAsyncData'
 import { useNotifications } from '@/hooks/useNotifications'
-import { useMode } from '@/hooks/useMode'
 import { CHART_COLORS } from '@/theme/chartTheme'
 import { formatDelta } from '@/utils/formatters'
-import {
-  emotionAnalysis,
-  influentialPosts,
-  regionBreakdown,
-  sentimentScores,
-  sentimentTrend,
-} from '@/data/sentimentData'
+import { downloadCsv } from '@/utils/csvExport'
+import { getSentimentAnalysisData } from '@/services/sentimentAnalysisService'
 
-const LANGUAGE_LABELS = { en: 'EN', ms: 'MY', zh: 'ZH' }
+const LANGUAGE_LABELS = { en: 'EN', ms: 'MY', zh: 'ZH', 'ms-en': 'MY/EN', unknown: '—' }
 const SENTIMENT_TONE = { positive: 'success', neutral: 'neutral', negative: 'danger' }
 const SCORE_TONE = {
   positive: 'text-accent-600 dark:text-accent-400',
@@ -34,27 +23,53 @@ const SCORE_TONE = {
   negative: 'text-danger',
 }
 
+function EmptyNote({ children }) {
+  return <p className="py-6 text-center text-sm text-slate-500 dark:text-slate-400">{children}</p>
+}
+
+function UnavailableCard({ title, description, reason }) {
+  return (
+    <Card title={title} description={description}>
+      <p className="text-sm italic text-slate-500 dark:text-slate-400">{reason}</p>
+    </Card>
+  )
+}
+
 export default function SentimentAnalysis() {
   const { notify } = useNotifications()
-  const { mode } = useMode()
   const [keyword, setKeyword] = useState('')
   const [language, setLanguage] = useState('all')
   const [platform, setPlatform] = useState('all')
 
+  const { status, data, error, reload } = useAsyncData(getSentimentAnalysisData, [])
+
   const filteredPosts = useMemo(() => {
-    return influentialPosts.filter((post) => {
-      const matchesMode = post.mode === mode
-      const matchesKeyword = keyword.trim()
-        ? post.text.toLowerCase().includes(keyword.trim().toLowerCase())
-        : true
+    const posts = data?.posts ?? []
+    return posts.filter((post) => {
+      const matchesKeyword = keyword.trim() ? post.text.toLowerCase().includes(keyword.trim().toLowerCase()) : true
       const matchesLanguage = language === 'all' || post.language === language
       const matchesPlatform = platform === 'all' || post.platform === platform
-      return matchesMode && matchesKeyword && matchesLanguage && matchesPlatform
+      return matchesKeyword && matchesLanguage && matchesPlatform
     })
-  }, [mode, keyword, language, platform])
+  }, [data, keyword, language, platform])
 
-  const maxMentions = Math.max(...regionBreakdown.map((r) => r.mentions))
-  const maxEmotion = Math.max(...emotionAnalysis.map((e) => e.value))
+  const handleExport = () => {
+    if (filteredPosts.length === 0) {
+      notify('Nothing to export for the current filters.')
+      return
+    }
+    downloadCsv(
+      'sentiment-posts.csv',
+      filteredPosts.map((post) => ({
+        platform: post.platform,
+        language: post.language,
+        sentiment: post.sentiment ?? '',
+        sentimentConfidence: post.sentimentConfidence ?? '',
+        engagement: post.engagement,
+        text: post.text,
+      }))
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -73,6 +88,7 @@ export default function SentimentAnalysis() {
               <option value="en">English</option>
               <option value="ms">Bahasa Melayu</option>
               <option value="zh">Mandarin</option>
+              <option value="ms-en">Code-mixed (MY/EN)</option>
             </Select>
             <Select label="Platform" value={platform} onChange={(event) => setPlatform(event.target.value)}>
               <option value="all">All platforms</option>
@@ -80,127 +96,125 @@ export default function SentimentAnalysis() {
               <option value="x">X</option>
             </Select>
           </div>
-          <Button variant="secondary" icon={Download} onClick={() => notify('Sentiment report export started.')}>
-            Export
+          <Button variant="secondary" icon={Download} onClick={handleExport}>
+            Export CSV
           </Button>
         </div>
       </Card>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        {sentimentScores.map((score) => {
-          const DeltaIcon = score.delta >= 0 ? ArrowUp : ArrowDown
-          const isGoodDelta = score.id === 'negative' ? score.delta <= 0 : score.delta >= 0
-          return (
-            <Card key={score.id} bodyClassName="p-5">
-              <p className="text-xs font-medium text-slate-500 dark:text-slate-400">{score.label}</p>
-              <p className={`mt-2 text-2xl font-semibold ${SCORE_TONE[score.id]}`}>{score.value}%</p>
-              <span
-                className={`mt-2 inline-flex items-center gap-0.5 text-xs font-medium ${
-                  isGoodDelta ? 'text-accent-600 dark:text-accent-400' : 'text-danger'
-                }`}
-              >
-                <DeltaIcon className="size-3" aria-hidden="true" />
-                {formatDelta(score.delta)} WoW
-              </span>
-            </Card>
-          )
-        })}
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <Card title="Sentiment Trend" description="Last 7 days, by sentiment label" className="lg:col-span-2">
-          <ResponsiveContainer width="100%" height={260}>
-            <LineChart data={sentimentTrend} margin={{ left: -20 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid} vertical={false} />
-              <XAxis dataKey="date" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 12 }} axisLine={false} tickLine={false} unit="%" />
-              <Tooltip content={<ChartTooltip formatter={(value) => `${value}%`} />} />
-              <Line type="monotone" dataKey="positive" name="Positive" stroke={CHART_COLORS.positive} strokeWidth={2} dot={false} />
-              <Line type="monotone" dataKey="neutral" name="Neutral" stroke={CHART_COLORS.neutral} strokeWidth={2} dot={false} />
-              <Line type="monotone" dataKey="negative" name="Negative" stroke={CHART_COLORS.negative} strokeWidth={2} dot={false} />
-            </LineChart>
-          </ResponsiveContainer>
-        </Card>
-
-        <Card title="Emotion Analysis" description="Breakdown of detected emotions">
-          <ul className="space-y-3">
-            {emotionAnalysis.map((item) => (
-              <li key={item.emotion}>
-                <div className="mb-1 flex items-center justify-between text-xs">
-                  <span className="font-medium text-slate-700 dark:text-slate-200">{item.emotion}</span>
-                  <span className="text-slate-500 dark:text-slate-400">{item.value}%</span>
-                </div>
-                <div className="h-2 w-full overflow-hidden rounded-full bg-line dark:bg-line-dark">
-                  <div
-                    className="h-full rounded-full bg-accent-500"
-                    style={{ width: `${(item.value / maxEmotion) * 100}%` }}
-                  />
-                </div>
-              </li>
-            ))}
-          </ul>
-        </Card>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <Card title="Most Influential Posts" description={`${filteredPosts.length} posts matching filters`}>
-          <ol className="space-y-3">
-            {filteredPosts.map((post, index) => (
-              <li key={post.id} className="rounded-lg border border-line p-3 dark:border-line-dark">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold text-slate-400">#{index + 1}</span>
-                  <Badge tone="neutral">{post.platform === 'tiktok' ? 'TikTok' : 'X'}</Badge>
-                  <Badge tone="neutral">{LANGUAGE_LABELS[post.language]}</Badge>
-                  <Badge tone={SENTIMENT_TONE[post.sentiment]} className="ml-auto">
-                    {post.sentiment} · {Math.round(post.confidence * 100)}%
-                  </Badge>
-                </div>
-                <p className="mt-2 text-sm leading-relaxed text-slate-700 dark:text-slate-200">{post.text}</p>
-                <p className="mt-1.5 text-xs text-slate-400">{post.engagement.toLocaleString()} engagements</p>
-              </li>
-            ))}
-            {filteredPosts.length === 0 && (
-              <p className="py-6 text-center text-sm text-slate-500 dark:text-slate-400">
-                No posts match the current filters.
-              </p>
+      <AsyncSection status={status} data={data} error={error} reload={reload}>
+        {(pageData) => (
+          <>
+            {pageData.sentimentScores === null ? (
+              <Card>
+                <EmptyNote>No sentiment data yet — upload reviews or social data via Dataset Management.</EmptyNote>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                {pageData.sentimentScores.map((score) => {
+                  const hasDelta = score.delta != null
+                  const DeltaIcon = score.delta >= 0 ? ArrowUp : ArrowDown
+                  const isGoodDelta = score.id === 'negative' ? score.delta <= 0 : score.delta >= 0
+                  return (
+                    <Card key={score.id} bodyClassName="p-5">
+                      <p className="text-xs font-medium text-slate-500 dark:text-slate-400">{score.label}</p>
+                      <p className={`mt-2 text-2xl font-semibold ${SCORE_TONE[score.id]}`}>{score.value}%</p>
+                      {hasDelta && (
+                        <span
+                          className={`mt-2 inline-flex items-center gap-0.5 text-xs font-medium ${
+                            isGoodDelta ? 'text-accent-600 dark:text-accent-400' : 'text-danger'
+                          }`}
+                        >
+                          <DeltaIcon className="size-3" aria-hidden="true" />
+                          {formatDelta(score.delta)} WoW
+                        </span>
+                      )}
+                    </Card>
+                  )
+                })}
+              </div>
             )}
-          </ol>
-        </Card>
 
-        <Card title="Region Breakdown" description="Sentiment score and mention volume by state">
-          <ul className="space-y-4">
-            {regionBreakdown.map((region) => (
-              <li key={region.state}>
-                <div className="mb-1 flex items-center justify-between text-xs">
-                  <span className="font-medium text-slate-700 dark:text-slate-200">{region.state}</span>
-                  <span className="text-slate-500 dark:text-slate-400">
-                    {region.score}% score · {region.mentions.toLocaleString()} mentions
-                  </span>
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+              <Card title="Sentiment Trend" description="Last 7 days, by sentiment label" className="lg:col-span-2">
+                {pageData.sentimentTrend.length === 0 ? (
+                  <EmptyNote>No sentiment history yet.</EmptyNote>
+                ) : (
+                  <ResponsiveContainer width="100%" height={260}>
+                    <LineChart data={pageData.sentimentTrend} margin={{ left: -20 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid} vertical={false} />
+                      <XAxis dataKey="date" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
+                      <YAxis tick={{ fontSize: 12 }} axisLine={false} tickLine={false} unit="%" />
+                      <Tooltip content={<ChartTooltip formatter={(value) => (value != null ? `${value}%` : '—')} />} />
+                      <Line type="monotone" dataKey="positive" name="Positive" stroke={CHART_COLORS.positive} strokeWidth={2} dot={false} connectNulls={false} />
+                      <Line type="monotone" dataKey="neutral" name="Neutral" stroke={CHART_COLORS.neutral} strokeWidth={2} dot={false} connectNulls={false} />
+                      <Line type="monotone" dataKey="negative" name="Negative" stroke={CHART_COLORS.negative} strokeWidth={2} dot={false} connectNulls={false} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                )}
+              </Card>
+
+              <UnavailableCard
+                title="Emotion Analysis"
+                description="Breakdown of detected emotions"
+                reason="Unavailable — this project only has 3-class sentiment (positive/neutral/negative); no emotion classifier is implemented."
+              />
+            </div>
+
+            <Card title="Trending Hashtags" description="From real captured posts">
+              {pageData.trendingHashtags.length === 0 ? (
+                <EmptyNote>No hashtags captured yet.</EmptyNote>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {pageData.trendingHashtags.map((item) => (
+                    <Chip key={item.hashtag}>
+                      #{item.hashtag} <span className="ml-1 text-slate-400">{item.mentions.toLocaleString()}</span>
+                    </Chip>
+                  ))}
                 </div>
-                <div className="space-y-1">
-                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-line dark:bg-line-dark">
-                    <div className="h-full rounded-full bg-accent-500" style={{ width: `${region.score}%` }} />
-                  </div>
-                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-line dark:bg-line-dark">
-                    <div
-                      className="h-full rounded-full"
-                      style={{ width: `${(region.mentions / maxMentions) * 100}%`, backgroundColor: CHART_COLORS.x }}
-                    />
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
-          <div className="mt-4 flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
-            <span className="flex items-center gap-1.5">
-              <span className="size-2 rounded-full bg-accent-500" /> Sentiment score
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="size-2 rounded-full" style={{ backgroundColor: CHART_COLORS.x }} /> Mentions
-            </span>
-          </div>
-        </Card>
-      </div>
+              )}
+            </Card>
+
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              <Card title="Most Influential Posts" description={`${filteredPosts.length} posts matching filters`}>
+                {filteredPosts.length === 0 ? (
+                  <EmptyNote>No posts match the current filters.</EmptyNote>
+                ) : (
+                  <ol className="space-y-3">
+                    {filteredPosts.map((post, index) => (
+                      <li key={post.id} className="rounded-lg border border-line p-3 dark:border-line-dark">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-semibold text-slate-400">#{index + 1}</span>
+                          <Badge tone="neutral">{post.platform === 'tiktok' ? 'TikTok' : post.platform === 'x' ? 'X' : (post.platform ?? 'Unknown')}</Badge>
+                          <Badge tone="neutral">{LANGUAGE_LABELS[post.language] ?? post.language}</Badge>
+                          {post.sentiment ? (
+                            <Badge tone={SENTIMENT_TONE[post.sentiment]} className="ml-auto">
+                              {post.sentiment}
+                              {post.sentimentConfidence != null ? ` · ${Math.round(post.sentimentConfidence * 100)}%` : ''}
+                            </Badge>
+                          ) : (
+                            <Badge tone="neutral" className="ml-auto">
+                              no rating
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="mt-2 text-sm leading-relaxed text-slate-700 dark:text-slate-200">{post.text}</p>
+                        <p className="mt-1.5 text-xs text-slate-400">{post.engagement.toLocaleString()} engagements</p>
+                      </li>
+                    ))}
+                  </ol>
+                )}
+              </Card>
+
+              <UnavailableCard
+                title="Region Breakdown"
+                description="Sentiment score and mention volume by state"
+                reason="Unavailable — no location field is captured during data ingestion, so posts can't be attributed to a state."
+              />
+            </div>
+          </>
+        )}
+      </AsyncSection>
     </div>
   )
 }

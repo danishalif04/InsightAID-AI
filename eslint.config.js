@@ -28,4 +28,12 @@ export default [
       'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
     },
   },
+  {
+    // Playwright E2E suite + its config run under Node, not the browser —
+    // real Node globals (process.env for credentials/base URL), not JSX.
+    files: ['e2e/**/*.js', 'playwright.config.js'],
+    languageOptions: {
+      globals: globals.node,
+    },
+  },
 ]

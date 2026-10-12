@@ -64,16 +64,18 @@ Format follows FYP2.md §83. Each source is a modular adapter in `src/adapters/`
 
 | | |
 |---|---|
-| **Source** | X (Twitter) API v2 |
-| **Purpose** | Same as TikTok — mentions/engagement for analysis |
-| **Authentication** | OAuth 2.0 — **not implemented or tested in this project** |
-| **Environment Variables** | `X_API_KEY`, `X_API_SECRET` — Supabase Edge Function secrets only, never `VITE_*` |
-| **Data Retrieved** | Not yet implemented |
-| **Rate Limit / Access Constraints** | X API access tiers and rate limits vary; unconfirmed until an app is registered |
-| **Current Status** | `NOT_CONFIGURED` or `AUTH_REQUIRED` (same meaning as TikTok, above) |
-| **Fallback** | Same as TikTok — CSV upload or fixture sample |
+| **Source** | X (Twitter) API v2 — `GET /2/tweets/search/recent` |
+| **Purpose** | Real recent posts matching the signed-in user's business name/product category, ingested through the same pipeline as a CSV upload |
+| **Authentication** | OAuth 2.0 App-Only (bearer token), real implementation |
+| **Environment Variables** | `X_BEARER_TOKEN` — Supabase Edge Function secret only, never `VITE_*`. (`X_API_KEY`/`X_API_SECRET`, OAuth 1.0a consumer keys, are not used by this read-only integration.) |
+| **Data Retrieved** | Post text, created-at date, like/reply/retweet/quote counts — only fields X actually returned, never a fabricated metric. Mapped to the `social` template (`src/adapters/xMapping.js`) and ingested via `dataPipelineService.ingestRows('social', ...)`, so it flows through the same preprocessing/feature-engineering/aggregation every CSV upload does. |
+| **Rate Limit / Access Constraints** | **X's Free API tier only permits posting, not reading** — `search/recent` will return HTTP 403 under Free tier. Reading real mentions requires the Basic tier (paid) or higher. This is a real, confirmed constraint of the credential tier used during this phase, not a guess. |
+| **Current Status** | `NOT_CONFIGURED` (no `X_BEARER_TOKEN` set) / `AUTH_REQUIRED` (configured but either no successful sync yet, or X rejected the request — e.g. insufficient tier, mapped from a real 401/403) / `RATE_LIMITED` (real 429) / `CONNECTED` (a real sync has inserted rows, or the most recent sync got a real 200 with zero matching posts) |
+| **Fallback** | CSV upload (now accepts any real column-header format — see `docs/DATA_PIPELINE.md` §5a) or the fixture sample |
 
-**Adapter:** `src/adapters/xAdapter.js`
+**Adapter:** `src/adapters/xAdapter.js` · **Edge Function:** `supabase/functions/sync-x-mentions/index.ts` · **Pure mapping:** `src/adapters/xMapping.js` (tested)
+
+**Known limitation, stated plainly:** this integration was built and unit-tested against synthetic X API response shapes, but has not been confirmed against a real live call — the credentials available during this phase are on X's Free tier, which this project's own research (and X's documented tier limits) indicates cannot call the search endpoint at all. Clicking "Sync" with Free-tier credentials should surface `AUTH_REQUIRED` with a real 403 detail from X, which is the correct, honest outcome for that tier — not a bug. If/when the tier is upgraded to Basic or higher, no code changes are needed; the existing error-handling path already distinguishes a real success from a real 403/429.
 
 ---
 

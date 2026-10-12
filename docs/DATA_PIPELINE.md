@@ -69,6 +69,14 @@ Implemented exactly as specified, in `preprocessText()`:
 
 Only **reviews** and **social** templates (the text-bearing ones) produce `processed_data` rows. **Sales**, **product**, and **expenses** templates are structured numeric/categorical data with nothing to preprocess — forcing them through the text pipeline would mean inventing steps the data doesn't support, so they stay in `raw_data` only.
 
+## 5a. Flexible column matching and the `custom` fallback (§35, extended)
+
+Real-world exports rarely use this project's exact column names (`date`, `product`, `revenue`, ...) — a Shopee seller-center export might say "Order Date" and "Total Price" instead. `src/utils/csvTemplates.js`'s `COLUMN_SYNONYMS` + `matchColumnsForTemplate()` recognize common alternate headers per template (case/spacing/punctuation-insensitive), and `inferTemplateId()` uses that fuzzy match instead of requiring an exact name.
+
+**No upload is hard-rejected anymore.** If a file's headers don't match any of the five templates even fuzzily, `inferTemplateId()` returns `CUSTOM_TEMPLATE_ID` ('custom') instead of `null`. A `custom` import is stored in `raw_data` exactly as uploaded (template_id = `'custom'`, added to the table's check constraint by `supabase/migrations/0008_custom_template_support.sql`) — but produces **no** `processed_data`/`daily_aggregates` rows, since there's no safe way to guess which arbitrary column is review text, a rating, or a date. It's kept for review/export, not deep analysis. `DatasetManagement.jsx` tells the user this plainly when it happens, rather than silently doing less than they'd expect.
+
+**"Preserve raw" still holds exactly**: the synonym mapping only affects a separate, in-memory normalized copy used for validation/feature-engineering (`remapRecordToCanonicalColumns()`); `raw_data.payload` always stores the original record with its original headers, untouched.
+
 ## 6. What's a real model vs. a documented heuristic — read this before trusting any sentiment/language value
 
 **No trained sentiment or language-ID model exists anywhere in this project yet** (confirmed repeatedly across the Phase 0–4 audits). Two provisional, clearly-labeled heuristics fill the gap so the pipeline isn't blocked on that future work:

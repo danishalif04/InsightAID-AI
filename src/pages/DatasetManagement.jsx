@@ -1,17 +1,19 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { AlertCircle, CheckCircle2, Database, HardDrive, RefreshCw, UploadCloud, Wifi, WifiOff } from 'lucide-react'
+import { AlertCircle, CheckCircle2, Database, Download, HardDrive, RefreshCw, UploadCloud, Wifi, WifiOff } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
 import Table from '@/components/ui/Table'
-import ProgressBar from '@/components/ui/ProgressBar'
 import Dialog from '@/components/ui/Dialog'
 import { useNotifications } from '@/hooks/useNotifications'
 import { useMode } from '@/hooks/useMode'
-import { storageUsage } from '@/data/datasetData'
 import { parseCsv } from '@/utils/csvParser'
 import { inferTemplateId } from '@/utils/datasetValidation'
+import { computeLanguageBreakdown } from '@/utils/socialAnalytics'
 import { ingestRows, seedFixtureSample } from '@/services/dataPipelineService'
+import { fetchLanguages } from '@/services/socialDataService'
+import { fetchForecastSalesRows, fetchForecastSentimentRegressorRows, fetchSentimentTrainingRows } from '@/services/mlExportService'
+import { downloadCsv } from '@/utils/csvExport'
 import { getAllSourceStatuses } from '@/adapters/registry'
 import { SOURCE_STATUS } from '@/adapters/sourceStatus'
 
@@ -78,6 +80,8 @@ export default function DatasetManagement() {
   const [syncingId, setSyncingId] = useState(null)
   const [seeding, setSeeding] = useState(false)
   const [reportDialog, setReportDialog] = useState(null)
+  const [languageBreakdown, setLanguageBreakdown] = useState(null)
+  const [exportingId, setExportingId] = useState(null)
 
   const refreshSources = async () => {
     try {
@@ -89,8 +93,17 @@ export default function DatasetManagement() {
     }
   }
 
+  const refreshLanguages = async () => {
+    try {
+      setLanguageBreakdown(computeLanguageBreakdown(await fetchLanguages()))
+    } catch {
+      setLanguageBreakdown([])
+    }
+  }
+
   useEffect(() => {
     refreshSources()
+    refreshLanguages()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -119,18 +132,17 @@ export default function DatasetManagement() {
     for (const file of Array.from(files)) {
       try {
         const { headers, records } = await parseUploadedFile(file)
+        // Never null anymore — unmatched headers fall back to 'custom'
+        // rather than rejecting the file outright (FYP2.md §35).
         const templateId = inferTemplateId(headers)
-
-        if (!templateId) {
-          notify(`${file.name}: couldn't match its columns to any known template — check the column headers.`, 'error')
-          continue
-        }
 
         const source = file.name.toLowerCase().endsWith('.json') ? 'json_upload' : 'csv_upload'
         const result = await ingestRows(templateId, records, source, file.name)
         recordImportResult({ file: file.name, size: file.size, templateId, result })
 
-        if (result.validation.readyForProcessing) {
+        if (templateId === 'custom') {
+          notify(`${file.name}: columns didn't match a known template — stored as-is (${result.rawCount} row(s)), not deeply analyzed.`, 'info')
+        } else if (result.validation.readyForProcessing) {
           notify(`${file.name} imported as "${templateId}" — ${result.rawCount} row(s), ${result.validation.warnings.length} warning(s).`)
         } else {
           notify(`${file.name} could not be fully processed — see the validation report.`, 'error')
@@ -140,6 +152,7 @@ export default function DatasetManagement() {
       }
     }
     refreshSources()
+    refreshLanguages()
   }
 
   const handleDrop = (event) => {
@@ -161,6 +174,23 @@ export default function DatasetManagement() {
     }
   }
 
+  const handleTrainingExport = async (id, fetchRows, filename, schemaLabel) => {
+    setExportingId(id)
+    try {
+      const rows = await fetchRows()
+      if (rows.length === 0) {
+        notify('No matching data yet — upload or sync data first.', 'info')
+        return
+      }
+      downloadCsv(filename, rows)
+      notify(`Exported ${rows.length} row(s) to ${filename} — matches ${schemaLabel}.`)
+    } catch (error) {
+      notify(error.message ?? `Could not export ${filename}.`, 'error')
+    } finally {
+      setExportingId(null)
+    }
+  }
+
   const handleSeedSample = async () => {
     setSeeding(true)
     try {
@@ -173,6 +203,7 @@ export default function DatasetManagement() {
     } finally {
       setSeeding(false)
       refreshSources()
+      refreshLanguages()
     }
   }
 
@@ -180,7 +211,7 @@ export default function DatasetManagement() {
     <div className="space-y-6">
       <Card
         title="Upload Dataset"
-        description="CSV or JSON — up to 100 MB per file. Columns must match one of the 5 downloadable templates (Sales, Reviews, Social, Product, Expenses)."
+        description="CSV or JSON — up to 100 MB per file. Matches a known template (Sales, Reviews, Social, Product, Expenses) automatically where possible, including common column-name variants; anything that doesn't match is still stored, just not deeply analyzed."
       >
         <div
           onDragOver={(event) => {
@@ -259,29 +290,77 @@ export default function DatasetManagement() {
         )}
       </Card>
 
-      <Card title="Storage Usage" description="Workspace storage and detected language mix">
-        <div className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
+      <Card title="Storage Usage" description="Detected language mix across ingested text">
+        <div className="flex items-center gap-2 text-sm italic text-slate-500 dark:text-slate-400">
           <HardDrive className="size-4 text-slate-400" aria-hidden="true" />
-          {storageUsage.usedGB} GB of {storageUsage.totalGB} GB used
+          Unavailable — storage quota is Supabase project infrastructure, not something this app's client-side
+          credentials can query.
         </div>
-        <ProgressBar value={storageUsage.usedGB} max={storageUsage.totalGB} className="mt-2" />
 
         <p className="mt-5 mb-2 text-xs font-medium text-slate-500 dark:text-slate-400">Language detection breakdown</p>
-        <div className="space-y-2">
-          {storageUsage.languageBreakdown.map((item, index) => (
-            <div key={item.code}>
-              <div className="mb-1 flex items-center justify-between text-xs">
-                <span className="font-medium text-slate-700 dark:text-slate-200">{item.language}</span>
-                <span className="text-slate-500 dark:text-slate-400">{item.percent}%</span>
+        {languageBreakdown === null ? (
+          <p className="text-sm text-slate-500 dark:text-slate-400">Loading…</p>
+        ) : languageBreakdown.length === 0 ? (
+          <p className="text-sm text-slate-500 dark:text-slate-400">No text data ingested yet.</p>
+        ) : (
+          <div className="space-y-2">
+            {languageBreakdown.map((item, index) => (
+              <div key={item.code}>
+                <div className="mb-1 flex items-center justify-between text-xs">
+                  <span className="font-medium text-slate-700 dark:text-slate-200">{item.language}</span>
+                  <span className="text-slate-500 dark:text-slate-400">{item.percent}%</span>
+                </div>
+                <div className="h-2 w-full overflow-hidden rounded-full bg-line dark:bg-line-dark">
+                  <div
+                    className="h-full rounded-full"
+                    style={{ width: `${item.percent}%`, backgroundColor: ['#22c55e', '#60a5fa', '#a8a29e', '#f59e0b', '#94a3b8'][index % 5] }}
+                  />
+                </div>
               </div>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-line dark:bg-line-dark">
-                <div
-                  className="h-full rounded-full"
-                  style={{ width: `${item.percent}%`, backgroundColor: ['#22c55e', '#60a5fa', '#a8a29e'][index] }}
-                />
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
+        )}
+      </Card>
+
+      <Card
+        title="ML Training Data Export"
+        description="Real rows from processed_data/daily_aggregates, shaped to match the offline training pipelines in ml/sentiment and ml/forecasting. Nothing is trained here — this only exports what's already been ingested."
+      >
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={Download}
+            loading={exportingId === 'sentiment'}
+            onClick={() => handleTrainingExport('sentiment', fetchSentimentTrainingRows, 'sentiment_training_export.csv', 'ml/sentiment/data/schema.md')}
+          >
+            Sentiment Training CSV
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={Download}
+            loading={exportingId === 'forecast_sales'}
+            onClick={() => handleTrainingExport('forecast_sales', fetchForecastSalesRows, 'forecast_sales_export.csv', 'ml/forecasting/data/schema.md (Input 1)')}
+          >
+            Forecast Sales CSV
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={Download}
+            loading={exportingId === 'forecast_regressors'}
+            onClick={() =>
+              handleTrainingExport(
+                'forecast_regressors',
+                fetchForecastSentimentRegressorRows,
+                'forecast_sentiment_regressors_export.csv',
+                'ml/forecasting/data/schema.md (Input 2)'
+              )
+            }
+          >
+            Forecast Sentiment Regressors CSV
+          </Button>
         </div>
       </Card>
 

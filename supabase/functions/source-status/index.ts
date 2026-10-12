@@ -7,8 +7,13 @@
 //
 // Configure via (never as a VITE_* var — see FYP2.md §59):
 //   supabase secrets set TIKTOK_CLIENT_KEY=... TIKTOK_CLIENT_SECRET=...
-//   supabase secrets set X_API_KEY=... X_API_SECRET=...
+//   supabase secrets set X_BEARER_TOKEN=...
 //   supabase secrets set THREADS_CLIENT_ID=... THREADS_CLIENT_SECRET=...
+//
+// X_BEARER_TOKEN is the one credential sync-x-mentions actually calls X's
+// v2 search API with (app-only auth) — X_API_KEY/X_API_SECRET (OAuth 1.0a
+// consumer keys) aren't used by this project's read-only integration, so
+// they're not checked here.
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -25,7 +30,7 @@ function jsonResponse(body: unknown, status = 200) {
 
 const SOURCES: Record<string, string[]> = {
   tiktok: ['TIKTOK_CLIENT_KEY', 'TIKTOK_CLIENT_SECRET'],
-  x: ['X_API_KEY', 'X_API_SECRET'],
+  x: ['X_BEARER_TOKEN'],
   threads: ['THREADS_CLIENT_ID', 'THREADS_CLIENT_SECRET'],
 }
 

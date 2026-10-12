@@ -21,6 +21,10 @@ npm-debug.log*
 .idea
 .DS_Store
 
+# Stray Expo CLI scaffold (this is a Vite app, not Expo — created by
+# accidentally running the global expo-cli in this folder)
+.expo/
+
 # Python / ML (ml/sentiment, ml/forecasting — see each folder's README.md)
 ml/**/__pycache__/
 ml/**/*.pyc

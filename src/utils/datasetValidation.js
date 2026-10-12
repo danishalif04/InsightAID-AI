@@ -3,7 +3,9 @@
  * every issue is reported, none is silently fixed or dropped.
  */
 
-import { CSV_TEMPLATES } from './csvTemplates'
+import { CSV_TEMPLATES, matchColumnsForTemplate } from './csvTemplates'
+
+export const CUSTOM_TEMPLATE_ID = 'custom'
 
 const NUMERIC_COLUMNS = {
   sales: ['quantity_sold', 'unit_price', 'revenue', 'discount', 'cost'],
@@ -41,23 +43,24 @@ const isBlank = (value) => value === undefined || value === null || String(value
 
 /**
  * Picks the CSV_TEMPLATES entry whose column set best matches the uploaded
- * file's headers. Returns null (never a low-confidence guess) when nothing
- * overlaps at all.
+ * file's headers — exact name OR a known synonym (FYP2.md §35's "any file
+ * format" request), case/spacing-insensitive. Never hard-rejects a file:
+ * when no template matches even fuzzily, returns CUSTOM_TEMPLATE_ID rather
+ * than null, so every upload lands somewhere real instead of being refused.
  */
 export function inferTemplateId(headers) {
-  const headerSet = new Set(headers.map((header) => header.trim()))
   let best = null
   let bestScore = 0
 
   for (const template of CSV_TEMPLATES) {
-    const overlap = template.columns.filter((column) => headerSet.has(column)).length
-    if (overlap > bestScore) {
-      bestScore = overlap
+    const { matchCount } = matchColumnsForTemplate(template.id, headers)
+    if (matchCount > bestScore) {
+      bestScore = matchCount
       best = template.id
     }
   }
 
-  return bestScore > 0 ? best : null
+  return bestScore > 0 ? best : CUSTOM_TEMPLATE_ID
 }
 
 /**
@@ -68,6 +71,31 @@ export function inferTemplateId(headers) {
  *            categoriesFound, checks: string[], warnings: string[], readyForProcessing: boolean}}
  */
 export function validateDataset(templateId, records) {
+  if (templateId === CUSTOM_TEMPLATE_ID) {
+    const presentColumns = records.length > 0 ? Object.keys(records[0]) : []
+    return {
+      templateId,
+      rowCount: records.length,
+      missingColumns: [],
+      duplicateFlags: records.map(() => false),
+      duplicateCount: 0,
+      missingValueCounts: {},
+      invalidDateCount: 0,
+      invalidNumericCount: 0,
+      negativeCount: 0,
+      categoriesFound: [],
+      checks: [
+        `${records.length} row(s) detected.`,
+        `Columns: ${presentColumns.join(', ') || '(none)'}.`,
+      ],
+      warnings: [
+        "Didn't match a known template (Sales/Reviews/Social/Product/Expenses) — stored as-is. " +
+          'Sentiment/crisis/forecast analysis only run on recognized columns, so this import is kept for review/export but not deeply analyzed.',
+      ],
+      readyForProcessing: true,
+    }
+  }
+
   const template = CSV_TEMPLATES.find((item) => item.id === templateId)
   if (!template) {
     return {

@@ -12,4 +12,5 @@ export const PATHS = {
   datasets: '/datasets',
   settings: '/settings',
   onboarding: '/onboarding',
+  modelPerformance: '/model-performance',
 }

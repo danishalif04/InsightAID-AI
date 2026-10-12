@@ -1,0 +1,17 @@
+{
+  "_note": "PLACEHOLDER. No forecasting run has produced this file's real counterpart yet — every value below is null because no model has been evaluated against real sales data. Do not fill this in by hand. Only src/evaluate.py's run_comparison(), run against a real daily series, should ever produce a populated forecast_results JSON. See ../README.md and docs/FORECASTING_MODEL.md for current status.",
+  "run_id": null,
+  "model_type": null,
+  "variant": null,
+  "generated_at": null,
+  "horizon_days": null,
+  "dataset_version": null,
+  "evaluation_period_start": null,
+  "evaluation_period_end": null,
+  "mae": null,
+  "rmse": null,
+  "mape": null,
+  "forecast_points": null,
+  "is_best": null,
+  "notes": null
+}

@@ -7,6 +7,7 @@ import {
   Globe,
   FileText,
   Database,
+  Gauge,
   Settings,
 } from 'lucide-react'
 import { PATHS } from '@/routes/paths'
@@ -24,6 +25,7 @@ export const NAV_ITEMS = [
   { label: 'Social Intelligence', path: PATHS.social, icon: Globe },
   { label: 'Reports', path: PATHS.reports, icon: FileText },
   { label: 'Dataset Management', path: PATHS.datasets, icon: Database },
+  { label: 'Model Performance', path: PATHS.modelPerformance, icon: Gauge },
   { label: 'Settings', path: PATHS.settings, icon: Settings },
 ]
 
@@ -39,4 +41,5 @@ export const PAGE_TITLES = {
   [PATHS.datasets]: 'Dataset Management',
   [PATHS.settings]: 'Settings',
   [PATHS.onboarding]: 'Business Planning',
+  [PATHS.modelPerformance]: 'Model Performance',
 }

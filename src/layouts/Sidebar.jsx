@@ -2,6 +2,9 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import { Activity, ChevronLeft, ChevronRight, LogOut, X } from 'lucide-react'
 import { NAV_ITEMS } from '@/constants/navigation'
 import { useAuth } from '@/hooks/useAuth'
+import { useAsyncData } from '@/hooks/useAsyncData'
+import { getMyProfile } from '@/services/profileService'
+import { initialsFromName } from '@/utils/formatters'
 import { PATHS } from '@/routes/paths'
 
 /**
@@ -10,8 +13,11 @@ import { PATHS } from '@/routes/paths'
  * the mobile drawer always renders full labels regardless of that state.
  */
 export default function Sidebar({ collapsed, onToggleCollapse, mobileOpen, onMobileClose }) {
-  const { signOut } = useAuth()
+  const { user, signOut } = useAuth()
   const navigate = useNavigate()
+  const { data: profile } = useAsyncData(getMyProfile, [])
+  const displayName = profile?.full_name?.trim() || user?.email || 'Signed in'
+  const displayRole = profile?.role || ''
 
   const handleLogout = async () => {
     await signOut()
@@ -97,12 +103,12 @@ export default function Sidebar({ collapsed, onToggleCollapse, mobileOpen, onMob
         <div className="border-t border-white/10 p-3">
           <div className="flex items-center gap-3 rounded-lg px-2 py-2">
             <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-xs font-semibold text-white">
-              AU
+              {initialsFromName(displayName)}
             </span>
 
             <div className={`min-w-0 flex-1 leading-tight ${collapsed ? 'md:hidden' : ''}`}>
-              <p className="truncate text-sm font-medium text-white">Admin User</p>
-              <p className="truncate text-xs text-brand-300">Founder</p>
+              <p className="truncate text-sm font-medium text-white">{displayName}</p>
+              {displayRole && <p className="truncate text-xs text-brand-300">{displayRole}</p>}
             </div>
 
             <button

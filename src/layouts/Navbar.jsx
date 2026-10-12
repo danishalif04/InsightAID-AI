@@ -1,8 +1,16 @@
 import { Bell, Menu, Moon, Search, Sun } from 'lucide-react'
 import ModeSwitcher from '@/components/common/ModeSwitcher'
+import { useAuth } from '@/hooks/useAuth'
+import { useAsyncData } from '@/hooks/useAsyncData'
+import { getMyProfile } from '@/services/profileService'
+import { initialsFromName } from '@/utils/formatters'
 
 /** App shell topbar — mobile menu trigger, page title, mode switch, search, theme toggle, notifications, avatar. */
 export default function Navbar({ pageTitle, isDark, onToggleTheme, onOpenMobileSidebar, mode, onModeChange }) {
+  const { user } = useAuth()
+  const { data: profile } = useAsyncData(getMyProfile, [])
+  const displayName = profile?.full_name?.trim() || user?.email || 'Signed in'
+
   return (
     <header className="flex items-center justify-between gap-4 border-b border-line bg-surface px-4 py-4 dark:border-line-dark dark:bg-surface-dark md:px-6">
       <div className="flex min-w-0 items-center gap-3">
@@ -46,18 +54,18 @@ export default function Navbar({ pageTitle, isDark, onToggleTheme, onOpenMobileS
           aria-label="Notifications"
           className="relative rounded-full border border-line p-2 text-slate-500 transition-colors hover:bg-canvas hover:text-slate-900 dark:border-line-dark dark:text-slate-400 dark:hover:bg-canvas-dark dark:hover:text-slate-100"
         >
+          {/* No notification-feed table/service exists yet — the unread
+              indicator dot that used to render unconditionally here was
+              removed (FYP2.md §40) rather than claim unread items that were
+              never real. */}
           <Bell className="size-4" />
-          <span
-            className="absolute right-1.5 top-1.5 size-2 rounded-full bg-danger"
-            aria-hidden="true"
-          />
         </button>
 
         <span
           className="flex size-9 shrink-0 items-center justify-center rounded-full bg-brand-950 text-xs font-semibold text-white"
           aria-hidden="true"
         >
-          AU
+          {initialsFromName(displayName)}
         </span>
       </div>
     </header>
