@@ -20,3 +20,33 @@ npm-debug.log*
 !.vscode/extensions.json
 .idea
 .DS_Store
+
+# Python / ML (ml/sentiment, ml/forecasting — see each folder's README.md)
+ml/**/__pycache__/
+ml/**/*.pyc
+ml/**/.pytest_cache/
+**/.ipynb_checkpoints/
+.venv/
+venv/
+ml/sentiment/results/*_model/
+ml/sentiment/results/*.json
+!ml/sentiment/results/metrics_template.json
+ml/forecasting/results/*.json
+!ml/forecasting/results/forecast_results_template.json
+
+# Real training datasets stay in Google Drive, never in Git — only the prep
+# code, notebooks, and dataset reports (docs/datasets/) are committed here.
+ml/data/
+*.parquet
+ml/**/*.csv
+
+# Playwright E2E (npm run test:e2e)
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+.scratch/
+
+# Supabase CLI local project-link cache (npx supabase link)
+supabase/.temp/
+supabase/.branches/

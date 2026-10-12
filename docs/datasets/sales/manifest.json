@@ -1,0 +1,96 @@
+{
+  "dataset_name": "insightaid_sales",
+  "dataset_version": "v20261012-2c339361a176",
+  "created_at_utc": "2026-10-12T16:19:57+00:00",
+  "rows": 35890,
+  "series": 32,
+  "datasets": {
+    "favorita": 25320,
+    "online_retail_ii": 6977,
+    "olist": 3593
+  },
+  "sources": {
+    "olist": "https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce (CC BY-NC-SA 4.0 \u2014 check page)",
+    "online_retail_ii": "https://archive.ics.uci.edu/dataset/502/online+retail+ii (CC BY 4.0)",
+    "rossmann": "https://www.kaggle.com/competitions/rossmann-store-sales (competition rules)",
+    "favorita": "https://www.kaggle.com/competitions/store-sales-time-series-forecasting (competition rules)",
+    "m5": "https://www.kaggle.com/competitions/m5-forecasting-accuracy (competition rules)"
+  },
+  "folds": {
+    "favorita": {
+      "test_start": "2017-05-18",
+      "test_end": "2017-08-15",
+      "horizon_days": 30,
+      "rolling_origin_folds": [
+        {
+          "fold": 1,
+          "train_end": "2017-02-16",
+          "valid_start": "2017-02-17",
+          "valid_end": "2017-03-18"
+        },
+        {
+          "fold": 2,
+          "train_end": "2017-03-18",
+          "valid_start": "2017-03-19",
+          "valid_end": "2017-04-17"
+        },
+        {
+          "fold": 3,
+          "train_end": "2017-04-17",
+          "valid_start": "2017-04-18",
+          "valid_end": "2017-05-17"
+        }
+      ]
+    },
+    "olist": {
+      "test_start": "2018-06-01",
+      "test_end": "2018-08-29",
+      "horizon_days": 30,
+      "rolling_origin_folds": [
+        {
+          "fold": 1,
+          "train_end": "2018-03-02",
+          "valid_start": "2018-03-03",
+          "valid_end": "2018-04-01"
+        },
+        {
+          "fold": 2,
+          "train_end": "2018-04-01",
+          "valid_start": "2018-04-02",
+          "valid_end": "2018-05-01"
+        },
+        {
+          "fold": 3,
+          "train_end": "2018-05-01",
+          "valid_start": "2018-05-02",
+          "valid_end": "2018-05-31"
+        }
+      ]
+    },
+    "online_retail_ii": {
+      "test_start": "2011-09-11",
+      "test_end": "2011-12-09",
+      "horizon_days": 30,
+      "rolling_origin_folds": [
+        {
+          "fold": 1,
+          "train_end": "2011-06-12",
+          "valid_start": "2011-06-13",
+          "valid_end": "2011-07-12"
+        },
+        {
+          "fold": 2,
+          "train_end": "2011-07-12",
+          "valid_start": "2011-07-13",
+          "valid_end": "2011-08-11"
+        },
+        {
+          "fold": 3,
+          "train_end": "2011-08-11",
+          "valid_start": "2011-08-12",
+          "valid_end": "2011-09-10"
+        }
+      ]
+    }
+  }
+}

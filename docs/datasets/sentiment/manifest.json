@@ -1,0 +1,120 @@
+{
+  "dataset_name": "insightaid_sentiment",
+  "dataset_version": "v20261012-ba90cb55d8f7",
+  "created_at_utc": "2026-10-12T16:18:22+00:00",
+  "rows": 107171,
+  "split_counts": {
+    "train": 85639,
+    "test": 10769,
+    "validation": 10763
+  },
+  "sources": {
+    "shopee_my_kensvin": "https://huggingface.co/datasets/kensvin/shopee-malaysia-reviews (MIT)",
+    "malay_combined": "https://huggingface.co/datasets/aisyahhrazak/combined-malay-sentiment (from github.com/mesolitica/malaysian-dataset)",
+    "online_shopping_10_cats": "https://github.com/SophonPlus/ChineseNlpCorpus (online_shopping_10_cats)",
+    "amazon_2023_all_beauty": "https://huggingface.co/datasets/McAuley-Lab/Amazon-Reviews-2023 (raw_review_All_Beauty); Hou et al., 2024",
+    "shopee_kaggle": "https://www.kaggle.com/datasets/shymammoth/shopee-reviews"
+  },
+  "processing_log": {
+    "steps": [
+      {
+        "step": "drop_unmapped_labels",
+        "rows_before": 1998091,
+        "rows_after": 1998006,
+        "removed": 85
+      },
+      {
+        "step": "length_filter",
+        "rows_before": 1998006,
+        "rows_after": 1996324,
+        "removed": 1682
+      },
+      {
+        "step": "drop_likely_indonesian_in_malay",
+        "rows_before": 1996324,
+        "rows_after": 1995174,
+        "removed": 1150
+      },
+      {
+        "step": "drop_empty_after_norm",
+        "rows_before": 1995174,
+        "rows_after": 1993395,
+        "removed": 1779
+      },
+      {
+        "step": "drop_conflicting_duplicate_labels",
+        "rows_before": 1993395,
+        "rows_after": 1976654,
+        "removed": 16741
+      },
+      {
+        "step": "drop_exact_duplicates",
+        "rows_before": 1976654,
+        "rows_after": 1879463,
+        "removed": 97191
+      },
+      {
+        "step": "per_source_label_caps",
+        "rows_before": 1879463,
+        "rows_after": 107171,
+        "removed": 1772292
+      }
+    ],
+    "loaded_per_source": {
+      "shopee_kaggle": 1502575,
+      "amazon_2023_all_beauty": 400000,
+      "online_shopping_10_cats": 62774,
+      "malay_combined": 31681,
+      "shopee_my_kensvin": 1061
+    }
+  },
+  "config": {
+    "seed": 42,
+    "caps_per_label": {
+      "shopee_my_kensvin": null,
+      "malay_combined": 15000,
+      "online_shopping_10_cats": 12000,
+      "amazon_2023_all_beauty": 10000,
+      "shopee_kaggle": 8000
+    },
+    "exclude_llm_labelled_malay": true,
+    "drop_likely_indonesian": true
+  },
+  "load_status": [
+    {
+      "source": "1. shopee_my_kensvin",
+      "status": "LOADED",
+      "rows": 1061,
+      "seconds": 3.2,
+      "detail": ""
+    },
+    {
+      "source": "2. malay_combined",
+      "status": "LOADED",
+      "rows": 31681,
+      "seconds": 37.9,
+      "detail": ""
+    },
+    {
+      "source": "3. online_shopping_10_cats",
+      "status": "LOADED",
+      "rows": 62774,
+      "seconds": 1.0,
+      "detail": ""
+    },
+    {
+      "source": "4. amazon_2023_all_beauty",
+      "status": "LOADED",
+      "rows": 400000,
+      "seconds": 5.4,
+      "detail": ""
+    },
+    {
+      "source": "5. shopee_kaggle",
+      "status": "LOADED",
+      "rows": 1502575,
+      "seconds": 6.4,
+      "detail": ""
+    }
+  ]
+}
