@@ -8,7 +8,7 @@ import tempfile
 import numpy as np
 import pandas as pd
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 import sentiment_prep as sp  # noqa: E402
 import sales_prep as sl  # noqa: E402
 
