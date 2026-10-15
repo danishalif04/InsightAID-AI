@@ -34,7 +34,15 @@ export const xAdapter = {
     const configured = await fetchXConfigured()
     if (!configured) return { status: SOURCE_STATUS.NOT_CONFIGURED, lastSync: null, recordCount: 0 }
 
-    const { count, error } = await supabase.from('raw_data').select('id', { count: 'exact', head: true }).eq('source', 'api_sync').eq('template_id', 'social')
+    // Filtered on processed_data's real `platform` column, not raw_data
+    // (where it's nested in jsonb) — now that Threads is also a real,
+    // api_sync/social-template source, filtering only by source+template
+    // here would double-count Threads' own rows as if they were X's.
+    const { count, error } = await supabase
+      .from('processed_data')
+      .select('id', { count: 'exact', head: true })
+      .eq('source', 'api_sync')
+      .eq('platform', 'X')
     if (error) throw error
 
     if (!count) {
@@ -47,14 +55,14 @@ export const xAdapter = {
     }
 
     const { data: latest } = await supabase
-      .from('raw_data')
-      .select('created_at')
+      .from('processed_data')
+      .select('collected_at')
       .eq('source', 'api_sync')
-      .eq('template_id', 'social')
-      .order('created_at', { ascending: false })
+      .eq('platform', 'X')
+      .order('collected_at', { ascending: false })
       .limit(1)
 
-    return { status: SOURCE_STATUS.CONNECTED, lastSync: latest?.[0]?.created_at ?? null, recordCount: count }
+    return { status: SOURCE_STATUS.CONNECTED, lastSync: latest?.[0]?.collected_at ?? null, recordCount: count }
   },
 
   async sync() {

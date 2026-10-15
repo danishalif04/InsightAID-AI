@@ -8,12 +8,27 @@
 // Configure via (never as a VITE_* var — see FYP2.md §59):
 //   supabase secrets set TIKTOK_CLIENT_KEY=... TIKTOK_CLIENT_SECRET=...
 //   supabase secrets set X_BEARER_TOKEN=...
-//   supabase secrets set THREADS_CLIENT_ID=... THREADS_CLIENT_SECRET=...
+//   supabase secrets set THREADS_APP_ID=... THREADS_APP_SECRET=... THREADS_ACCESS_TOKEN=...
 //
 // X_BEARER_TOKEN is the one credential sync-x-mentions actually calls X's
 // v2 search API with (app-only auth) — X_API_KEY/X_API_SECRET (OAuth 1.0a
 // consumer keys) aren't used by this project's read-only integration, so
 // they're not checked here.
+//
+// Threads naming note: earlier revisions of this function checked
+// THREADS_CLIENT_ID/THREADS_CLIENT_SECRET (an OAuth-client-flow naming),
+// but the actual credentials configured are an already-authorized user
+// access token plus the app's own id/secret — Meta's own naming
+// (THREADS_APP_ID/THREADS_APP_SECRET/THREADS_ACCESS_TOKEN), which
+// sync-threads-mentions actually uses. Renamed here to match reality
+// rather than keep a name nothing writes to.
+//
+// Presence here is NOT proof of API connectivity (Phase 1.5) — it only
+// means the secrets exist. A present-but-revoked/expired token still
+// reports 'not_configured_but_present'; real connectivity is only ever
+// confirmed by an actual call (sync-threads-mentions, or
+// threadsAdapter.checkStatus()'s own sync-history check), never by this
+// function alone.
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -31,7 +46,7 @@ function jsonResponse(body: unknown, status = 200) {
 const SOURCES: Record<string, string[]> = {
   tiktok: ['TIKTOK_CLIENT_KEY', 'TIKTOK_CLIENT_SECRET'],
   x: ['X_BEARER_TOKEN'],
-  threads: ['THREADS_CLIENT_ID', 'THREADS_CLIENT_SECRET'],
+  threads: ['THREADS_APP_ID', 'THREADS_APP_SECRET', 'THREADS_ACCESS_TOKEN'],
 }
 
 Deno.serve((req) => {

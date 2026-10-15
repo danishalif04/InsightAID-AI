@@ -51,7 +51,7 @@ describe('xAdapter.checkStatus', () => {
     supabase.functions.invoke.mockResolvedValue({ data: { sources: { x: { status: 'not_configured_but_present' } } }, error: null })
     supabase.from
       .mockReturnValueOnce(chainMock({ count: 5, error: null }))
-      .mockReturnValueOnce(chainMock({ data: [{ created_at: '2026-09-20T00:00:00Z' }], error: null }))
+      .mockReturnValueOnce(chainMock({ data: [{ collected_at: '2026-09-20T00:00:00Z' }], error: null }))
 
     const result = await xAdapter.checkStatus()
     expect(result.status).toBe(SOURCE_STATUS.CONNECTED)
