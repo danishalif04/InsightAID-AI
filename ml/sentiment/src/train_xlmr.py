@@ -96,6 +96,10 @@ def train_transformer(
         metric_for_best_model="eval_loss",
         seed=seed,
         report_to=[],
+        # Mixed-precision on GPU — real speedup (T4 has dedicated fp16
+        # tensor cores) with no accuracy trade-off, unlike cutting epochs
+        # or batch size. False on CPU, where fp16 isn't supported/helpful.
+        fp16=torch.cuda.is_available(),
     )
 
     trainer = Trainer(
