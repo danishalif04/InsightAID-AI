@@ -26,6 +26,7 @@ from torch.utils.data import Dataset
 from transformers import (
     AutoModelForSequenceClassification,
     AutoTokenizer,
+    DataCollatorWithPadding,
     Trainer,
     TrainingArguments,
 )
@@ -38,17 +39,28 @@ XLMR_CHECKPOINT = "xlm-roberta-base"
 
 
 class TextClassificationDataset(Dataset):
+    """Tokenizes lazily, one example per __getitem__ call, with no padding
+    here — padding is deferred to DataCollatorWithPadding at batch time
+    (train_transformer() below), so each batch only pads to its own
+    longest sequence instead of one shared length across the whole
+    dataset. The previous version tokenized every row upfront in a single
+    call with padding=True, materializing a dense [n_rows x max_len]
+    tensor for a 85k+ row training set — real system-RAM exhaustion on
+    Colab ("crashed after using all available RAM"), not a GPU/CUDA OOM.
+    This is the standard HuggingFace pattern for exactly that reason."""
+
     def __init__(self, texts: Sequence[str], labels: Sequence[str], tokenizer, max_length: int = 128):
-        self.encodings = tokenizer(
-            list(texts), truncation=True, padding=True, max_length=max_length
-        )
+        self.texts = list(texts)
         self.label_ids = [LABEL2ID[label] for label in labels]
+        self.tokenizer = tokenizer
+        self.max_length = max_length
 
     def __len__(self) -> int:
         return len(self.label_ids)
 
     def __getitem__(self, idx: int) -> dict:
-        item = {key: torch.tensor(val[idx]) for key, val in self.encodings.items()}
+        encoding = self.tokenizer(self.texts[idx], truncation=True, max_length=self.max_length)
+        item = {key: torch.tensor(val) for key, val in encoding.items()}
         item["labels"] = torch.tensor(self.label_ids[idx])
         return item
 
@@ -107,6 +119,7 @@ def train_transformer(
         args=args,
         train_dataset=train_dataset,
         eval_dataset=val_dataset,
+        data_collator=DataCollatorWithPadding(tokenizer=tokenizer),
     )
     trainer.train()
 
