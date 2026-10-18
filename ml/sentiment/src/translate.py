@@ -20,8 +20,22 @@ from typing import Optional
 # Maps our language tags (from clean.detect_language) to an opus-mt checkpoint
 # that translates that language to English. 'ms-en' (code-mixed) and 'en'
 # text is passed through untouched - there's nothing useful to translate.
+#
+# 'ms' intentionally does NOT point to "Helsinki-NLP/opus-mt-ms-en" - that
+# repo does not exist on the Hugging Face Hub (confirmed via a direct HTTP
+# check; Helsinki-NLP never published a dedicated bilateral Malay-English
+# OPUS-MT pair), and using it crashed every real training run's evaluation
+# step with a 404/RepositoryNotFoundError. "Helsinki-NLP/opus-mt-mul-en"
+# (confirmed to exist) is multilingual-source, 120+ languages into English,
+# which per HuggingFace's own Marian docs needs no language-prefix token
+# since English is the only target language. Malay is among its covered
+# source languages, but - unlike the dedicated zh-en pair - per-language
+# translation quality for Malay specifically has not been independently
+# verified here; state this plainly if citing translate_to_english results
+# for Malay in the thesis, rather than treating it as equivalent quality
+# to a dedicated bilingual model.
 OPUS_MT_CHECKPOINTS = {
-    "ms": "Helsinki-NLP/opus-mt-ms-en",
+    "ms": "Helsinki-NLP/opus-mt-mul-en",
     "zh": "Helsinki-NLP/opus-mt-zh-en",
 }
 

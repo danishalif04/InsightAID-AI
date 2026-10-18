@@ -142,11 +142,19 @@ paths:
 
 - **`original_language`** — classify `cleaned_text` as-is.
 - **`translate_to_english`** — translate non-English text first (local,
-  offline Helsinki-NLP `opus-mt-{ms,zh}-en` models via `ml/sentiment/src/translate.py`
-  — no paid API, fully reproducible), then classify the translated text.
-  English and code-mixed (`ms-en`) text passes through unchanged for this
-  path, since there is no single well-defined translation direction for
-  code-mixed text that doesn't discard information.
+  offline Helsinki-NLP models via `ml/sentiment/src/translate.py` — no paid
+  API, fully reproducible), then classify the translated text. Chinese
+  uses the dedicated `opus-mt-zh-en` pair; Malay uses `opus-mt-mul-en`
+  (120+ source languages into English) since Helsinki-NLP never published
+  a dedicated Malay-English OPUS-MT pair — confirmed by a direct HTTP
+  check against the Hub, after a real training run crashed trying to
+  download the dedicated-pair name this doc previously assumed existed.
+  Malay-specific translation quality from the multilingual model has not
+  been independently verified, unlike the dedicated `zh-en` pair — state
+  this plainly if citing Malay `translate_to_english` results. English and
+  code-mixed (`ms-en`) text passes through unchanged for this path, since
+  there is no single well-defined translation direction for code-mixed
+  text that doesn't discard information.
 
 This produces up to 6 result rows per training run (3 models × 2 paths).
 Metrics computed (`ml/sentiment/src/metrics.py`, real code, unit-tested):
