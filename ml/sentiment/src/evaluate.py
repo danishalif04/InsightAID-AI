@@ -84,9 +84,16 @@ def run_full_comparison(
     languages = list(test_df["language"])
     rows: list[metrics_module.ModelVersionRow] = []
 
+    # Computed once per eval_path, not once per model - translation doesn't
+    # depend on which model is being scored, and translate_to_english can
+    # be slow (a real model call per non-English row). The previous version
+    # called _texts_for_path() inside the model loop, silently retranslating
+    # the same test set once per model (3x the real work for no reason).
+    texts_by_path = {eval_path: _texts_for_path(test_df, eval_path, text_column) for eval_path in EVAL_PATHS}
+
     for model_type, predict_fn in predict_fns.items():
         for eval_path in EVAL_PATHS:
-            texts = _texts_for_path(test_df, eval_path, text_column)
+            texts = texts_by_path[eval_path]
             y_pred = predict_fn(texts)
             _computed, row = evaluate_predictions(
                 y_true,
