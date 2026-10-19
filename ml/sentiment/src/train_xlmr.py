@@ -133,12 +133,22 @@ def train_transformer(
 @torch.no_grad()
 def predict(trained: TrainedModel, texts: Sequence[str], batch_size: int = 32) -> list[str]:
     trained.model.eval()
+    # Whatever device the model is actually on - a freshly-trained model
+    # (via Trainer) ends up on GPU automatically; one reloaded from a Drive
+    # checkpoint via from_pretrained() does NOT, unless moved there
+    # explicitly (see the notebook's checkpoint-reload cells). Tokenizer
+    # output is CPU tensors by default either way, so without this,
+    # calling the model on a GPU-resident model with CPU-resident inputs
+    # raises a device-mismatch RuntimeError.
+    device = next(trained.model.parameters()).device
     predictions: list[str] = []
-    for start in range(0, len(texts), batch_size):
+    total_batches = (len(texts) + batch_size - 1) // batch_size
+    for batch_num, start in enumerate(range(0, len(texts), batch_size), start=1):
+        print(f"[predict] batch {batch_num}/{total_batches} ({len(predictions)}/{len(texts)} done)", flush=True)
         batch = list(texts[start : start + batch_size])
-        encodings = trained.tokenizer(batch, truncation=True, padding=True, max_length=128, return_tensors="pt")
+        encodings = trained.tokenizer(batch, truncation=True, padding=True, max_length=128, return_tensors="pt").to(device)
         logits = trained.model(**encodings).logits
-        batch_ids = np.argmax(logits.numpy(), axis=1)
+        batch_ids = np.argmax(logits.cpu().numpy(), axis=1)
         predictions.extend(ID2LABEL[i] for i in batch_ids)
     return predictions
 

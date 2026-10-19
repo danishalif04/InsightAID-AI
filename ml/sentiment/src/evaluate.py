@@ -89,10 +89,21 @@ def run_full_comparison(
     # be slow (a real model call per non-English row). The previous version
     # called _texts_for_path() inside the model loop, silently retranslating
     # the same test set once per model (3x the real work for no reason).
-    texts_by_path = {eval_path: _texts_for_path(test_df, eval_path, text_column) for eval_path in EVAL_PATHS}
+    #
+    # This is also the single longest, most silent step in the whole
+    # comparison - translating the entire test set happens here, before
+    # any model prediction even starts, and used to print nothing at all
+    # while it ran (indistinguishable from actually being stuck). Printed
+    # explicitly now so it's visible in Colab's output as it happens.
+    texts_by_path = {}
+    for eval_path in EVAL_PATHS:
+        print(f"[evaluate] preparing texts for eval_path={eval_path} ({len(test_df)} rows)...", flush=True)
+        texts_by_path[eval_path] = _texts_for_path(test_df, eval_path, text_column)
+        print(f"[evaluate] done preparing texts for eval_path={eval_path}", flush=True)
 
     for model_type, predict_fn in predict_fns.items():
         for eval_path in EVAL_PATHS:
+            print(f"[evaluate] running {model_type} / {eval_path}...", flush=True)
             texts = texts_by_path[eval_path]
             y_pred = predict_fn(texts)
             _computed, row = evaluate_predictions(
@@ -110,5 +121,6 @@ def run_full_comparison(
             )
             metrics_module.write_metrics_json(row, results_dir)
             rows.append(row)
+            print(f"[evaluate] {model_type} / {eval_path}: acc={row.accuracy:.4f} f1={row.f1:.4f}", flush=True)
 
     return rows

@@ -76,7 +76,12 @@ def _translate_many(texts: list[str], checkpoint: str, batch_size: int = 32) -> 
 
     model, tokenizer, device = _load_model_and_tokenizer(checkpoint)
     results: list[str] = []
-    for start in range(0, len(texts), batch_size):
+    total_batches = (len(texts) + batch_size - 1) // batch_size
+    for batch_num, start in enumerate(range(0, len(texts), batch_size), start=1):
+        # Printed per batch, not just once at the start/end - this is the
+        # single slowest step in the whole evaluation, and used to run
+        # completely silently (indistinguishable from being stuck).
+        print(f"[translate] {checkpoint}: batch {batch_num}/{total_batches} ({len(results)}/{len(texts)} done)", flush=True)
         batch = texts[start : start + batch_size]
         inputs = tokenizer(batch, return_tensors="pt", truncation=True, max_length=512, padding=True).to(device)
         with torch.no_grad():
