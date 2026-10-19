@@ -50,12 +50,39 @@ def _load_model_and_tokenizer(checkpoint: str):
     # in get_supported_tasks() at all). AutoModelForSeq2SeqLM + generate()
     # is the stable, lower-level API pipeline() called internally anyway -
     # removing the high-level task-string shortcut didn't remove this.
+    import torch
     from transformers import AutoModelForSeq2SeqLM, AutoTokenizer  # deferred: heavy, optional dependency
 
     tokenizer = AutoTokenizer.from_pretrained(checkpoint)
     model = AutoModelForSeq2SeqLM.from_pretrained(checkpoint)
     model.eval()  # inference only - without this, dropout stays active and generation is non-deterministic
-    return model, tokenizer
+
+    # Real bug in the first version of this fix: the model was never moved
+    # to the GPU, so every translation ran on CPU even on a T4 runtime -
+    # XLM-R/mBERT get this for free via HF's Trainer, but this module's
+    # raw AutoModelForSeq2SeqLM path needed it done explicitly.
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    model.to(device)
+    return model, tokenizer, device
+
+
+def _translate_many(texts: list[str], checkpoint: str, batch_size: int = 32) -> list[str]:
+    """Translates `texts` (all the same language/checkpoint) in real
+    batches instead of one generate() call per text - with a test set
+    this size (thousands of non-English rows), one-at-a-time was the
+    other real bottleneck: thousands of individual calls instead of a
+    few dozen batched ones."""
+    import torch
+
+    model, tokenizer, device = _load_model_and_tokenizer(checkpoint)
+    results: list[str] = []
+    for start in range(0, len(texts), batch_size):
+        batch = texts[start : start + batch_size]
+        inputs = tokenizer(batch, return_tensors="pt", truncation=True, max_length=512, padding=True).to(device)
+        with torch.no_grad():
+            output_ids = model.generate(**inputs, max_length=512)
+        results.extend(tokenizer.decode(ids, skip_special_tokens=True) for ids in output_ids)
+    return results
 
 
 def translate_to_english(text: str, language: str) -> str:
@@ -72,16 +99,32 @@ def translate_to_english(text: str, language: str) -> str:
     if checkpoint is None:
         return text
 
-    import torch  # deferred, same reason as the transformers import above
-
-    model, tokenizer = _load_model_and_tokenizer(checkpoint)
-    inputs = tokenizer(text, return_tensors="pt", truncation=True, max_length=512)
-    with torch.no_grad():
-        output_ids = model.generate(**inputs, max_length=512)
-    return tokenizer.decode(output_ids[0], skip_special_tokens=True)
+    return _translate_many([text], checkpoint)[0]
 
 
 def translate_batch(texts: list[str], languages: list[str]) -> list[str]:
     if len(texts) != len(languages):
         raise ValueError("texts and languages must be the same length")
-    return [translate_to_english(t, lang) for t, lang in zip(texts, languages)]
+
+    results: list[str | None] = [None] * len(texts)
+
+    # Group by checkpoint (same language -> same checkpoint) so each group
+    # is translated together in real batches, rather than one generate()
+    # call per text regardless of how many share the same model.
+    by_checkpoint: dict[str, list[int]] = {}
+    for i, (text, lang) in enumerate(zip(texts, languages)):
+        if lang in PASSTHROUGH_LANGUAGES:
+            results[i] = text
+            continue
+        checkpoint = OPUS_MT_CHECKPOINTS.get(lang)
+        if checkpoint is None:
+            results[i] = text
+            continue
+        by_checkpoint.setdefault(checkpoint, []).append(i)
+
+    for checkpoint, indices in by_checkpoint.items():
+        translated = _translate_many([texts[i] for i in indices], checkpoint)
+        for idx, t in zip(indices, translated):
+            results[idx] = t
+
+    return results
