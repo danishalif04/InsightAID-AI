@@ -21,7 +21,11 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
-const GEMINI_MODEL = Deno.env.get('GEMINI_MODEL') || 'gemini-2.0-flash'
+// gemini-2.0-flash was retired by Google (confirmed via a real 404 from
+// the live API: "This model ... is no longer available ... use
+// models/gemini-3.8-flash"). Overridable via the GEMINI_MODEL secret so a
+// future retirement doesn't need a code change/redeploy, just a new secret.
+const GEMINI_MODEL = Deno.env.get('GEMINI_MODEL') || 'gemini-3.8-flash'
 const MAX_SECTIONS = 15
 const MAX_NARRATIVE_LENGTH = 1500
 
