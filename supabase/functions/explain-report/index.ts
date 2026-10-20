@@ -49,6 +49,22 @@ function jsonResponse(body: unknown, status = 200) {
   })
 }
 
+// Gemini's 503 ("high demand... try again later") is typically transient -
+// a short retry has a real chance of succeeding within seconds. Only 503
+// is retried: 404/400/401/403 are deterministic and a retry cannot fix them.
+const MAX_RETRIES = 2
+const RETRY_DELAY_MS = 1200
+
+async function fetchWithRetry(url: string, init: RequestInit): Promise<Response> {
+  let response: Response
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    response = await fetch(url, init)
+    if (response.status !== 503) return response
+    if (attempt < MAX_RETRIES) await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS * (attempt + 1)))
+  }
+  return response!
+}
+
 function isValidSection(value: unknown): value is ReportSection {
   return !!value && typeof value === 'object' && typeof (value as ReportSection).id === 'string'
 }
@@ -120,7 +136,7 @@ ${sectionsBlock}`
 
   let geminiResponse: Response
   try {
-    geminiResponse = await fetch(
+    geminiResponse = await fetchWithRetry(
       `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
       {
         method: 'POST',
