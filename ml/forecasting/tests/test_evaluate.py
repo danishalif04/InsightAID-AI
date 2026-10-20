@@ -63,6 +63,24 @@ def test_run_comparison_prophet_variants_use_identical_evaluation_periods():
     assert len(periods) == 1  # same evaluation window for both variants
 
 
+def test_run_comparison_skips_sentiment_enhanced_gracefully_when_no_regressor_columns_exist():
+    # Real bug found before this test existed: most of this project's real
+    # public sales series (favorita/online_retail_ii) have no paired
+    # sentiment signal at all. run_comparison() used to crash ENTIRELY
+    # (not just skip prophet_sentiment_enhanced) the moment it hit that
+    # candidate, taking every other model's real result down with it.
+    df = _daily_df()[["date", "revenue", "sales"]]  # no sentiment columns
+    result = run_comparison(df, horizon=5, initial_train_size=40, step=5)
+
+    model_variant_pairs = {(row.model_type, row.variant) for row in result.rows}
+    assert ("prophet", "sentiment_enhanced") not in model_variant_pairs
+    assert ("prophet", "sales_only") in model_variant_pairs
+    assert ("arima", "sales_only") in model_variant_pairs
+    assert ("xgboost", "sales_only") in model_variant_pairs
+    assert ("moving_average", "sales_only") in model_variant_pairs
+    assert sum(row.is_best for row in result.rows) == 1
+
+
 def test_metrics_computation_is_not_fabricated_smoke_check():
     # sanity: a forecaster that's obviously wrong should score obviously worse
     # than one that's obviously right, on the same actuals.

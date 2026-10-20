@@ -128,7 +128,18 @@ def run_comparison(
 
     rows = []
     for _key, (model_type, variant, fn) in candidates.items():
-        metrics = evaluate_candidate(daily_df, fn, initial_train_size, horizon, step=step, max_folds=max_folds)
+        try:
+            metrics = evaluate_candidate(daily_df, fn, initial_train_size, horizon, step=step, max_folds=max_folds)
+        except (KeyError, ValueError) as exc:
+            # Most commonly: prophet_sentiment_enhanced on a daily_df with no
+            # sentiment regressor columns at all (e.g. a series with no
+            # paired social/review data - most of this package's real public
+            # series are sales-only, nothing to enhance with). One candidate
+            # genuinely not being runnable against this data must not crash
+            # every other candidate's real result - skip it, not fabricate
+            # a placeholder row for a model that never actually ran.
+            print(f"[run_comparison] skipping {model_type}/{variant}: {exc}")
+            continue
         eval_start = str(pd.to_datetime(daily_df["date"]).iloc[initial_train_size].date())
         eval_end = str(pd.to_datetime(daily_df["date"]).iloc[-1].date())
 
