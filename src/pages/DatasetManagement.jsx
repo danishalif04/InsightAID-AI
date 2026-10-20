@@ -8,6 +8,7 @@ import Dialog from '@/components/ui/Dialog'
 import { useNotifications } from '@/hooks/useNotifications'
 import { useMode } from '@/hooks/useMode'
 import { parseCsv } from '@/utils/csvParser'
+import { parseXlsx } from '@/utils/excelParser'
 import { inferTemplateId } from '@/utils/datasetValidation'
 import { computeLanguageBreakdown } from '@/utils/socialAnalytics'
 import { ingestRows, seedFixtureSample } from '@/services/dataPipelineService'
@@ -48,13 +49,29 @@ function readFileAsText(file) {
   })
 }
 
-/** Parses an uploaded file into { headers, records } — CSV and JSON (array of objects) only; .xlsx is not supported yet. */
-async function parseUploadedFile(file) {
-  const isJson = file.name.toLowerCase().endsWith('.json')
-  const isCsv = file.name.toLowerCase().endsWith('.csv')
+function readFileAsArrayBuffer(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result)
+    reader.onerror = () => reject(reader.error)
+    reader.readAsArrayBuffer(file)
+  })
+}
 
-  if (!isJson && !isCsv) {
-    throw new Error(`${file.name}: only .csv and .json are supported right now — .xlsx support is planned but not built yet.`)
+/** Parses an uploaded file into { headers, records } — CSV, JSON (array of objects), and Excel (.xlsx/.xls, first sheet only). */
+async function parseUploadedFile(file) {
+  const name = file.name.toLowerCase()
+  const isJson = name.endsWith('.json')
+  const isCsv = name.endsWith('.csv')
+  const isExcel = name.endsWith('.xlsx') || name.endsWith('.xls')
+
+  if (!isJson && !isCsv && !isExcel) {
+    throw new Error(`${file.name}: only .csv, .json, and .xlsx/.xls are supported.`)
+  }
+
+  if (isExcel) {
+    const buffer = await readFileAsArrayBuffer(file)
+    return parseXlsx(buffer)
   }
 
   const text = await readFileAsText(file)
@@ -211,7 +228,7 @@ export default function DatasetManagement() {
     <div className="space-y-6">
       <Card
         title="Upload Dataset"
-        description="CSV or JSON — up to 100 MB per file. Matches a known template (Sales, Reviews, Social, Product, Expenses) automatically where possible, including common column-name variants; anything that doesn't match is still stored, just not deeply analyzed."
+        description="CSV, JSON, or Excel — up to 100 MB per file. Matches a known template (Sales, Reviews, Social, Product, Expenses) automatically where possible, including common column-name variants; anything that doesn't match is still stored, just not deeply analyzed."
       >
         <div
           onDragOver={(event) => {
@@ -230,7 +247,7 @@ export default function DatasetManagement() {
           <p className="mt-3 text-sm font-medium text-slate-700 dark:text-slate-200">
             Drag and drop files here, or click to browse
           </p>
-          <p className="mt-1 text-xs text-slate-400">CSV or JSON — .xlsx is not supported yet</p>
+          <p className="mt-1 text-xs text-slate-400">CSV, JSON, or Excel (.xlsx/.xls)</p>
           <div className="mt-4 flex flex-wrap justify-center gap-2">
             <Button variant="secondary" size="sm" onClick={() => fileInputRef.current?.click()}>
               Browse Files
@@ -243,7 +260,7 @@ export default function DatasetManagement() {
             ref={fileInputRef}
             type="file"
             multiple
-            accept=".csv,.json"
+            accept=".csv,.json,.xlsx,.xls"
             className="hidden"
             onChange={(event) => event.target.files && handleFiles(event.target.files)}
           />
