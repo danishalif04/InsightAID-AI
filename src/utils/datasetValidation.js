@@ -3,7 +3,7 @@
  * every issue is reported, none is silently fixed or dropped.
  */
 
-import { CSV_TEMPLATES, matchColumnsForTemplate } from './csvTemplates'
+import { CSV_TEMPLATES, matchColumnsForTemplate, remapRecordToCanonicalColumns } from './csvTemplates'
 
 export const CUSTOM_TEMPLATE_ID = 'custom'
 
@@ -119,8 +119,21 @@ export function validateDataset(templateId, records) {
   const warnings = []
   const presentColumns = records.length > 0 ? Object.keys(records[0]) : []
 
+  // Same flexible column-matching the real ingestion path uses
+  // (dataPipelineService.ingestRows) — checking raw headers for an EXACT
+  // canonical name here would flag "missing required columns" for a file
+  // ingestRows already processed successfully via a synonym (e.g. "Order
+  // Date" -> date), which is exactly what happened: validation reported
+  // an error on a file that was, in reality, ready and processed fine.
+  const { mapping } = matchColumnsForTemplate(templateId, presentColumns)
+  const canonicalRecords = records.map((record) => remapRecordToCanonicalColumns(record, mapping))
+  // mapping is a Map<originalHeader, canonicalColumn> - matchedColumns is
+  // the reverse view (which canonical columns got matched at all) needed
+  // for every "is this column present" check below.
+  const matchedColumns = new Set(mapping.values())
+
   // File format / required columns
-  const missingColumns = template.columns.filter((column) => !presentColumns.includes(column))
+  const missingColumns = template.columns.filter((column) => !matchedColumns.has(column))
   if (missingColumns.length === 0) {
     checks.push(`All required columns detected (${template.columns.join(', ')}).`)
   } else {
@@ -131,8 +144,8 @@ export function validateDataset(templateId, records) {
   // Missing values
   const missingValueCounts = {}
   for (const column of template.columns) {
-    if (!presentColumns.includes(column)) continue
-    const count = records.filter((row) => isBlank(row[column])).length
+    if (!matchedColumns.has(column)) continue
+    const count = canonicalRecords.filter((row) => isBlank(row[column])).length
     if (count > 0) missingValueCounts[column] = count
   }
   Object.entries(missingValueCounts).forEach(([column, count]) => warnings.push(`${count} missing value(s) in "${column}".`))
@@ -140,7 +153,7 @@ export function validateDataset(templateId, records) {
   // Duplicate rows (exact match across the template's own columns)
   const seen = new Set()
   let duplicateCount = 0
-  const duplicateFlags = records.map((row) => {
+  const duplicateFlags = canonicalRecords.map((row) => {
     const key = template.columns.map((column) => row[column] ?? '').join('|')
     if (seen.has(key)) {
       duplicateCount++
@@ -154,8 +167,8 @@ export function validateDataset(templateId, records) {
   // Dates
   let invalidDateCount = 0
   for (const column of DATE_COLUMNS[templateId] ?? []) {
-    if (!presentColumns.includes(column)) continue
-    for (const row of records) {
+    if (!matchedColumns.has(column)) continue
+    for (const row of canonicalRecords) {
       if (isBlank(row[column])) continue
       if (Number.isNaN(new Date(row[column]).getTime())) invalidDateCount++
     }
@@ -165,8 +178,8 @@ export function validateDataset(templateId, records) {
   // Numeric types
   let invalidNumericCount = 0
   for (const column of NUMERIC_COLUMNS[templateId] ?? []) {
-    if (!presentColumns.includes(column)) continue
-    for (const row of records) {
+    if (!matchedColumns.has(column)) continue
+    for (const row of canonicalRecords) {
       if (isBlank(row[column])) continue
       if (!Number.isFinite(Number.parseFloat(row[column]))) invalidNumericCount++
     }
@@ -176,8 +189,8 @@ export function validateDataset(templateId, records) {
   // Negative values where inappropriate
   let negativeCount = 0
   for (const column of NON_NEGATIVE_COLUMNS[templateId] ?? []) {
-    if (!presentColumns.includes(column)) continue
-    for (const row of records) {
+    if (!matchedColumns.has(column)) continue
+    for (const row of canonicalRecords) {
       const value = Number.parseFloat(row[column])
       if (Number.isFinite(value) && value < 0) negativeCount++
     }
@@ -187,8 +200,8 @@ export function validateDataset(templateId, records) {
   // Category consistency — reported, not judged (spelling/casing variants are for the user to review).
   const categoryColumn = CATEGORY_COLUMNS[templateId]
   const categoriesFound =
-    categoryColumn && presentColumns.includes(categoryColumn)
-      ? [...new Set(records.map((row) => row[categoryColumn]).filter((value) => !isBlank(value)))]
+    categoryColumn && matchedColumns.has(categoryColumn)
+      ? [...new Set(canonicalRecords.map((row) => row[categoryColumn]).filter((value) => !isBlank(value)))]
       : []
   if (categoriesFound.length > 0) {
     checks.push(`${categoriesFound.length} distinct value(s) found in "${categoryColumn}": ${categoriesFound.join(', ')}.`)

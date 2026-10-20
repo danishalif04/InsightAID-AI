@@ -35,6 +35,16 @@ describe('validateDataset', () => {
     expect(report.rowCount).toBe(2)
   })
 
+  it('recognizes real-world synonym headers as satisfying required columns - the exact bug found via a live .xlsx upload, where this previously reported a false "missing required column" error on a file that ingestRows() processed successfully', () => {
+    const records = [
+      { 'Review Date': '2026-01-01', 'Product Name': 'Serum', Review: 'Great product, really love it', Stars: '5', Source: 'Shopee' },
+      { 'Review Date': '2026-01-02', 'Product Name': 'Cleanser', Review: 'Not bad could be better', Stars: '3', Source: 'TikTok' },
+    ]
+    const report = validateDataset('reviews', records)
+    expect(report.readyForProcessing).toBe(true)
+    expect(report.missingColumns).toEqual([])
+  })
+
   it('flags missing required columns without throwing', () => {
     const report = validateDataset('sales', [{ date: '2026-01-01', product: 'Serum' }])
     expect(report.readyForProcessing).toBe(false)
