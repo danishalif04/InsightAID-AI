@@ -4,9 +4,21 @@ import { shopeeAdapter } from './shopeeAdapter'
 import { tiktokAdapter } from './tiktokAdapter'
 import { xAdapter } from './xAdapter'
 import { threadsAdapter } from './threadsAdapter'
+import { shopeeAffiliateAdapter } from './shopeeAffiliateAdapter'
+import { lazadaAffiliateAdapter } from './lazadaAffiliateAdapter'
+import { tiktokShopAdapter } from './tiktokShopAdapter'
 
 /** Every registered source, in the order shown in Dataset Management. */
-export const SOURCE_ADAPTERS = [salesDataAdapter, shopeeAdapter, tiktokAdapter, xAdapter, threadsAdapter]
+export const SOURCE_ADAPTERS = [
+  salesDataAdapter,
+  shopeeAdapter,
+  tiktokAdapter,
+  xAdapter,
+  threadsAdapter,
+  shopeeAffiliateAdapter,
+  lazadaAffiliateAdapter,
+  tiktokShopAdapter,
+]
 
 /**
  * Checks every adapter's status independently (FYP2.md §66 — one source

@@ -9,6 +9,14 @@
 //   supabase secrets set TIKTOK_CLIENT_KEY=... TIKTOK_CLIENT_SECRET=...
 //   supabase secrets set X_BEARER_TOKEN=...
 //   supabase secrets set THREADS_APP_ID=... THREADS_APP_SECRET=... THREADS_ACCESS_TOKEN=...
+//   supabase secrets set SHOPEE_AFFILIATE_APP_ID=... SHOPEE_AFFILIATE_APP_SECRET=...
+//   supabase secrets set LAZADA_AFFILIATE_APP_KEY=... LAZADA_AFFILIATE_APP_SECRET=...
+//   supabase secrets set TIKTOK_SHOP_APP_KEY=... TIKTOK_SHOP_APP_SECRET=...
+//
+// The three marketplace secret pairs above are NOT set anywhere yet — no
+// affiliate program sign-up has happened for any of them (see
+// docs/API_INTEGRATION.md's Marketplace section). Listed here so the
+// exact names are on record for whenever that changes.
 //
 // X_BEARER_TOKEN is the one credential sync-x-mentions actually calls X's
 // v2 search API with (app-only auth) — X_API_KEY/X_API_SECRET (OAuth 1.0a
@@ -47,6 +55,9 @@ const SOURCES: Record<string, string[]> = {
   tiktok: ['TIKTOK_CLIENT_KEY', 'TIKTOK_CLIENT_SECRET'],
   x: ['X_BEARER_TOKEN'],
   threads: ['THREADS_APP_ID', 'THREADS_APP_SECRET', 'THREADS_ACCESS_TOKEN'],
+  shopee_affiliate: ['SHOPEE_AFFILIATE_APP_ID', 'SHOPEE_AFFILIATE_APP_SECRET'],
+  lazada_affiliate: ['LAZADA_AFFILIATE_APP_KEY', 'LAZADA_AFFILIATE_APP_SECRET'],
+  tiktok_shop: ['TIKTOK_SHOP_APP_KEY', 'TIKTOK_SHOP_APP_SECRET'],
 }
 
 Deno.serve((req) => {
