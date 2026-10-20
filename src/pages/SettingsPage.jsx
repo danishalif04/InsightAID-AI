@@ -56,7 +56,12 @@ function ProfileSection() {
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    if (profile) setForm({ full_name: profile.full_name ?? '', email: profile.email ?? '', role: profile.role ?? '', phone: profile.phone ?? '' })
+    // No `if (profile)` guard - every other section here sets its form
+    // unconditionally with `?? ''` defaults. A real account with no
+    // `profiles` row yet (maybeSingle() legitimately resolves to null)
+    // left this section stuck on "Loading..." forever, since form was
+    // never set at all for that case.
+    setForm({ full_name: profile?.full_name ?? '', email: profile?.email ?? '', role: profile?.role ?? '', phone: profile?.phone ?? '' })
   }, [profile])
 
   const update = (key) => (event) => setForm((current) => ({ ...current, [key]: event.target.value }))
