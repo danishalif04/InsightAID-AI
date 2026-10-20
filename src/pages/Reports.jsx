@@ -70,7 +70,7 @@ export default function Reports() {
 
   return (
     <div className="space-y-6">
-      <Card title="Reports" description="Generated from structured analytical outputs only — see FYP2.md §69-70">
+      <Card title="Reports" description="Generated from structured analytical outputs only">
         <p className="text-sm text-slate-600 dark:text-slate-300">
           Every report below clearly separates <span className="font-semibold text-accent-600 dark:text-accent-400">Actual Data</span> (measured from
           real, already-collected information) from <span className="font-semibold text-amber-600 dark:text-amber-400">Scenario / Estimated Data</span>{' '}
@@ -130,7 +130,7 @@ export default function Reports() {
             <div className="mb-3 flex items-center gap-2 rounded-lg border border-line bg-canvas p-3 text-xs text-slate-500 dark:border-line-dark dark:bg-canvas-dark dark:text-slate-400">
               <Download className="size-3.5 shrink-0" aria-hidden="true" />
               Gemini narrative explanations are unavailable right now — every section below still shows its real
-              data (FYP2.md §55: rule-based/structured output must still work without Gemini).
+              data.
             </div>
           )}
           <div>

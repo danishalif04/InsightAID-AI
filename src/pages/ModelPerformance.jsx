@@ -86,7 +86,7 @@ export default function ModelPerformance() {
 
   return (
     <div className="space-y-6">
-      <Card title="Model Performance" description="Real metrics only — see FYP2.md §72. Never fabricated.">
+      <Card title="Model Performance" description="Real metrics only. Never fabricated.">
         <p className="text-sm text-slate-600 dark:text-slate-300">
           This page reads directly from <code>model_versions</code> and <code>forecast_results</code>. Where no
           training or evaluation run has happened yet, sections below say so plainly instead of showing a number.

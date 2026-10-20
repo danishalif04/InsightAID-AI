@@ -89,7 +89,7 @@ export default function CrisisDetection() {
             </span>
             <div>
               <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                Current Crisis Level (FYP2.md §52)
+                Current Crisis Level
               </p>
               <div className="mt-1 flex items-center gap-2">
                 <p className="text-2xl font-semibold" style={{ color: levelMeta.color }}>
@@ -136,7 +136,7 @@ export default function CrisisDetection() {
 
       <Card
         title="Detected Signals"
-        description="Every signal this run could compute, with measurable evidence — never an unexplained AI-generated label (FYP2.md §53)"
+        description="Every signal this run could compute, with measurable evidence — never an unexplained AI-generated label"
       >
         {loading ? (
           <p className="text-sm text-slate-500 dark:text-slate-400">Running detection…</p>

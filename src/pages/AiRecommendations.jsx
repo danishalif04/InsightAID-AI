@@ -51,7 +51,7 @@ function RecommendationCard({ recommendation }) {
           ) : (
             <p className="text-slate-500 dark:text-slate-400">
               Gemini explanation unavailable right now — this recommendation is shown from the rule engine's
-              evidence above, which is always real regardless of Gemini's availability (FYP2.md §55).
+              evidence above, which is always real regardless of Gemini's availability.
             </p>
           )}
         </div>
@@ -135,13 +135,13 @@ export default function AiRecommendations() {
         {!loading && !geminiAvailable && recommendations.length > 0 && (
           <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
             Gemini explanations are unavailable right now — recommendations below are still real, rule-based
-            results (FYP2.md §55: rule-based recommendations must still work without Gemini).
+            results.
           </p>
         )}
       </Card>
 
       <Card
-        title="Business Context (FYP2.md §56)"
+        title="Business Context"
         description="Factors these recommendations may consider. Anything not on file reads exactly as such — never guessed."
       >
         <dl className="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2">

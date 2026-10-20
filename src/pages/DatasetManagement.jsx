@@ -250,7 +250,7 @@ export default function DatasetManagement() {
         </div>
       </Card>
 
-      <Card title="Data Source Status" description="Every source is checked independently — one failing never affects the others (FYP2.md §66)">
+      <Card title="Data Source Status" description="Every source is checked independently — one failing never affects the others">
         {loadingSources ? (
           <p className="text-sm text-slate-500 dark:text-slate-400">Checking source status…</p>
         ) : (

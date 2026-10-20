@@ -93,7 +93,7 @@ export default function Forecasting() {
       ) : !runId ? (
         <Card title="No forecasting run yet">
           <p className="text-sm text-slate-600 dark:text-slate-300">
-            Forecasting (FYP2.md §50-51) trains offline — moving average, ARIMA, Prophet (sales-only and
+            Forecasting trains offline — moving average, ARIMA, Prophet (sales-only and
             sentiment-enhanced), and XGBoost are evaluated on identical rolling-origin time periods, and the
             actual best-performing model is written to <code>forecast_results</code>. No run has produced any
             data yet.
@@ -183,7 +183,7 @@ export default function Forecasting() {
 
           <Card
             title="Model Comparison"
-            description="Every candidate evaluated on the same rolling-origin periods (FYP2.md §51). The best model is never hardcoded — it's whichever row actually scored lowest MAPE."
+            description="Every candidate evaluated on the same rolling-origin periods. The best model is never hardcoded — it's whichever row actually scored lowest MAPE."
           >
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
