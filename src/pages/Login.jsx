@@ -6,6 +6,7 @@ import Button from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { useAuth } from '@/hooks/useAuth'
 import { PATHS } from '@/routes/paths'
+import { getProfile } from '@/services/businessProfileService'
 
 export default function Login() {
   const { signIn } = useAuth()
@@ -21,11 +22,34 @@ export default function Login() {
     setError(null)
     setLoading(true)
     const { error: signInError } = await signIn(email, password)
-    setLoading(false)
     if (signInError) {
+      setLoading(false)
       setError(signInError.message)
       return
     }
+
+    // No business profile (e.g. after a full "Reset Session") -> treat this
+    // sign-in like a brand-new account and show the onboarding choice step
+    // again, instead of landing on a dashboard (or wherever RequireAuth
+    // happened to bounce them from) with nothing in it. Checked
+    // unconditionally — `location.state?.from` is NOT a reliable signal for
+    // "this is a normal login": signOut() during Reset Session triggers
+    // RequireAuth's own redirect-to-login with a `from` of whatever page
+    // the reset was clicked from, which would otherwise wrongly take
+    // priority over the onboarding check.
+    try {
+      const profile = await getProfile()
+      if (!profile.exists) {
+        setLoading(false)
+        navigate(PATHS.onboarding, { replace: true })
+        return
+      }
+    } catch {
+      // If this check itself fails, fall through to the normal redirect
+      // rather than blocking sign-in over a non-essential check.
+    }
+
+    setLoading(false)
     navigate(location.state?.from ?? PATHS.dashboard, { replace: true })
   }
 

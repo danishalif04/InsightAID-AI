@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   Bell,
   Building2,
@@ -8,22 +9,27 @@ import {
   Info,
   KeyRound,
   Moon,
+  RefreshCw,
   ShieldCheck,
   SlidersHorizontal,
   User,
 } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
+import Dialog from '@/components/ui/Dialog'
 import { Input, Select } from '@/components/ui/Input'
 import Switch from '@/components/ui/Switch'
 import { useAsyncData } from '@/hooks/useAsyncData'
+import { useAuth } from '@/hooks/useAuth'
 import { useNotifications } from '@/hooks/useNotifications'
 import { useTheme } from '@/hooks/useTheme'
 import { getMyProfile, updateMyProfile } from '@/services/profileService'
 import { getApiKeys, getCompany, getPreferences, saveCompany, savePreferences } from '@/services/settingsService'
+import { resetUploadedDatasets } from '@/services/accountResetService'
 import { supabase } from '@/config/supabaseClient'
 import { NOTIFICATION_PREFERENCE_DEFINITIONS } from '@/config/notificationPreferences'
 import { initialsFromName } from '@/utils/formatters'
+import { PATHS } from '@/routes/paths'
 
 const ABOUT_INFO = {
   version: '0.1.0',
@@ -373,8 +379,12 @@ function ModelConfigSection() {
 
 function DatabaseSection() {
   const { notify } = useNotifications()
+  const { signOut } = useAuth()
+  const navigate = useNavigate()
   const { data: preferences } = useAsyncData(getPreferences, [])
   const [backupFrequency, setBackupFrequency] = useState(null)
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [resetting, setResetting] = useState(false)
 
   useEffect(() => {
     setBackupFrequency(preferences?.backup_frequency ?? 'daily')
@@ -391,24 +401,80 @@ function DatabaseSection() {
     }
   }
 
+  const handleRefresh = () => {
+    window.location.reload()
+  }
+
+  const handleResetSession = async () => {
+    setResetting(true)
+    try {
+      await resetUploadedDatasets()
+      await signOut()
+      navigate(PATHS.login)
+    } catch (error) {
+      notify(`Could not reset session: ${error.message}`, 'error')
+      setResetting(false)
+      setConfirmOpen(false)
+    }
+  }
+
   return (
-    <Card title="Database">
-      <p className="text-sm italic text-slate-500 dark:text-slate-400">
-        This app uses one shared Supabase project with row-level security — there is no per-user connection string
-        to show.
-      </p>
-      {backupFrequency !== null && (
-        <Select label="Backup Frequency (saved preference)" className="mt-4" value={backupFrequency} onChange={handleChange}>
-          <option value="hourly">Hourly</option>
-          <option value="daily">Daily</option>
-          <option value="weekly">Weekly</option>
-        </Select>
-      )}
-      <p className="mt-4 text-sm italic text-slate-500 dark:text-slate-400">
-        Unavailable — on-demand backups are a Supabase project-admin operation, not something this app's
-        client-side credentials can trigger.
-      </p>
-    </Card>
+    <>
+      <Card title="Database">
+        <p className="text-sm italic text-slate-500 dark:text-slate-400">
+          This app uses one shared Supabase project with row-level security — there is no per-user connection string
+          to show.
+        </p>
+        {backupFrequency !== null && (
+          <Select label="Backup Frequency (saved preference)" className="mt-4" value={backupFrequency} onChange={handleChange}>
+            <option value="hourly">Hourly</option>
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+          </Select>
+        )}
+        <p className="mt-4 text-sm italic text-slate-500 dark:text-slate-400">
+          Unavailable — on-demand backups are a Supabase project-admin operation, not something this app's
+          client-side credentials can trigger.
+        </p>
+        <Button className="mt-6" variant="secondary" icon={RefreshCw} onClick={handleRefresh}>
+          Refresh
+        </Button>
+      </Card>
+
+      <Card title="Danger Zone" className="mt-6">
+        <p className="text-sm font-medium text-slate-800 dark:text-slate-100">Reset Session</p>
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+          Full fresh start: permanently deletes every dataset you've uploaded (sales, reviews, social), everything
+          visually derived from it (forecast results, Crisis Detection's logged history, saved AI Recommendations),
+          and your Business Profile — then signs you out. The next sign-in starts from the onboarding "Do you have
+          data?" question again, exactly like a brand-new account.
+        </p>
+        <Button className="mt-4" variant="danger" onClick={() => setConfirmOpen(true)}>
+          Reset Session
+        </Button>
+      </Card>
+
+      <Dialog
+        open={confirmOpen}
+        onClose={() => (resetting ? null : setConfirmOpen(false))}
+        title="Reset session?"
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setConfirmOpen(false)} disabled={resetting}>
+              Cancel
+            </Button>
+            <Button variant="danger" loading={resetting} onClick={handleResetSession}>
+              Yes, delete my datasets and sign out
+            </Button>
+          </>
+        }
+      >
+        <p className="text-sm text-slate-600 dark:text-slate-300">
+          This cannot be undone. All uploaded sales, reviews, and social data for this account will be permanently
+          deleted, and you'll be signed out immediately.
+        </p>
+      </Dialog>
+    </>
   )
 }
 
