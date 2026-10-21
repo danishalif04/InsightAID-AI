@@ -51,6 +51,33 @@
   /* Shape & depth */
   --radius-card: 1rem;
   --shadow-card: 0 1px 2px rgb(15 23 19 / 0.04), 0 6px 16px rgb(15 23 19 / 0.05);
+
+  /* ----------------------------------------------------------------
+   * Chart/data semantic colors — mirrors src/config/colorTokens.js
+   * exactly. That file is the documented source of truth; these CSS
+   * custom properties exist because Tailwind utility classes (badges,
+   * borders) need them as tokens, while Recharts (SVG) needs the same
+   * values as plain hex, imported straight from colorTokens.js. Keep
+   * both in sync by hand — colorTokens.test.js only guards against
+   * cross-category hex collisions, not drift between these two files.
+   * ---------------------------------------------------------------- */
+  --color-sentiment-positive: #0072b2;
+  --color-sentiment-neutral: #78716c;
+  --color-sentiment-negative: #d55e00;
+
+  --color-platform-shopee: #f59e0b;
+  --color-platform-tiktok: #0ea5e9;
+  --color-platform-x: #6366f1;
+  --color-platform-threads: #a855f7;
+
+  --color-crisis-normal: #64748b;
+  --color-crisis-warning: #d97706;
+  --color-crisis-critical: #dc2626;
+
+  --color-forecast-actual: #1e2f29;
+  --color-forecast-forecast: #7c3aed;
+  --color-forecast-baseline: #0d9488;
+  --color-forecast-scenario: #db2777;
 }
 
 @layer base {

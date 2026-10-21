@@ -1,0 +1,243 @@
+import { useEffect, useId, useRef, useState } from 'react'
+import { motion } from 'framer-motion'
+import { Download, ImageIcon, Info, Maximize2, MoreVertical } from 'lucide-react'
+import Card from '@/components/ui/Card'
+import Badge from '@/components/ui/Badge'
+import Skeleton from '@/components/ui/Skeleton'
+import AsyncSection from '@/components/common/AsyncSection'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
+import { downloadCsv } from '@/utils/csvExport'
+import { exportChartAsPng, toggleFullscreen } from '@/utils/chartExport'
+import { fadeInUp } from '@/animations/motionPresets'
+import { CHART_HEIGHTS } from './chartDefaults'
+
+/**
+ * "Real data" / "Heuristic" / "Baseline" / "Scenario" — the exact four
+ * labels PLAN.md's honesty convention requires on every chart (rule 0.1).
+ * Never add a fifth without updating this map; nothing here should fall
+ * back to a guessed label.
+ */
+const METHOD_BADGES = {
+  real: { label: 'Real data', tone: 'info' },
+  heuristic: { label: 'Heuristic', tone: 'warning' },
+  baseline: { label: 'Baseline', tone: 'neutral' },
+  scenario: { label: 'Scenario', tone: 'brand' },
+}
+
+function resolveHeight(height) {
+  if (typeof height === 'number') return height
+  return CHART_HEIGHTS[height] ?? CHART_HEIGHTS.md
+}
+
+/**
+ * The shared wrapper every redesigned chart renders inside: title/subtitle,
+ * a method badge with an info tooltip explaining how the number was
+ * produced, an actions menu (Export CSV / Export PNG / Fullscreen), and
+ * the project's standard 5-state async handling (loading/success/empty/
+ * error/unavailable — see useAsyncData/AsyncSection) baked in so no page
+ * has to re-implement it per chart.
+ *
+ * `children` is a render-prop `(data) => ReactNode`, same contract as
+ * AsyncSection, so a chart body only ever renders once there's real data.
+ *
+ * @param {string} title
+ * @param {string} [subtitle]
+ * @param {'real'|'heuristic'|'baseline'|'scenario'} method
+ * @param {string} methodNote one-sentence explanation shown in the info tooltip
+ * @param {'sm'|'md'|'lg'|'hero'|number} [height='md']
+ * @param {string} ariaLabel one-sentence REAL data summary for role="img" — must describe the actual rendered data, not a static caption
+ * @param {'loading'|'success'|'error'|'unavailable'} status
+ * @param {*} data
+ * @param {Error} [error]
+ * @param {() => void} [reload]
+ * @param {(data:*) => boolean} [emptyWhen]
+ * @param {string} [emptyMessage]
+ * @param {string} [unavailableMessage]
+ * @param {Array<object>|((data:*) => Array<object>)} [csvRows] when provided, enables "Export CSV"
+ * @param {string} [csvFilename]
+ * @param {import('react').ReactNode} [headerActions] extra controls rendered left of the actions menu (e.g. a chart-mode toggle)
+ * @param {(data:*) => import('react').ReactNode} children
+ */
+export default function ChartCard({
+  title,
+  subtitle,
+  method,
+  methodNote,
+  height = 'md',
+  ariaLabel,
+  status,
+  data,
+  error,
+  reload,
+  emptyWhen,
+  emptyMessage,
+  unavailableMessage,
+  csvRows,
+  csvFilename = 'chart-data.csv',
+  headerActions,
+  className = '',
+  children,
+}) {
+  const bodyRef = useRef(null)
+  const reducedMotion = useReducedMotion()
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [infoOpen, setInfoOpen] = useState(false)
+  const [exportError, setExportError] = useState(null)
+  const menuRef = useRef(null)
+  const infoId = useId()
+  const pixelHeight = resolveHeight(height)
+  const badge = method ? METHOD_BADGES[method] : null
+
+  useEffect(() => {
+    if (!menuOpen) return undefined
+    const handleClick = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) setMenuOpen(false)
+    }
+    const handleKey = (event) => {
+      if (event.key === 'Escape') setMenuOpen(false)
+    }
+    document.addEventListener('mousedown', handleClick)
+    document.addEventListener('keydown', handleKey)
+    return () => {
+      document.removeEventListener('mousedown', handleClick)
+      document.removeEventListener('keydown', handleKey)
+    }
+  }, [menuOpen])
+
+  const handleExportCsv = () => {
+    setMenuOpen(false)
+    const rows = typeof csvRows === 'function' ? csvRows(data) : csvRows
+    if (!rows || rows.length === 0) return
+    downloadCsv(csvFilename, rows)
+  }
+
+  const handleExportPng = async () => {
+    setMenuOpen(false)
+    setExportError(null)
+    try {
+      await exportChartAsPng(bodyRef.current, `${csvFilename.replace(/\.csv$/i, '')}.png`)
+    } catch (err) {
+      setExportError(err.message)
+    }
+  }
+
+  const handleFullscreen = () => {
+    setMenuOpen(false)
+    toggleFullscreen(bodyRef.current)
+  }
+
+  const motionProps = reducedMotion ? {} : fadeInUp
+
+  return (
+    <motion.div {...motionProps}>
+      <Card
+        className={className}
+        title={title}
+        description={subtitle}
+        actions={
+          <div className="flex items-center gap-1.5">
+            {badge && (
+              <div className="relative">
+                <button
+                  type="button"
+                  className="flex items-center gap-1"
+                  aria-expanded={infoOpen}
+                  aria-describedby={methodNote ? infoId : undefined}
+                  onClick={() => setInfoOpen((open) => !open)}
+                >
+                  <Badge tone={badge.tone}>{badge.label}</Badge>
+                  {methodNote && <Info className="size-3.5 text-slate-400" aria-hidden="true" />}
+                </button>
+                {methodNote && (
+                  <div
+                    id={infoId}
+                    role="tooltip"
+                    className={`absolute right-0 z-20 mt-2 w-64 rounded-lg border border-line bg-surface p-3 text-xs text-slate-600 shadow-card dark:border-line-dark dark:bg-surface-dark dark:text-slate-300 ${
+                      infoOpen ? 'block' : 'hidden'
+                    }`}
+                  >
+                    {methodNote}
+                  </div>
+                )}
+              </div>
+            )}
+            {headerActions}
+            <div className="relative" ref={menuRef}>
+              <button
+                type="button"
+                aria-label="Chart actions"
+                aria-haspopup="menu"
+                aria-expanded={menuOpen}
+                className="rounded-lg p-1.5 text-slate-400 hover:bg-canvas hover:text-slate-700 dark:hover:bg-canvas-dark dark:hover:text-slate-200"
+                onClick={() => setMenuOpen((open) => !open)}
+              >
+                <MoreVertical className="size-4" aria-hidden="true" />
+              </button>
+              {menuOpen && (
+                <div
+                  role="menu"
+                  className="absolute right-0 z-20 mt-1 w-44 overflow-hidden rounded-lg border border-line bg-surface py-1 text-sm shadow-card dark:border-line-dark dark:bg-surface-dark"
+                >
+                  {csvRows && (
+                    <button
+                      type="button"
+                      role="menuitem"
+                      className="flex w-full items-center gap-2 px-3 py-2 text-left text-slate-700 hover:bg-canvas dark:text-slate-200 dark:hover:bg-canvas-dark"
+                      onClick={handleExportCsv}
+                    >
+                      <Download className="size-3.5" aria-hidden="true" /> Export CSV
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-slate-700 hover:bg-canvas dark:text-slate-200 dark:hover:bg-canvas-dark"
+                    onClick={handleExportPng}
+                  >
+                    <ImageIcon className="size-3.5" aria-hidden="true" /> Export PNG
+                  </button>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-slate-700 hover:bg-canvas dark:text-slate-200 dark:hover:bg-canvas-dark"
+                    onClick={handleFullscreen}
+                  >
+                    <Maximize2 className="size-3.5" aria-hidden="true" /> Fullscreen
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        }
+      >
+        {exportError && <p className="mb-2 text-xs text-danger">{exportError}</p>}
+        <div ref={bodyRef} style={{ minHeight: pixelHeight }}>
+          {status === 'loading' ? (
+            <div style={{ height: pixelHeight }}>
+              <Skeleton className="h-full w-full" />
+            </div>
+          ) : (
+            <AsyncSection
+              status={status}
+              data={data}
+              error={error}
+              reload={reload}
+              emptyWhen={emptyWhen}
+              emptyMessage={emptyMessage}
+              unavailableMessage={unavailableMessage}
+            >
+              {(resolvedData) => (
+                // role="img" only wraps actual rendered chart content, never
+                // the error/retry UI — a screen reader must still reach the
+                // Retry button, which role="img" on an ancestor would hide.
+                <div role="img" aria-label={ariaLabel ?? title}>
+                  {children(resolvedData)}
+                </div>
+              )}
+            </AsyncSection>
+          )}
+        </div>
+      </Card>
+    </motion.div>
+  )
+}
