@@ -22,9 +22,19 @@ import { renderEventMarkers } from './EventMarkers'
  * @param {Array<{key:string, label:string, color:string, format?:(value:number)=>string}>} panels one dataKey per stacked mini-chart
  * @param {Array<object>} data shared rows — each panel reads its own `key` from the same array
  * @param {Array<{date:string, label?:string}>} [events] rendered on every panel via EventMarkers
+ * @param {string|null} [highlightDate] an externally-controlled "current" date (e.g. from a click or a replay scrubber) — drawn as an extra marker on every panel so the whole stack visibly reacts together, since Recharts' syncId only syncs hover, not a programmatically-set position
  * @param {number} [panelHeight=120]
  */
-export default function SyncedStack({ panels = [], data = [], events = [], panelHeight = 120 }) {
+export default function SyncedStack({
+  panels = [],
+  data = [],
+  events = [],
+  highlightDate = null,
+  panelHeight = 120,
+}) {
+  const allEvents = highlightDate
+    ? [...events, { date: highlightDate, label: 'Viewing', color: '#7c3aed' }]
+    : events
   const syncId = useId()
   if (panels.length === 0 || data.length === 0) return null
 
@@ -51,7 +61,7 @@ export default function SyncedStack({ panels = [], data = [], events = [], panel
                   />
                 }
               />
-              {renderEventMarkers(events)}
+              {renderEventMarkers(allEvents)}
               <Line
                 type="monotone"
                 dataKey={panel.key}
