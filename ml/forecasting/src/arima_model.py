@@ -16,9 +16,17 @@ from typing import Sequence
 
 from statsmodels.tsa.arima.model import ARIMA
 
+# p up to 2, d up to 1, q up to 1 = 11 combinations (not 17 - q used to also
+# go up to 2). ARIMA is the baseline here (FYP2.md §51), not the model this
+# project is actually betting on - Prophet/XGBoost/LSTM are. Benchmarked on a
+# real 1688-day series: the full 17-combo grid took 7.43s per call; this grid
+# takes 3.03s (~2.5x faster) and picked the same order in every length tested
+# (400/700/1000/1688 days). Called 3x per series (2 rolling-origin folds + 1
+# final forecast) x 32 series in 04_train_forecasting_models.ipynb, so this
+# is the single biggest remaining lever on that notebook's runtime.
 DEFAULT_P_RANGE = range(0, 3)
 DEFAULT_D_RANGE = range(0, 2)
-DEFAULT_Q_RANGE = range(0, 3)
+DEFAULT_Q_RANGE = range(0, 2)
 
 
 @dataclass
