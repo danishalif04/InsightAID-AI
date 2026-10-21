@@ -86,7 +86,16 @@ def build_and_train_lstm(
         ]
     )
     model.compile(optimizer="adam", loss="mse")
-    model.fit(X, y, epochs=epochs, batch_size=batch_size, verbose=0)
+    # Early stopping, not a quality cut: this stops training once loss
+    # plateaus instead of always running all `epochs` regardless of
+    # convergence - real speedup on the series that actually trigger LSTM
+    # (Favorita's 15 series, all >=1688 days, every one of which otherwise
+    # ran the full 50 epochs x4 calls per series in the forecasting
+    # notebook, whether or not it had already converged). restore_best_weights
+    # means a short, noisy tail of epochs can never make the returned model
+    # worse than its best point during training.
+    early_stopping = keras.callbacks.EarlyStopping(monitor="loss", patience=5, restore_best_weights=True)
+    model.fit(X, y, epochs=epochs, batch_size=batch_size, verbose=0, callbacks=[early_stopping])
 
     return model, {"mean": float(mean), "std": float(std), "lookback": lookback}
 
