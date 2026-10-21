@@ -30,3 +30,23 @@ export async function getLatestForecastRun() {
 export function getBestRow(rows) {
   return rows.find((row) => row.is_best) ?? null
 }
+
+/**
+ * Triggers the `run-forecast` Edge Function — a real, instantly-computed
+ * moving-average baseline against this user's own uploaded sales data (no
+ * email, no offline notebook). See that function's header comment for why
+ * it's baseline-tier rather than the full ARIMA/Prophet/XGBoost/LSTM
+ * comparison (Python-only, can't run inside a Deno Edge Function).
+ */
+export async function runForecast() {
+  const { data, error } = await supabase.functions.invoke('run-forecast', { method: 'POST' })
+  if (error) {
+    // supabase-js only gives a generic message for a non-2xx Edge Function
+    // response by default — the real detail is in the response body.
+    const body = await error.context?.json?.().catch(() => null)
+    const err = new Error(body?.message ?? error.message ?? 'Could not run forecasting right now.')
+    err.code = body?.error ?? null
+    throw err
+  }
+  return data
+}
