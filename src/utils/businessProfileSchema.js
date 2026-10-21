@@ -31,7 +31,24 @@ export const PROFILE_GROUPS = [
     fields: [
       { id: 'business_name', label: 'Business Name', table: 'profile', type: 'text' },
       { id: 'business_type', label: 'Business Type', table: 'profile', type: 'text' },
-      { id: 'industry', label: 'Industry', table: 'profile', type: 'text' },
+      {
+        id: 'industry',
+        label: 'Business Sector',
+        table: 'profile',
+        type: 'select',
+        options: [
+          'Food & Beverage',
+          'Beauty & Skincare',
+          'Fashion & Apparel',
+          'Health & Wellness',
+          'Electronics & Gadgets',
+          'Home & Living',
+          'Education & Training',
+          'Professional Services',
+          'Retail / E-commerce',
+          'Other',
+        ],
+      },
       { id: 'business_stage', label: 'Business Stage', table: 'profile', type: 'text' },
       { id: 'location', label: 'Location / Market', table: 'profile', type: 'text' },
       { id: 'business_model', label: 'Business Model', table: 'profile', type: 'text' },
@@ -179,6 +196,12 @@ export function validateFieldValue(fieldId, rawValue) {
 
   if (field.type === 'multiselect') {
     const value = Array.isArray(rawValue) ? rawValue.filter((item) => field.options.includes(item)) : []
+    return { valid: true, value }
+  }
+
+  if (field.type === 'select') {
+    const value = String(rawValue)
+    if (!field.options.includes(value)) return { valid: false, value: null, error: `${field.label} must be one of the listed options.` }
     return { valid: true, value }
   }
 

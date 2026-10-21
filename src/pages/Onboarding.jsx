@@ -4,12 +4,13 @@ import { Building2, CheckCircle2, PackageSearch, Sparkles } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
-import { Input, Textarea } from '@/components/ui/Input'
+import { Input, Select, Textarea } from '@/components/ui/Input'
 import Skeleton from '@/components/ui/Skeleton'
 import ProgressBar from '@/components/ui/ProgressBar'
 import { useNotifications } from '@/hooks/useNotifications'
 import { PATHS } from '@/routes/paths'
 import {
+  FIELDS_BY_ID,
   PROFILE_GROUPS,
   PROVENANCE,
   PROVENANCE_META,
@@ -29,6 +30,21 @@ function ProvenanceTag({ tag }) {
 }
 
 function FieldControl({ field, value, onChange }) {
+  if (field.type === 'select') {
+    return (
+      <Select value={value ?? ''} onChange={(event) => onChange(event.target.value)}>
+        <option value="" disabled>
+          Choose one…
+        </option>
+        {field.options.map((option) => (
+          <option key={option} value={option}>
+            {option}
+          </option>
+        ))}
+      </Select>
+    )
+  }
+
   if (field.type === 'multiselect') {
     const selected = Array.isArray(value) ? value : []
     return (
@@ -69,7 +85,10 @@ export default function Onboarding() {
 
   const [step, setStep] = useState('choice')
   const [loadingExisting, setLoadingExisting] = useState(true)
+  const [sector, setSector] = useState('')
+  const [revenueTarget, setRevenueTarget] = useState('')
   const [description, setDescription] = useState('')
+  const [quickSetupError, setQuickSetupError] = useState(null)
   const [extracting, setExtracting] = useState(false)
   const [saving, setSaving] = useState(false)
   const [values, setValues] = useState({})
@@ -121,7 +140,48 @@ export default function Onboarding() {
     setStep('describe')
   }
 
+  /** Sector + revenue target are explicit, structured choices — never left
+   * to AI to guess, and always applied as 'user_provided' so a later AI
+   * extraction pass can never silently overwrite them. Returns false (and
+   * shows an inline error) if either filled-in field doesn't validate. */
+  const applyQuickSetupFields = () => {
+    const quickValues = {}
+    const quickProvenance = {}
+
+    if (sector) {
+      const result = validateFieldValue('industry', sector)
+      if (!result.valid) {
+        setQuickSetupError(result.error)
+        return false
+      }
+      quickValues.industry = result.value
+      quickProvenance.industry = PROVENANCE.userProvided
+    }
+
+    if (revenueTarget) {
+      const result = validateFieldValue('revenue_target', revenueTarget)
+      if (!result.valid) {
+        setQuickSetupError(result.error)
+        return false
+      }
+      quickValues.revenue_target = result.value
+      quickProvenance.revenue_target = PROVENANCE.userProvided
+    }
+
+    setQuickSetupError(null)
+    setValues((current) => ({ ...current, ...quickValues }))
+    setProvenance((current) => ({ ...current, ...quickProvenance }))
+    return true
+  }
+
+  const handleSkipDescription = () => {
+    if (!applyQuickSetupFields()) return
+    setStep('profile')
+  }
+
   const handleExtract = async () => {
+    if (!applyQuickSetupFields()) return
+
     setExtracting(true)
     const result = await extractProfile(description)
     setExtracting(false)
@@ -138,8 +198,20 @@ export default function Onboarding() {
       extractedValues[fieldId] = value
       extractedProvenance[fieldId] = PROVENANCE.aiExtracted
     }
-    setValues((current) => ({ ...current, ...extractedValues }))
-    setProvenance((current) => ({ ...current, ...extractedProvenance }))
+    setValues((current) => ({
+      ...current,
+      ...extractedValues,
+      // Re-applied last: the quick-setup choices above always win over
+      // whatever Gemini may have also guessed for the same fields.
+      ...(sector ? { industry: sector } : {}),
+      ...(revenueTarget ? { revenue_target: Number.parseFloat(revenueTarget) } : {}),
+    }))
+    setProvenance((current) => ({
+      ...current,
+      ...extractedProvenance,
+      ...(sector ? { industry: PROVENANCE.userProvided } : {}),
+      ...(revenueTarget ? { revenue_target: PROVENANCE.userProvided } : {}),
+    }))
     result.warnings.forEach((warning) => notify(warning, 'info'))
     notify(`Extracted ${Object.keys(result.profile).length} field(s) from your description.`)
     setStep('profile')
@@ -209,9 +281,37 @@ export default function Onboarding() {
     return (
       <div className="mx-auto max-w-2xl space-y-6">
         <Card
-          title="Describe your business"
-          description="A few sentences is enough — mention your product, target customers, price, and expected sales if you know them."
+          title="Tell us about your business"
+          description="Answer what you can — AI fills in the rest of your business plan from your description below. Fields based on a guess, not what you typed, are always labeled 'AI extracted' so you know which numbers to double-check."
         >
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-slate-400">
+                Business Sector
+              </label>
+              <Select value={sector} onChange={(event) => setSector(event.target.value)}>
+                <option value="">Select a sector…</option>
+                {FIELDS_BY_ID.industry.options.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </Select>
+            </div>
+            <Input
+              label="Revenue Target (RM / month)"
+              type="number"
+              min="0"
+              placeholder="e.g. 5000"
+              value={revenueTarget}
+              onChange={(event) => setRevenueTarget(event.target.value)}
+            />
+          </div>
+          {quickSetupError && <p className="mt-2 text-sm text-danger">{quickSetupError}</p>}
+
+          <label className="mb-1.5 mt-5 block text-xs font-medium text-slate-500 dark:text-slate-400">
+            Business Description
+          </label>
           <Textarea
             rows={6}
             placeholder="I want to start a small Malaysian skincare business selling affordable products through TikTok Shop and Shopee. My target customers are university students and young adults..."
@@ -219,11 +319,11 @@ export default function Onboarding() {
             onChange={(event) => setDescription(event.target.value)}
           />
           <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-between">
-            <Button variant="ghost" size="sm" onClick={() => setStep('profile')}>
+            <Button variant="ghost" size="sm" onClick={handleSkipDescription}>
               Skip — I&apos;ll fill this in myself
             </Button>
             <Button icon={Sparkles} loading={extracting} disabled={!description.trim()} onClick={handleExtract}>
-              Extract with AI
+              Generate My Business Plan
             </Button>
           </div>
         </Card>
