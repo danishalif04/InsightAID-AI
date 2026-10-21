@@ -3,6 +3,7 @@ import { ChevronDown, RefreshCw, SaveAll } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
+import Skeleton from '@/components/ui/Skeleton'
 import { useNotifications } from '@/hooks/useNotifications'
 import { useMode } from '@/hooks/useMode'
 import { CATEGORIES } from '@/utils/recommendationRules'
@@ -17,7 +18,9 @@ function RecommendationCard({ recommendation }) {
     <Card bodyClassName="p-5">
       <div className="flex flex-wrap items-center gap-2">
         <Badge tone="brand">{recommendation.category}</Badge>
-        <Badge tone={PRIORITY_TONE[recommendation.priority]}>{recommendation.priority} priority</Badge>
+        <Badge tone={PRIORITY_TONE[recommendation.priority]}>
+          {recommendation.priority} priority
+        </Badge>
       </div>
 
       <p className="mt-3 text-sm font-semibold leading-relaxed text-slate-900 dark:text-slate-100">
@@ -46,12 +49,14 @@ function RecommendationCard({ recommendation }) {
             <>
               <p>{recommendation.rationale}</p>
               {recommendation.context && <p className="mt-2">{recommendation.context}</p>}
-              <p className="mt-2 text-[11px] text-slate-400">Explained by Gemini, from the evidence above only.</p>
+              <p className="mt-2 text-[11px] text-slate-400">
+                Explained by Gemini, from the evidence above only.
+              </p>
             </>
           ) : (
             <p className="text-slate-500 dark:text-slate-400">
-              Gemini explanation unavailable right now — this recommendation is shown from the rule engine's
-              evidence above, which is always real regardless of Gemini's availability.
+              Gemini explanation unavailable right now — this recommendation is shown from the rule
+              engine's evidence above, which is always real regardless of Gemini's availability.
             </p>
           )}
         </div>
@@ -101,7 +106,9 @@ export default function AiRecommendations() {
     }
   }
 
-  const filtered = recommendations.filter((item) => category === 'All' || item.category === category)
+  const filtered = recommendations.filter(
+    (item) => category === 'All' || item.category === category
+  )
 
   return (
     <div className="space-y-6">
@@ -127,15 +134,21 @@ export default function AiRecommendations() {
             <Button icon={RefreshCw} loading={loading} onClick={load}>
               Regenerate
             </Button>
-            <Button icon={SaveAll} loading={saving} disabled={recommendations.length === 0} onClick={handleSave} variant="secondary">
+            <Button
+              icon={SaveAll}
+              loading={saving}
+              disabled={recommendations.length === 0}
+              onClick={handleSave}
+              variant="secondary"
+            >
               Save
             </Button>
           </div>
         </div>
         {!loading && !geminiAvailable && recommendations.length > 0 && (
           <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-            Gemini explanations are unavailable right now — recommendations below are still real, rule-based
-            results.
+            Gemini explanations are unavailable right now — recommendations below are still real,
+            rule-based results.
           </p>
         )}
       </Card>
@@ -144,23 +157,46 @@ export default function AiRecommendations() {
         title="Business Context"
         description="Factors these recommendations may consider. Anything not on file reads exactly as such — never guessed."
       >
-        <dl className="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2">
-          {businessContext.map((factor) => (
-            <div key={factor.id}>
-              <dt className="text-xs font-medium text-slate-500 dark:text-slate-400">{factor.label}</dt>
-              <dd className={`mt-0.5 text-sm ${factor.insufficient ? 'italic text-slate-400 dark:text-slate-500' : 'text-slate-800 dark:text-slate-100'}`}>
-                {factor.value}
-              </dd>
-            </div>
-          ))}
-        </dl>
+        {loading ? (
+          <div className="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2">
+            {[0, 1, 2, 3].map((i) => (
+              <div key={i}>
+                <Skeleton className="h-3 w-28" />
+                <Skeleton className="mt-2 h-4 w-40" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <dl className="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2">
+            {businessContext.map((factor) => (
+              <div key={factor.id}>
+                <dt className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                  {factor.label}
+                </dt>
+                <dd
+                  className={`mt-0.5 text-sm ${factor.insufficient ? 'italic text-slate-400 dark:text-slate-500' : 'text-slate-800 dark:text-slate-100'}`}
+                >
+                  {factor.value}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        )}
       </Card>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {loading ? (
-          <p className="col-span-full py-10 text-center text-sm text-slate-500 dark:text-slate-400">
-            Running the rule engine…
-          </p>
+          [0, 1].map((i) => (
+            <Card key={i} bodyClassName="p-5">
+              <div className="flex gap-2">
+                <Skeleton className="h-5 w-20 rounded-full" />
+                <Skeleton className="h-5 w-24 rounded-full" />
+              </div>
+              <Skeleton className="mt-3 h-4 w-3/4" />
+              <Skeleton className="mt-3 h-3 w-full" />
+              <Skeleton className="mt-1.5 h-3 w-5/6" />
+            </Card>
+          ))
         ) : filtered.length === 0 ? (
           <p className="col-span-full py-10 text-center text-sm text-slate-500 dark:text-slate-400">
             {recommendations.length === 0
@@ -168,7 +204,9 @@ export default function AiRecommendations() {
               : 'No recommendations in this category right now.'}
           </p>
         ) : (
-          filtered.map((recommendation) => <RecommendationCard key={recommendation.id} recommendation={recommendation} />)
+          filtered.map((recommendation) => (
+            <RecommendationCard key={recommendation.id} recommendation={recommendation} />
+          ))
         )}
       </div>
     </div>

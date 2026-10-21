@@ -84,7 +84,8 @@ export function computeSentimentScores(dailyAggregateRows = []) {
   if (latest.positiveRatio === null && latest.negativeRatio === null) return null
 
   const comparison = collapsed[Math.max(0, collapsed.length - 8)]
-  const neutralOf = (positive, negative) => (positive != null && negative != null ? Math.max(0, 1 - positive - negative) : null)
+  const neutralOf = (positive, negative) =>
+    positive != null && negative != null ? Math.max(0, 1 - positive - negative) : null
 
   const latestNeutral = neutralOf(latest.positiveRatio, latest.negativeRatio)
   const comparisonNeutral = neutralOf(comparison.positiveRatio, comparison.negativeRatio)
@@ -109,9 +110,14 @@ export function computeSentimentScores(dailyAggregateRows = []) {
 export function computeSentimentTrend(dailyAggregateRows = [], days = 14) {
   const collapsed = collapseAggregatesByDate(dailyAggregateRows).slice(-days)
   return collapsed.map((point) => {
-    const positive = point.positiveRatio == null ? null : Math.round(point.positiveRatio * 1000) / 10
-    const negative = point.negativeRatio == null ? null : Math.round(point.negativeRatio * 1000) / 10
-    const neutral = positive != null && negative != null ? Math.round((100 - positive - negative) * 10) / 10 : null
+    const positive =
+      point.positiveRatio == null ? null : Math.round(point.positiveRatio * 1000) / 10
+    const negative =
+      point.negativeRatio == null ? null : Math.round(point.negativeRatio * 1000) / 10
+    const neutral =
+      positive != null && negative != null
+        ? Math.round((100 - positive - negative) * 10) / 10
+        : null
     return { date: formatShortDate(point.date), positive, neutral, negative }
   })
 }
@@ -135,10 +141,14 @@ export function computePlatformComparison(processedRows = [], dailyAggregateRows
       : platformRows.length
 
     const engagementValues = platformRows.map((row) => row.engagement).filter(isNumber)
-    const avgEngagement = engagementValues.length ? engagementValues.reduce((a, b) => a + b, 0) / engagementValues.length : null
+    const avgEngagement = engagementValues.length
+      ? engagementValues.reduce((a, b) => a + b, 0) / engagementValues.length
+      : null
 
     const sentimentValues = platformRows.map((row) => row.sentiment_score).filter(isNumber)
-    const avgSentimentScore = sentimentValues.length ? sentimentValues.reduce((a, b) => a + b, 0) / sentimentValues.length : null
+    const avgSentimentScore = sentimentValues.length
+      ? sentimentValues.reduce((a, b) => a + b, 0) / sentimentValues.length
+      : null
 
     const languageCounts = new Map()
     for (const row of platformRows) {
@@ -156,15 +166,33 @@ export function computePlatformComparison(processedRows = [], dailyAggregateRows
 
     return {
       platform,
+      // `mentionVolume` is a SUM of engagement (see aggregateDaily/sumEngagement),
+      // not a post count — the audit found the UI mislabeling it "Mentions" and
+      // showing it alongside a sentiment % computed from a disjoint data path
+      // (Shopee reviews have no engagement columns at all, so mentionVolume is
+      // always 0 there even with real, rated posts). `postCount` below is the
+      // actual number of real posts, so callers can show both honestly instead
+      // of one ambiguous number.
       mentionVolume,
+      postCount: platformRows.length,
       avgEngagement: avgEngagement == null ? null : Math.round(avgEngagement * 10) / 10,
       // sentiment_score is normalized to [-1, 1] (ratingSentimentHeuristic.js) — rescaled
       // to a 0-100 "% positive sentiment" figure for display, a linear transform of a
       // real number, not a new one.
-      sentimentScorePercent: avgSentimentScore == null ? null : Math.round(((avgSentimentScore + 1) / 2) * 1000) / 10,
+      sentimentScorePercent:
+        avgSentimentScore == null ? null : Math.round(((avgSentimentScore + 1) / 2) * 1000) / 10,
       topLanguage,
     }
   })
+}
+
+/** Picks the platform with the most real posts to default-select — never
+ * arbitrary `Set` insertion order, which could land on the platform with
+ * the least (or zero) data as the very first thing a visitor sees. */
+export function selectDefaultPlatform(platformComparisonRows = []) {
+  if (platformComparisonRows.length === 0) return null
+  return platformComparisonRows.reduce((best, row) => (row.postCount > best.postCount ? row : best))
+    .platform
 }
 
 /** Per-platform daily mention volume for the last `days` days:
@@ -209,7 +237,13 @@ export function computeTrendingHashtags(processedRows = [], limit = 8) {
     .slice(0, limit)
 }
 
-const LANGUAGE_LABELS = { en: 'English', ms: 'Bahasa Melayu', zh: 'Mandarin', 'ms-en': 'Code-mixed (MY/EN)', unknown: 'Unknown' }
+const LANGUAGE_LABELS = {
+  en: 'English',
+  ms: 'Bahasa Melayu',
+  zh: 'Mandarin',
+  'ms-en': 'Code-mixed (MY/EN)',
+  unknown: 'Unknown',
+}
 
 /** Real language-detection breakdown (Dataset Management's "language mix"
  * widget) from the `language` column processed_data rows already carry —

@@ -13,6 +13,7 @@ import Button from '@/components/ui/Button'
  * @param {() => void} [reload]
  * @param {(data:*) => boolean} [emptyWhen] success + this returns true -> 'empty' copy instead of children
  * @param {string} [loadingMessage]
+ * @param {import('react').ReactNode} [loadingSkeleton] optional richer loading placeholder (e.g. Skeleton blocks shaped like the real layout); when omitted, falls back to the default spinner + loadingMessage text unchanged
  * @param {string} [emptyMessage]
  * @param {string} [unavailableMessage] fallback when the thrown DataUnavailableError has no message
  * @param {(data:*) => import('react').ReactNode} children
@@ -24,11 +25,13 @@ export default function AsyncSection({
   reload,
   emptyWhen,
   loadingMessage = 'Loading…',
+  loadingSkeleton,
   emptyMessage = 'Nothing here yet.',
   unavailableMessage = 'This data is currently unavailable.',
   children,
 }) {
   if (status === 'loading') {
+    if (loadingSkeleton) return loadingSkeleton
     return (
       <p className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
         <Loader2 className="size-4 animate-spin" aria-hidden="true" />
@@ -55,7 +58,9 @@ export default function AsyncSection({
 
   if (status === 'unavailable') {
     return (
-      <p className="text-sm italic text-slate-500 dark:text-slate-400">{error?.message ?? unavailableMessage}</p>
+      <p className="text-sm italic text-slate-500 dark:text-slate-400">
+        {error?.message ?? unavailableMessage}
+      </p>
     )
   }
 

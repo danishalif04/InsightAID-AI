@@ -15,13 +15,23 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import { AlertTriangle, ArrowDown, ArrowUp, ClipboardList, Lightbulb, RefreshCw, Sparkles, X } from 'lucide-react'
+import {
+  AlertTriangle,
+  ArrowDown,
+  ArrowUp,
+  ClipboardList,
+  Lightbulb,
+  RefreshCw,
+  Sparkles,
+  X,
+} from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import Chip from '@/components/ui/Chip'
 import Button from '@/components/ui/Button'
 import ChartTooltip from '@/components/ui/ChartTooltip'
 import AsyncSection from '@/components/common/AsyncSection'
+import Skeleton from '@/components/ui/Skeleton'
 import { useAsyncData } from '@/hooks/useAsyncData'
 import { useMode } from '@/hooks/useMode'
 import { PATHS } from '@/routes/paths'
@@ -32,7 +42,12 @@ import { getDashboardData } from '@/services/dashboardService'
 import BusinessPlanningPanel from '@/components/common/BusinessPlanningPanel'
 
 const ALERT_TONES = { warning: 'warning', critical: 'danger' }
-const PLATFORM_COLORS = [CHART_COLORS.tiktok, CHART_COLORS.x, CHART_COLORS.positive, CHART_COLORS.neutral]
+const PLATFORM_COLORS = [
+  CHART_COLORS.tiktok,
+  CHART_COLORS.x,
+  CHART_COLORS.positive,
+  CHART_COLORS.neutral,
+]
 
 function humanizeSignalId(id) {
   return capitalize(id.replace(/_/g, ' '))
@@ -74,7 +89,12 @@ function buildKpis(data) {
 
   const positive = data.sentimentScores?.find((score) => score.id === 'positive')
   if (positive?.value != null) {
-    kpis.push({ id: 'sentiment', label: 'Overall Sentiment (Positive)', display: `${positive.value}%`, delta: positive.delta })
+    kpis.push({
+      id: 'sentiment',
+      label: 'Overall Sentiment (Positive)',
+      display: `${positive.value}%`,
+      delta: positive.delta,
+    })
   }
 
   if (data.crisis) {
@@ -86,17 +106,47 @@ function buildKpis(data) {
     })
   }
 
-  const lastForecastPoint = data.bestForecastRow?.forecast_points?.[data.bestForecastRow.forecast_points.length - 1]
+  const lastForecastPoint =
+    data.bestForecastRow?.forecast_points?.[data.bestForecastRow.forecast_points.length - 1]
   if (lastForecastPoint?.predicted != null) {
     kpis.push({
       id: 'forecast',
       label: 'Revenue Forecast',
       display: formatCurrencyMYR(lastForecastPoint.predicted),
-      footer: data.bestForecastRow.mape != null ? `Model MAPE: ${data.bestForecastRow.mape}%` : null,
+      footer:
+        data.bestForecastRow.mape != null ? `Model MAPE: ${data.bestForecastRow.mape}%` : null,
     })
   }
 
   return kpis
+}
+
+/** Real skeleton for the dashboard body's loading state — shaped like the
+ * actual layout (KPI row + 3 chart cards) instead of a bare "Loading…"
+ * line, so the page doesn't read as stuck during its several real,
+ * parallel Supabase round-trips (see dashboardService.getDashboardData). */
+function DashboardBodySkeleton() {
+  return (
+    <>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {[0, 1, 2].map((i) => (
+          <Card key={i} bodyClassName="p-5">
+            <Skeleton className="h-3 w-24" />
+            <Skeleton className="mt-3 h-7 w-20" />
+            <Skeleton className="mt-3 h-3 w-16" />
+          </Card>
+        ))}
+      </div>
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <Card className="lg:col-span-2" bodyClassName="p-5">
+          <Skeleton className="h-full min-h-[220px] w-full" />
+        </Card>
+        <Card bodyClassName="p-5">
+          <Skeleton className="h-full min-h-[220px] w-full" />
+        </Card>
+      </div>
+    </>
+  )
 }
 
 function DashboardBody({ data }) {
@@ -107,7 +157,9 @@ function DashboardBody({ data }) {
     <>
       {kpis.length === 0 ? (
         <Card>
-          <EmptyNote>No KPIs computable yet — upload sales, review, or social data via Dataset Management.</EmptyNote>
+          <EmptyNote>
+            No KPIs computable yet — upload sales, review, or social data via Dataset Management.
+          </EmptyNote>
         </Card>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -118,7 +170,11 @@ function DashboardBody({ data }) {
       )}
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <Card title="Sentiment Trend" description="Last 14 days, by sentiment label" className="lg:col-span-2">
+        <Card
+          title="Sentiment Trend"
+          description="Last 14 days, by sentiment label"
+          className="lg:col-span-2"
+        >
           {data.sentimentTrend.length === 0 ? (
             <EmptyNote>No sentiment history yet.</EmptyNote>
           ) : (
@@ -127,11 +183,45 @@ function DashboardBody({ data }) {
                 <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid} vertical={false} />
                 <XAxis dataKey="date" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 12 }} axisLine={false} tickLine={false} unit="%" />
-                <Tooltip content={<ChartTooltip formatter={(value) => (value != null ? `${value}%` : '—')} />} />
+                <Tooltip
+                  content={
+                    <ChartTooltip formatter={(value) => (value != null ? `${value}%` : '—')} />
+                  }
+                />
                 <Legend iconType="circle" wrapperStyle={{ fontSize: 12 }} />
-                <Area type="monotone" dataKey="positive" name="Positive" stackId="sentiment" stroke={CHART_COLORS.positive} fill={CHART_COLORS.positive} fillOpacity={0.25} strokeWidth={2} connectNulls={false} />
-                <Area type="monotone" dataKey="neutral" name="Neutral" stackId="sentiment" stroke={CHART_COLORS.neutral} fill={CHART_COLORS.neutral} fillOpacity={0.25} strokeWidth={2} connectNulls={false} />
-                <Area type="monotone" dataKey="negative" name="Negative" stackId="sentiment" stroke={CHART_COLORS.negative} fill={CHART_COLORS.negative} fillOpacity={0.25} strokeWidth={2} connectNulls={false} />
+                <Area
+                  type="monotone"
+                  dataKey="positive"
+                  name="Positive"
+                  stackId="sentiment"
+                  stroke={CHART_COLORS.positive}
+                  fill={CHART_COLORS.positive}
+                  fillOpacity={0.25}
+                  strokeWidth={2}
+                  connectNulls={false}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="neutral"
+                  name="Neutral"
+                  stackId="sentiment"
+                  stroke={CHART_COLORS.neutral}
+                  fill={CHART_COLORS.neutral}
+                  fillOpacity={0.25}
+                  strokeWidth={2}
+                  connectNulls={false}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="negative"
+                  name="Negative"
+                  stackId="sentiment"
+                  stroke={CHART_COLORS.negative}
+                  fill={CHART_COLORS.negative}
+                  fillOpacity={0.25}
+                  strokeWidth={2}
+                  connectNulls={false}
+                />
               </AreaChart>
             </ResponsiveContainer>
           )}
@@ -156,7 +246,10 @@ function DashboardBody({ data }) {
                   stroke="var(--color-surface)"
                 >
                   {data.platformComparison.map((entry, index) => (
-                    <Cell key={entry.platform} fill={PLATFORM_COLORS[index % PLATFORM_COLORS.length]} />
+                    <Cell
+                      key={entry.platform}
+                      fill={PLATFORM_COLORS[index % PLATFORM_COLORS.length]}
+                    />
                   ))}
                 </Pie>
               </PieChart>
@@ -166,7 +259,11 @@ function DashboardBody({ data }) {
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <Card title="Daily Mention Volume" description="Mentions by platform, last 7 days" className="lg:col-span-2">
+        <Card
+          title="Daily Mention Volume"
+          description="Mentions by platform, last 7 days"
+          className="lg:col-span-2"
+        >
           {data.mentionVolumeSeries.length === 0 ? (
             <EmptyNote>No mention-volume history yet.</EmptyNote>
           ) : (
@@ -178,7 +275,13 @@ function DashboardBody({ data }) {
                 <Tooltip content={<ChartTooltip />} />
                 <Legend iconType="circle" wrapperStyle={{ fontSize: 12 }} />
                 {platforms.map((platform, index) => (
-                  <Bar key={platform} dataKey={platform} name={capitalize(platform)} fill={PLATFORM_COLORS[index % PLATFORM_COLORS.length]} radius={[4, 4, 0, 0]} />
+                  <Bar
+                    key={platform}
+                    dataKey={platform}
+                    name={capitalize(platform)}
+                    fill={PLATFORM_COLORS[index % PLATFORM_COLORS.length]}
+                    radius={[4, 4, 0, 0]}
+                  />
                 ))}
               </BarChart>
             </ResponsiveContainer>
@@ -192,7 +295,8 @@ function DashboardBody({ data }) {
             <div className="flex flex-wrap gap-2">
               {data.trendingHashtags.map((item) => (
                 <Chip key={item.hashtag}>
-                  #{item.hashtag} <span className="ml-1 text-slate-400">{item.mentions.toLocaleString()}</span>
+                  #{item.hashtag}{' '}
+                  <span className="ml-1 text-slate-400">{item.mentions.toLocaleString()}</span>
                 </Chip>
               ))}
             </div>
@@ -205,7 +309,10 @@ function DashboardBody({ data }) {
           title="Recent Alerts"
           description="Latest crisis-detection signals"
           actions={
-            <Link to={PATHS.crisis} className="text-xs font-medium text-accent-600 hover:underline dark:text-accent-400">
+            <Link
+              to={PATHS.crisis}
+              className="text-xs font-medium text-accent-600 hover:underline dark:text-accent-400"
+            >
               View all
             </Link>
           }
@@ -215,16 +322,23 @@ function DashboardBody({ data }) {
           ) : (
             <ul className="space-y-3">
               {data.crisis.triggeredSignals.map((signal) => (
-                <li key={signal.id} className="flex gap-3 rounded-lg border border-line p-3 dark:border-line-dark">
+                <li
+                  key={signal.id}
+                  className="flex gap-3 rounded-lg border border-line p-3 dark:border-line-dark"
+                >
                   <span className="mt-0.5 shrink-0">
                     <AlertTriangle className="size-4 text-danger" aria-hidden="true" />
                   </span>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <p className="truncate text-sm font-medium text-slate-800 dark:text-slate-100">{humanizeSignalId(signal.id)}</p>
+                      <p className="truncate text-sm font-medium text-slate-800 dark:text-slate-100">
+                        {humanizeSignalId(signal.id)}
+                      </p>
                       <Badge tone={ALERT_TONES[signal.level] ?? 'neutral'}>{signal.level}</Badge>
                     </div>
-                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{signal.evidence}</p>
+                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                      {signal.evidence}
+                    </p>
                   </div>
                 </li>
               ))}
@@ -236,27 +350,43 @@ function DashboardBody({ data }) {
           title="Latest AI Recommendations"
           description="Highest-priority suggestions right now"
           actions={
-            <Link to={PATHS.recommendations} className="text-xs font-medium text-accent-600 hover:underline dark:text-accent-400">
+            <Link
+              to={PATHS.recommendations}
+              className="text-xs font-medium text-accent-600 hover:underline dark:text-accent-400"
+            >
               View all
             </Link>
           }
         >
           {data.recommendations.length === 0 ? (
-            <EmptyNote>No recommendations right now — nothing is fabricated to fill this space.</EmptyNote>
+            <EmptyNote>
+              No recommendations right now — nothing is fabricated to fill this space.
+            </EmptyNote>
           ) : (
             <ul className="space-y-3">
               {data.recommendations.map((rec) => (
-                <li key={rec.id} className="flex gap-3 rounded-lg border border-line p-3 dark:border-line-dark">
+                <li
+                  key={rec.id}
+                  className="flex gap-3 rounded-lg border border-line p-3 dark:border-line-dark"
+                >
                   <span className="mt-0.5 shrink-0">
                     <Lightbulb className="size-4 text-accent-500" aria-hidden="true" />
                   </span>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <Badge tone="brand">{rec.category}</Badge>
-                      <Badge tone={rec.priority === 'high' ? 'danger' : 'warning'}>{rec.priority}</Badge>
+                      <Badge tone={rec.priority === 'high' ? 'danger' : 'warning'}>
+                        {rec.priority}
+                      </Badge>
                     </div>
-                    <p className="mt-1.5 text-sm font-medium text-slate-800 dark:text-slate-100">{rec.title}</p>
-                    {rec.evidence?.[0] && <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{rec.evidence[0]}</p>}
+                    <p className="mt-1.5 text-sm font-medium text-slate-800 dark:text-slate-100">
+                      {rec.title}
+                    </p>
+                    {rec.evidence?.[0] && (
+                      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                        {rec.evidence[0]}
+                      </p>
+                    )}
                   </div>
                 </li>
               ))}
@@ -276,13 +406,16 @@ export default function Dashboard() {
   const { status, data, error, reload } = useAsyncData(() => getDashboardData(mode), [mode])
 
   const showOnboardingBanner = businessProfile && !businessProfile.exists && !dismissedBanner
-  const showPlanningPanel = businessProfile?.exists && businessProfile.dataAvailabilityPath === 'no_data'
+  const showPlanningPanel =
+    businessProfile?.exists && businessProfile.dataAvailabilityPath === 'no_data'
 
   return (
     <div className="space-y-6">
       {showPlanningPanel ? (
         <div>
-          <p className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">Business Planning Mode</p>
+          <p className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">
+            Business Planning Mode
+          </p>
           <BusinessPlanningPanel
             values={businessProfile.values}
             provenance={businessProfile.provenance}
@@ -295,12 +428,18 @@ export default function Dashboard() {
             <Card bodyClassName="p-5">
               <div className="flex flex-wrap items-center gap-4">
                 <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-accent-100 dark:bg-accent-600/15">
-                  <ClipboardList className="size-4 text-accent-600 dark:text-accent-400" aria-hidden="true" />
+                  <ClipboardList
+                    className="size-4 text-accent-600 dark:text-accent-400"
+                    aria-hidden="true"
+                  />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Set up your business profile</p>
+                  <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                    Set up your business profile
+                  </p>
                   <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                    Tell us about your business — with or without existing data — so InsightAid can tailor this dashboard to you.
+                    Tell us about your business — with or without existing data — so InsightAid can
+                    tailor this dashboard to you.
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
@@ -333,9 +472,13 @@ export default function Dashboard() {
                       {modeConfig.label}
                     </span>
                   </div>
-                  <p className="mt-1 max-w-3xl text-sm leading-relaxed text-brand-200">
-                    {status === 'loading' ? 'Loading…' : (data?.executiveSummary ?? 'Not enough data yet.')}
-                  </p>
+                  {status === 'loading' ? (
+                    <Skeleton className="mt-2 h-4 w-72 bg-white/15" />
+                  ) : (
+                    <p className="mt-1 max-w-3xl text-sm leading-relaxed text-brand-200">
+                      {data?.executiveSummary ?? 'Not enough data yet.'}
+                    </p>
+                  )}
                 </div>
               </div>
               <Button
@@ -350,7 +493,13 @@ export default function Dashboard() {
             </div>
           </Card>
 
-          <AsyncSection status={status} data={data} error={error} reload={reload}>
+          <AsyncSection
+            status={status}
+            data={data}
+            error={error}
+            reload={reload}
+            loadingSkeleton={<DashboardBodySkeleton />}
+          >
             {(dashboardData) => <DashboardBody data={dashboardData} />}
           </AsyncSection>
         </>

@@ -49,7 +49,14 @@ export default function DashboardLayout() {
           onModeChange={handleModeChange}
         />
 
-        <main className="flex-1 p-4 md:p-6">
+        {/* pb-24: the floating AI assistant button is `fixed bottom-6
+            right-6` over the whole viewport, so it sits on top of
+            whatever's at the bottom of the page when scrolled all the way
+            down (confirmed overlapping the Forecasting page's Model
+            Comparison table and Social Intelligence's Trending Hashtags
+            list). Reserving real bottom space means the button only ever
+            overlaps this padding, never a page's last real row. */}
+        <main className="flex-1 p-4 pb-24 md:p-6 md:pb-28">
           <Suspense fallback={<PageLoader />}>
             <Outlet />
           </Suspense>

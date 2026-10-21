@@ -10,8 +10,14 @@ import { useAsyncData } from '@/hooks/useAsyncData'
 import { CHART_COLORS } from '@/theme/chartTheme'
 import { capitalize } from '@/utils/formatters'
 import { getSocialIntelligenceData } from '@/services/socialIntelligenceService'
+import { selectDefaultPlatform } from '@/utils/socialAnalytics'
 
-const PLATFORM_COLORS = [CHART_COLORS.tiktok, CHART_COLORS.x, CHART_COLORS.positive, CHART_COLORS.neutral]
+const PLATFORM_COLORS = [
+  CHART_COLORS.tiktok,
+  CHART_COLORS.x,
+  CHART_COLORS.positive,
+  CHART_COLORS.neutral,
+]
 
 function EmptyNote({ children }) {
   return <p className="py-6 text-center text-sm text-slate-500 dark:text-slate-400">{children}</p>
@@ -30,7 +36,11 @@ export default function SocialIntelligence() {
   const [selectedPlatform, setSelectedPlatform] = useState(null)
 
   const platforms = data?.platformComparison.map((p) => p.platform) ?? []
-  const effectivePlatform = selectedPlatform ?? platforms[0] ?? null
+  const effectivePlatform =
+    selectedPlatform ??
+    selectDefaultPlatform(data?.platformComparison ?? []) ??
+    platforms[0] ??
+    null
   const platformColorIndex = Math.max(0, platforms.indexOf(effectivePlatform))
   const platformColor = PLATFORM_COLORS[platformColorIndex % PLATFORM_COLORS.length]
   const platformLabel = effectivePlatform ? capitalize(effectivePlatform) : 'Platform'
@@ -71,21 +81,61 @@ export default function SocialIntelligence() {
                 </Card>
               )}
 
-              <Card title="Platform Comparison" description="Real mention volume, average engagement, and sentiment per platform">
+              <Card
+                title="Platform Comparison"
+                description="Real post count, engagement volume, and sentiment per platform"
+              >
                 {pageData.platformComparison.length === 0 ? (
-                  <EmptyNote>No platform data yet — upload social/review data via Dataset Management.</EmptyNote>
+                  <EmptyNote>
+                    No platform data yet — upload social/review data via Dataset Management.
+                  </EmptyNote>
                 ) : (
                   <Table
                     columns={[
-                      { key: 'platform', label: 'Platform', render: (row) => capitalize(row.platform) },
-                      { key: 'mentionVolume', label: 'Mentions', align: 'right', render: (row) => row.mentionVolume.toLocaleString() },
-                      { key: 'avgEngagement', label: 'Avg. Engagement', align: 'right', render: (row) => (row.avgEngagement != null ? row.avgEngagement.toLocaleString() : '—') },
-                      { key: 'topLanguage', label: 'Top Language', render: (row) => row.topLanguage ?? '—' },
+                      {
+                        key: 'platform',
+                        label: 'Platform',
+                        render: (row) => capitalize(row.platform),
+                      },
+                      {
+                        key: 'postCount',
+                        label: 'Posts',
+                        align: 'right',
+                        render: (row) => row.postCount.toLocaleString(),
+                      },
+                      {
+                        key: 'mentionVolume',
+                        label: 'Engagement Volume',
+                        align: 'right',
+                        render: (row) => row.mentionVolume.toLocaleString(),
+                      },
+                      {
+                        key: 'avgEngagement',
+                        label: 'Avg. Engagement',
+                        align: 'right',
+                        render: (row) =>
+                          row.avgEngagement != null ? row.avgEngagement.toLocaleString() : '—',
+                      },
+                      {
+                        key: 'topLanguage',
+                        label: 'Top Language',
+                        render: (row) => row.topLanguage ?? '—',
+                      },
                       {
                         key: 'sentimentScorePercent',
                         label: 'Sentiment',
                         align: 'right',
-                        render: (row) => (row.sentimentScorePercent != null ? <Badge tone="success">{row.sentimentScorePercent}%</Badge> : '—'),
+                        render: (row) =>
+                          row.sentimentScorePercent != null ? (
+                            <Badge tone="success">{row.sentimentScorePercent}%</Badge>
+                          ) : (
+                            <span
+                              className="italic text-slate-400 dark:text-slate-500"
+                              title="No rated reviews captured for this platform yet — this platform's posts come from a template with no rating column, so the rating-heuristic sentiment score can never be computed for it."
+                            >
+                              — (no ratings)
+                            </span>
+                          ),
                       },
                     ]}
                     data={pageData.platformComparison}
@@ -101,17 +151,34 @@ export default function SocialIntelligence() {
                   ) : (
                     <ResponsiveContainer width="100%" height={240}>
                       <BarChart data={platformSeries} margin={{ left: -20 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid} vertical={false} />
-                        <XAxis dataKey="date" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          stroke={CHART_COLORS.grid}
+                          vertical={false}
+                        />
+                        <XAxis
+                          dataKey="date"
+                          tick={{ fontSize: 12 }}
+                          axisLine={false}
+                          tickLine={false}
+                        />
                         <YAxis tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
                         <Tooltip content={<ChartTooltip />} />
-                        <Bar dataKey={effectivePlatform} name="Mentions" fill={platformColor} radius={[4, 4, 0, 0]} />
+                        <Bar
+                          dataKey={effectivePlatform}
+                          name="Mentions"
+                          fill={platformColor}
+                          radius={[4, 4, 0, 0]}
+                        />
                       </BarChart>
                     </ResponsiveContainer>
                   )}
                 </Card>
 
-                <Card title="Trending Hashtags" description="From real captured posts, across all platforms">
+                <Card
+                  title="Trending Hashtags"
+                  description="From real captured posts, across all platforms"
+                >
                   {filteredHashtags.length === 0 ? (
                     <EmptyNote>No hashtags captured yet.</EmptyNote>
                   ) : (
@@ -119,11 +186,18 @@ export default function SocialIntelligence() {
                       {filteredHashtags.map((item) => (
                         <li key={item.hashtag}>
                           <div className="mb-1 flex items-center justify-between text-xs">
-                            <span className="font-medium text-slate-700 dark:text-slate-200">#{item.hashtag}</span>
-                            <span className="text-slate-500 dark:text-slate-400">{item.mentions.toLocaleString()}</span>
+                            <span className="font-medium text-slate-700 dark:text-slate-200">
+                              #{item.hashtag}
+                            </span>
+                            <span className="text-slate-500 dark:text-slate-400">
+                              {item.mentions.toLocaleString()}
+                            </span>
                           </div>
                           <div className="h-2 w-full overflow-hidden rounded-full bg-line dark:bg-line-dark">
-                            <div className="h-full rounded-full bg-accent-500" style={{ width: `${(item.mentions / maxHashtag) * 100}%` }} />
+                            <div
+                              className="h-full rounded-full bg-accent-500"
+                              style={{ width: `${(item.mentions / maxHashtag) * 100}%` }}
+                            />
                           </div>
                         </li>
                       ))}
@@ -138,17 +212,26 @@ export default function SocialIntelligence() {
                 reason="Unavailable — author identity is deliberately anonymized during ingestion (author_id_hash), and no follower-count field is captured."
               />
 
-              <Card title="Top Posts" description={`Highest-engagement real posts on ${platformLabel}`}>
+              <Card
+                title="Top Posts"
+                description={`Highest-engagement real posts on ${platformLabel}`}
+              >
                 {filteredPosts.length === 0 ? (
                   <EmptyNote>No posts for this platform yet.</EmptyNote>
                 ) : (
                   <ul className="space-y-3">
                     {filteredPosts.map((post) => (
-                      <li key={post.id} className="rounded-lg border border-line p-3 dark:border-line-dark">
-                        <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-200">{post.text}</p>
+                      <li
+                        key={post.id}
+                        className="rounded-lg border border-line p-3 dark:border-line-dark"
+                      >
+                        <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-200">
+                          {post.text}
+                        </p>
                         <div className="mt-2 flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
                           <span className="flex items-center gap-1">
-                            <Heart className="size-3.5" aria-hidden="true" /> {post.engagement.toLocaleString()}
+                            <Heart className="size-3.5" aria-hidden="true" />{' '}
+                            {post.engagement.toLocaleString()}
                           </span>
                         </div>
                       </li>

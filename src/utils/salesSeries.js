@@ -128,3 +128,30 @@ export function computeProductBreakdown(rows = []) {
 export function computeCategoryBreakdown(rows = []) {
   return groupBy(rows, 'category')
 }
+
+/**
+ * Merges real historical daily revenue (from computeDailySalesSeries) with
+ * a forecast run's forward-looking points into one chart-ready series —
+ * fixes the Forecasting page showing forecast-only with no historical
+ * actuals at all (docs/redesign/PLAN.md 0.4 #3). Rows are date-disjoint:
+ * history rows carry `actual` with no `predicted`/`low`/`band`, forecast
+ * rows carry the reverse, so two separately-rendered Recharts series
+ * (each with connectNulls={false}) show as one continuous-looking chart
+ * without either line being drawn across the other's range.
+ */
+export function mergeActualsWithForecast(
+  dailySalesSeries = [],
+  forecastPoints = [],
+  { historyDays = 30 } = {}
+) {
+  const history = dailySalesSeries
+    .slice(-historyDays)
+    .map((day) => ({ date: day.date, actual: day.revenue }))
+  const forecast = forecastPoints.map((point) => ({
+    date: point.date,
+    predicted: point.predicted,
+    low: point.lower,
+    band: point.upper != null && point.lower != null ? point.upper - point.lower : null,
+  }))
+  return [...history, ...forecast]
+}

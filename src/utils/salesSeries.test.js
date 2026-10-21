@@ -3,6 +3,7 @@ import {
   computeCategoryBreakdown,
   computeDailySalesSeries,
   computeProductBreakdown,
+  mergeActualsWithForecast,
   normalizeSalesRow,
   normalizeSalesRows,
 } from './salesSeries'
@@ -133,5 +134,42 @@ describe('computeProductBreakdown / computeCategoryBreakdown', () => {
     const breakdown = computeCategoryBreakdown(rows)
     expect(breakdown).toHaveLength(1)
     expect(breakdown[0]).toMatchObject({ category: 'Skincare', revenue: 450 })
+  })
+})
+
+describe('mergeActualsWithForecast', () => {
+  it('produces date-disjoint rows: history carries actual, forecast carries predicted/low/band', () => {
+    const dailySeries = [
+      { date: '2026-10-19', revenue: 100 },
+      { date: '2026-10-20', revenue: 150 },
+      { date: '2026-10-21', revenue: 200 },
+    ]
+    const forecastPoints = [
+      { date: '2026-10-22', predicted: 180, lower: 50, upper: 300 },
+      { date: '2026-10-23', predicted: 190, lower: 60, upper: 310 },
+    ]
+
+    const merged = mergeActualsWithForecast(dailySeries, forecastPoints)
+
+    expect(merged).toHaveLength(5)
+    expect(merged[0]).toMatchObject({ date: '2026-10-19', actual: 100 })
+    expect(merged[0].predicted).toBeUndefined()
+    expect(merged[3]).toMatchObject({ date: '2026-10-22', predicted: 180, low: 50, band: 250 })
+    expect(merged[3].actual).toBeUndefined()
+  })
+
+  it('caps history to the requested window', () => {
+    const dailySeries = Array.from({ length: 40 }, (_, i) => ({
+      date: `2026-09-${String(i + 1).padStart(2, '0')}`,
+      revenue: i,
+    }))
+    const merged = mergeActualsWithForecast(dailySeries, [], { historyDays: 10 })
+    expect(merged).toHaveLength(10)
+  })
+
+  it('handles no historical data without throwing', () => {
+    expect(
+      mergeActualsWithForecast([], [{ date: '2026-10-22', predicted: 100, lower: 50, upper: 150 }])
+    ).toHaveLength(1)
   })
 })

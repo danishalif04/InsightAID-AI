@@ -6,6 +6,7 @@ import {
   computeSentimentScores,
   computeSentimentTrend,
   computeTrendingHashtags,
+  selectDefaultPlatform,
   selectTopPosts,
 } from './socialAnalytics'
 
@@ -26,11 +27,15 @@ function aggRow(date, overrides = {}) {
 describe('computeSentimentScores', () => {
   it('returns null when there is no ratio data at all', () => {
     expect(computeSentimentScores([])).toBeNull()
-    expect(computeSentimentScores([aggRow('2026-01-01', { positive_ratio: null, negative_ratio: null })])).toBeNull()
+    expect(
+      computeSentimentScores([aggRow('2026-01-01', { positive_ratio: null, negative_ratio: null })])
+    ).toBeNull()
   })
 
   it('computes positive/neutral/negative percentages from the latest day', () => {
-    const scores = computeSentimentScores([aggRow('2026-01-01', { positive_ratio: 0.5, negative_ratio: 0.2 })])
+    const scores = computeSentimentScores([
+      aggRow('2026-01-01', { positive_ratio: 0.5, negative_ratio: 0.2 }),
+    ])
     const positive = scores.find((s) => s.id === 'positive')
     const neutral = scores.find((s) => s.id === 'neutral')
     const negative = scores.find((s) => s.id === 'negative')
@@ -42,7 +47,9 @@ describe('computeSentimentScores', () => {
   it('computes delta versus ~7 days earlier', () => {
     const rows = [
       aggRow('2026-01-01', { positive_ratio: 0.4, negative_ratio: 0.1 }),
-      ...Array.from({ length: 6 }, (_, i) => aggRow(`2026-01-0${i + 2}`, { positive_ratio: 0.4, negative_ratio: 0.1 })),
+      ...Array.from({ length: 6 }, (_, i) =>
+        aggRow(`2026-01-0${i + 2}`, { positive_ratio: 0.4, negative_ratio: 0.1 })
+      ),
       aggRow('2026-01-08', { positive_ratio: 0.6, negative_ratio: 0.1 }),
     ]
     const scores = computeSentimentScores(rows)
@@ -53,8 +60,18 @@ describe('computeSentimentScores', () => {
 
   it('collapses multiple platforms on the same day via comment-volume-weighted average', () => {
     const rows = [
-      aggRow('2026-01-01', { platform: 'tiktok', positive_ratio: 0.8, negative_ratio: 0.0, comment_volume: 8 }),
-      aggRow('2026-01-01', { platform: 'x', positive_ratio: 0.2, negative_ratio: 0.4, comment_volume: 2 }),
+      aggRow('2026-01-01', {
+        platform: 'tiktok',
+        positive_ratio: 0.8,
+        negative_ratio: 0.0,
+        comment_volume: 8,
+      }),
+      aggRow('2026-01-01', {
+        platform: 'x',
+        positive_ratio: 0.2,
+        negative_ratio: 0.4,
+        comment_volume: 2,
+      }),
     ]
     const scores = computeSentimentScores(rows)
     // weighted: (0.8*8 + 0.2*2) / 10 = 0.68
@@ -64,7 +81,10 @@ describe('computeSentimentScores', () => {
 
 describe('computeSentimentTrend', () => {
   it('returns a chart-ready point per day with null gaps preserved', () => {
-    const rows = [aggRow('2026-01-01'), aggRow('2026-01-02', { positive_ratio: null, negative_ratio: null })]
+    const rows = [
+      aggRow('2026-01-01'),
+      aggRow('2026-01-02', { positive_ratio: null, negative_ratio: null }),
+    ]
     const trend = computeSentimentTrend(rows, 14)
     expect(trend).toHaveLength(2)
     expect(trend[0].positive).toBe(60)
@@ -73,7 +93,9 @@ describe('computeSentimentTrend', () => {
   })
 
   it('limits to the requested number of most recent days', () => {
-    const rows = Array.from({ length: 20 }, (_, i) => aggRow(`2026-01-${String(i + 1).padStart(2, '0')}`))
+    const rows = Array.from({ length: 20 }, (_, i) =>
+      aggRow(`2026-01-${String(i + 1).padStart(2, '0')}`)
+    )
     expect(computeSentimentTrend(rows, 5)).toHaveLength(5)
   })
 })
@@ -103,6 +125,38 @@ describe('computePlatformComparison', () => {
     const processedRows = [{ platform: 'x' }, { platform: 'x' }, { platform: 'x' }]
     const result = computePlatformComparison(processedRows, [])
     expect(result.find((p) => p.platform === 'x').mentionVolume).toBe(3)
+  })
+
+  it('reports postCount as the real number of posts, independent of mentionVolume', () => {
+    // Shopee-shaped case: real rated posts but zero engagement columns at
+    // all (reviews template has no engagement/likes/comments/shares), so
+    // mentionVolume (a sum of engagement) is 0 even though 3 real posts exist.
+    const processedRows = [
+      { platform: 'shopee', rating: 5, sentiment_score: 1 },
+      { platform: 'shopee', rating: 4, sentiment_score: 0.5 },
+      { platform: 'shopee', rating: 5, sentiment_score: 1 },
+    ]
+    const dailyAggregateRows = [aggRow('2026-01-01', { platform: 'shopee', mention_volume: 0 })]
+    const result = computePlatformComparison(processedRows, dailyAggregateRows)
+    const shopee = result.find((p) => p.platform === 'shopee')
+    expect(shopee.postCount).toBe(3)
+    expect(shopee.mentionVolume).toBe(0)
+    expect(shopee.sentimentScorePercent).not.toBeNull()
+  })
+})
+
+describe('selectDefaultPlatform', () => {
+  it('returns null when there are no platforms', () => {
+    expect(selectDefaultPlatform([])).toBeNull()
+  })
+
+  it('picks the platform with the most real posts, not insertion order', () => {
+    const rows = [
+      { platform: 'shopee', postCount: 0 },
+      { platform: 'tiktok', postCount: 265 },
+      { platform: 'threads', postCount: 90 },
+    ]
+    expect(selectDefaultPlatform(rows)).toBe('tiktok')
   })
 })
 
@@ -172,7 +226,10 @@ describe('selectTopPosts', () => {
   })
 
   it('excludes rows with no text at all', () => {
-    const rows = [{ id: 1, engagement: 100 }, { id: 2, cleaned_text: 'has text', engagement: 1 }]
+    const rows = [
+      { id: 1, engagement: 100 },
+      { id: 2, cleaned_text: 'has text', engagement: 1 },
+    ]
     const result = selectTopPosts(rows, 5)
     expect(result).toHaveLength(1)
     expect(result[0].id).toBe(2)
