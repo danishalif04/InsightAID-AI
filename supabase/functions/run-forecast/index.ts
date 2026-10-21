@@ -119,13 +119,25 @@ Deno.serve(async (req) => {
 
   const supabase = createClient(url, anonKey, { global: { headers: { Authorization: authorization } } })
 
-  const { data: rows, error: readError } = await supabase
-    .from('raw_data')
-    .select('payload')
-    .eq('template_id', 'sales')
-    .order('row_index', { ascending: true })
-  if (readError) return jsonResponse({ error: 'DATABASE_ERROR', message: readError.message }, 500)
-  if (!rows || rows.length === 0) {
+  // PostgREST caps a single request at its configured max-rows (default
+  // 1000) even without an explicit .limit() — silently truncating a large
+  // account's history to an old subset. Page through with .range() so a
+  // >1000-row sales upload doesn't quietly freeze the forecast at a stale
+  // cutoff date.
+  const PAGE_SIZE = 1000
+  const rows: { payload: unknown }[] = []
+  for (let from = 0; ; from += PAGE_SIZE) {
+    const { data: page, error: readError } = await supabase
+      .from('raw_data')
+      .select('payload')
+      .eq('template_id', 'sales')
+      .order('row_index', { ascending: true })
+      .range(from, from + PAGE_SIZE - 1)
+    if (readError) return jsonResponse({ error: 'DATABASE_ERROR', message: readError.message }, 500)
+    rows.push(...(page ?? []))
+    if (!page || page.length < PAGE_SIZE) break
+  }
+  if (rows.length === 0) {
     return jsonResponse(
       { error: 'NO_SALES_DATA', message: 'No sales dataset found for your account yet — upload one via Dataset Management first.' },
       422
