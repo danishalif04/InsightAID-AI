@@ -52,9 +52,15 @@ export const COLUMN_SYNONYMS = {
     category: ['product category'],
     quantity_sold: ['quantity', 'qty', 'units sold', 'qty sold'],
     unit_price: ['price', 'selling price', 'item price', 'unit cost price'],
-    revenue: ['total', 'total price', 'total revenue', 'total amount', 'sales amount', 'amount'],
+    revenue: ['total', 'total price', 'total revenue', 'total amount', 'sales amount', 'amount', 'amount rm', 'amount (rm)'],
     discount: ['discount amount', 'voucher amount', 'voucher'],
     cost: ['cost price', 'unit cost'],
+    // Recognized but intentionally NOT in CSV_TEMPLATES' sales.columns above
+    // (never required) — a local Malaysian shop's daily cash/QR/e-wallet
+    // sales commonly record how a sale was paid; a bigger e-commerce
+    // seller's export usually won't have this column at all, and that must
+    // stay a non-issue, never a "missing required column" warning.
+    payment_method: ['payment', 'payment type', 'payment mode', 'payment method', 'e-wallet', 'ewallet', 'tunai'],
   },
   reviews: {
     date: ['review date', 'date posted'],
@@ -159,19 +165,48 @@ export function buildCsvContent(templateId) {
   return template.columns.map(escapeCsvCell).join(',') + '\n'
 }
 
-/** Triggers a browser download of the template. No-op outside a browser (e.g. during tests/SSR). */
-export function downloadCsvTemplate(templateId) {
-  const template = CSV_TEMPLATES.find((item) => item.id === templateId)
-  if (!template) throw new Error(`Unknown CSV template: ${templateId}`)
-  if (typeof document === 'undefined') return
+/**
+ * A friendlier-header download variant for the Local Malaysian Shop mode
+ * (FYP II Phase 1) — simpler column names than the full `sales` template
+ * (`date, item, quantity, amount_RM, payment_method` rather than
+ * `date, product, category, quantity_sold, unit_price, revenue, discount,
+ * cost`). This is NOT a separate entry in CSV_TEMPLATES/COLUMN_SYNONYMS —
+ * doing that would give it its own `template_id` and need a database check-
+ * constraint change. Instead its header names are already recognized
+ * synonyms of the real `sales` template's canonical columns (see
+ * COLUMN_SYNONYMS.sales: `item` → product, `quantity` → quantity_sold,
+ * `amount_rm`/`amount (rm)` → revenue, `payment_method` → the new optional
+ * field above), so a file downloaded from here uploads and auto-detects as
+ * `template_id = 'sales'` exactly like the full template does — one
+ * ingestion path, two header conventions for two kinds of seller.
+ */
+const LOCAL_SHOP_SALES_FILENAME = 'insightaid_local_shop_sales_template.csv'
+const LOCAL_SHOP_SALES_COLUMNS = ['date', 'item', 'quantity', 'amount_RM', 'payment_method']
 
-  const blob = new Blob([buildCsvContent(templateId)], { type: 'text/csv;charset=utf-8;' })
+export function buildLocalShopSalesCsvContent() {
+  return LOCAL_SHOP_SALES_COLUMNS.map(escapeCsvCell).join(',') + '\n'
+}
+
+function triggerCsvDownload(content, filename) {
+  if (typeof document === 'undefined') return
+  const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
   link.href = url
-  link.download = template.filename
+  link.download = filename
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
   URL.revokeObjectURL(url)
+}
+
+export function downloadLocalShopSalesTemplate() {
+  triggerCsvDownload(buildLocalShopSalesCsvContent(), LOCAL_SHOP_SALES_FILENAME)
+}
+
+/** Triggers a browser download of the template. No-op outside a browser (e.g. during tests/SSR). */
+export function downloadCsvTemplate(templateId) {
+  const template = CSV_TEMPLATES.find((item) => item.id === templateId)
+  if (!template) throw new Error(`Unknown CSV template: ${templateId}`)
+  triggerCsvDownload(buildCsvContent(templateId), template.filename)
 }

@@ -8,6 +8,7 @@ import { Input, Select, Textarea } from '@/components/ui/Input'
 import Skeleton from '@/components/ui/Skeleton'
 import ProgressBar from '@/components/ui/ProgressBar'
 import { useNotifications } from '@/hooks/useNotifications'
+import { useMode } from '@/hooks/useMode'
 import { PATHS } from '@/routes/paths'
 import {
   FIELDS_BY_ID,
@@ -17,6 +18,8 @@ import {
   calculateCompleteness,
   validateFieldValue,
 } from '@/utils/businessProfileSchema'
+import { MODES } from '@/constants/modes'
+import { getModeDetails } from '@/config/modesConfig'
 import { extractProfile, getProfile, saveProfile } from '@/services/businessProfileService'
 import BusinessPlanningPanel from '@/components/common/BusinessPlanningPanel'
 
@@ -82,8 +85,14 @@ function FieldControl({ field, value, onChange }) {
 export default function Onboarding() {
   const { notify } = useNotifications()
   const navigate = useNavigate()
+  const { mode, setMode } = useMode()
 
-  const [step, setStep] = useState('choice')
+  // FYP II Phase 1: the workspace-mode choice runs FIRST, before the
+  // existing "do you have data?" step — a brand-new user with an existing
+  // profile already skips straight to 'profile' below exactly as before;
+  // this new step only inserts itself for someone who hasn't finished
+  // onboarding yet.
+  const [step, setStep] = useState('workspace')
   const [loadingExisting, setLoadingExisting] = useState(true)
   const [sector, setSector] = useState('')
   const [revenueTarget, setRevenueTarget] = useState('')
@@ -123,6 +132,11 @@ export default function Onboarding() {
     if (!valid) return
     setValues((current) => ({ ...current, [fieldId]: value }))
     setProvenance((current) => ({ ...current, [fieldId]: PROVENANCE.userProvided }))
+  }
+
+  const handleChooseWorkspaceMode = (modeId) => {
+    setMode(modeId)
+    setStep('choice')
   }
 
   const handleChooseHasData = async () => {
@@ -241,6 +255,49 @@ export default function Onboarding() {
       <div className="space-y-4">
         <Skeleton className="h-32" />
         <Skeleton className="h-64" />
+      </div>
+    )
+  }
+
+  if (step === 'workspace') {
+    return (
+      <div className="mx-auto max-w-3xl space-y-6">
+        <Card bodyClassName="p-6 text-center">
+          <h1 className="font-display text-xl font-semibold text-slate-900 dark:text-slate-100">
+            What kind of business is this?
+          </h1>
+          <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+            Both share the same models — this just changes which inputs and outputs are shown first.
+          </p>
+        </Card>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {Object.values(MODES).map((modeOption) => {
+            const details = getModeDetails(modeOption.id)
+            const Icon = modeOption.icon
+            return (
+              <button
+                key={modeOption.id}
+                type="button"
+                onClick={() => handleChooseWorkspaceMode(modeOption.id)}
+                className={choiceCardClass}
+              >
+                <Icon className="size-6 text-accent-500" aria-hidden="true" />
+                <p className="mt-3 text-sm font-semibold text-slate-900 dark:text-slate-100">{modeOption.label}</p>
+                <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+                  {modeOption.description}
+                </p>
+                <p className="mt-2 text-xs italic text-slate-400">
+                  e.g. {details.targetBusinessExamples.slice(0, 3).join(', ')}
+                </p>
+              </button>
+            )
+          })}
+        </div>
+        <div className="text-center">
+          <Button variant="ghost" size="sm" onClick={() => setStep('choice')}>
+            Skip — keep current ({MODES[mode]?.label ?? 'Business Startup'})
+          </Button>
+        </div>
       </div>
     )
   }

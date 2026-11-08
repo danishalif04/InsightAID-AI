@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest'
 import {
   CSV_TEMPLATES,
   buildCsvContent,
+  buildLocalShopSalesCsvContent,
   downloadCsvTemplate,
+  downloadLocalShopSalesTemplate,
   matchColumnsForTemplate,
   normalizeHeader,
   remapRecordToCanonicalColumns,
@@ -47,6 +49,33 @@ describe('normalizeHeader', () => {
     expect(normalizeHeader('Order Date')).toBe('order date')
     expect(normalizeHeader('  order_date ')).toBe('order date')
     expect(normalizeHeader('Order-Date')).toBe('order date')
+  })
+})
+
+describe('Local Malaysian Shop sales template (FYP II Phase 1)', () => {
+  it('builds a friendlier header-only CSV, still a header-only row like every other template', () => {
+    expect(buildLocalShopSalesCsvContent()).toBe('date,item,quantity,amount_RM,payment_method\n')
+  })
+
+  it('no-ops outside a browser instead of crashing', () => {
+    expect(() => downloadLocalShopSalesTemplate()).not.toThrow()
+  })
+
+  it('its friendly headers all resolve to the real sales template via existing/new synonyms, so an upload still gets template_id=sales', () => {
+    const { matchCount, mapping } = matchColumnsForTemplate('sales', ['date', 'item', 'quantity', 'amount_RM', 'payment_method'])
+    expect(matchCount).toBe(5)
+    expect(mapping.get('date')).toBe('date')
+    expect(mapping.get('item')).toBe('product')
+    expect(mapping.get('quantity')).toBe('quantity_sold')
+    expect(mapping.get('amount_RM')).toBe('revenue')
+    expect(mapping.get('payment_method')).toBe('payment_method')
+  })
+
+  it('payment_method is recognized but never required — the 5 core sales columns alone still fully match', () => {
+    // CSV_TEMPLATES.sales.columns (the REQUIRED list) is untouched by this
+    // phase; payment_method lives only in COLUMN_SYNONYMS, so an upload
+    // with no payment column at all must never be flagged as missing one.
+    expect(CSV_TEMPLATES.find((t) => t.id === 'sales').columns).not.toContain('payment_method')
   })
 })
 
