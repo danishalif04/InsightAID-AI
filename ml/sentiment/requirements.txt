@@ -6,6 +6,11 @@ numpy>=1.26
 scikit-learn>=1.4
 pytest>=8.0
 
+# Evaluation (Phase 3: O1 scorecard, confidence_interval.py's Wilson
+# interval, mcnemar_test.py's paired significance test).
+scipy>=1.11
+statsmodels>=0.14
+
 # Training (only needed inside Colab / a GPU environment to actually run
 # train_xlmr.py / train_mbert.py / the notebook - not needed for the tests).
 torch>=2.2
