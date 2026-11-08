@@ -1,0 +1,122 @@
+{
+  "series": "olist_total",
+  "comparison": {
+    "n_folds": 2,
+    "n_combined_test_points": 60,
+    "prophet_sales_only": {
+      "mae": 6701.6018,
+      "rmse": 8061.4225,
+      "mape": 30.0356,
+      "n_points": 60,
+      "n_mape_points": 60,
+      "mase": 1.1707
+    },
+    "prophet_sentiment_enhanced": {
+      "mae": 6703.0075,
+      "rmse": 8090.7908,
+      "mape": 29.7472,
+      "n_points": 60,
+      "n_mape_points": 60,
+      "mase": 1.1709
+    },
+    "diebold_mariano": {
+      "dm_statistic": -0.174906,
+      "p_value": 0.861752,
+      "mean_loss_diff": -469981.637123,
+      "n": 60,
+      "h": 30,
+      "significant_at_05": false,
+      "interpretation": "No statistically significant difference between Prophet sales-only and Prophet sentiment-enhanced (DM=-0.174906, p=0.861752, n=60) \u2014 cannot claim one beats the other."
+    }
+  },
+  "lag_analysis_sentiment_vs_revenue": [
+    {
+      "lag_days": 0,
+      "correlation": 0.0891
+    },
+    {
+      "lag_days": 1,
+      "correlation": 0.0153
+    },
+    {
+      "lag_days": 2,
+      "correlation": 0.033
+    },
+    {
+      "lag_days": 3,
+      "correlation": -0.0119
+    },
+    {
+      "lag_days": 4,
+      "correlation": -0.0638
+    },
+    {
+      "lag_days": 5,
+      "correlation": -0.0312
+    },
+    {
+      "lag_days": 6,
+      "correlation": 0.0625
+    },
+    {
+      "lag_days": 7,
+      "correlation": 0.0621
+    },
+    {
+      "lag_days": 8,
+      "correlation": -0.0409
+    },
+    {
+      "lag_days": 9,
+      "correlation": -0.0478
+    },
+    {
+      "lag_days": 10,
+      "correlation": -0.0276
+    },
+    {
+      "lag_days": 11,
+      "correlation": -0.1022
+    },
+    {
+      "lag_days": 12,
+      "correlation": -0.1055
+    },
+    {
+      "lag_days": 13,
+      "correlation": 0.0184
+    },
+    {
+      "lag_days": 14,
+      "correlation": 0.0276
+    },
+    {
+      "lag_days": 15,
+      "correlation": -0.0588
+    },
+    {
+      "lag_days": 16,
+      "correlation": -0.0674
+    },
+    {
+      "lag_days": 17,
+      "correlation": -0.0763
+    },
+    {
+      "lag_days": 18,
+      "correlation": -0.1578
+    },
+    {
+      "lag_days": 19,
+      "correlation": -0.1219
+    },
+    {
+      "lag_days": 20,
+      "correlation": -0.002
+    },
+    {
+      "lag_days": 21,
+      "correlation": -0.0162
+    }
+  ]
+}

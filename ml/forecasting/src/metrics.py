@@ -24,9 +24,30 @@ class ForecastMetrics:
     mape: Optional[float]  # None when every actual in the window was 0 (MAPE undefined)
     n_points: int
     n_mape_points: int  # how many points actually contributed to MAPE (excludes actual==0)
+    mase: Optional[float] = None  # None when no y_train was given, or training history was too short
 
 
-def compute_forecast_metrics(y_true: Sequence[float], y_pred: Sequence[float]) -> ForecastMetrics:
+def _seasonal_naive_scale(y_train: Sequence[float], seasonal_period: int) -> Optional[float]:
+    """Mean absolute seasonal difference over the TRAINING set (Hyndman &
+    Koehler, 2006) - the denominator MASE divides a model's MAE by. Not
+    computed from the test set: MASE asks "how much better than a naive
+    seasonal repeat am I," using only information the model actually had
+    at training time."""
+    if len(y_train) <= seasonal_period:
+        return None
+    diffs = [abs(y_train[i] - y_train[i - seasonal_period]) for i in range(seasonal_period, len(y_train))]
+    if not diffs:
+        return None
+    scale = sum(diffs) / len(diffs)
+    return scale if scale > 0 else None
+
+
+def compute_forecast_metrics(
+    y_true: Sequence[float],
+    y_pred: Sequence[float],
+    y_train: Optional[Sequence[float]] = None,
+    seasonal_period: int = 7,
+) -> ForecastMetrics:
     if len(y_true) != len(y_pred):
         raise ValueError("y_true and y_pred must be the same length")
     n = len(y_true)
@@ -40,12 +61,19 @@ def compute_forecast_metrics(y_true: Sequence[float], y_pred: Sequence[float]) -
     mape_terms = [abs((t - p) / t) for t, p in zip(y_true, y_pred) if t != 0]
     mape = (sum(mape_terms) / len(mape_terms)) * 100 if mape_terms else None
 
+    mase = None
+    if y_train is not None:
+        scale = _seasonal_naive_scale(list(y_train), seasonal_period)
+        if scale is not None:
+            mase = round(mae / scale, 4)
+
     return ForecastMetrics(
         mae=round(mae, 4),
         rmse=round(rmse, 4),
         mape=round(mape, 4) if mape is not None else None,
         n_points=n,
         n_mape_points=len(mape_terms),
+        mase=mase,
     )
 
 
@@ -59,6 +87,8 @@ def average_metrics(fold_metrics: Sequence[ForecastMetrics]) -> ForecastMetrics:
     rmse = sum(m.rmse for m in fold_metrics) / len(fold_metrics)
     mape_values = [m.mape for m in fold_metrics if m.mape is not None]
     mape = sum(mape_values) / len(mape_values) if mape_values else None
+    mase_values = [m.mase for m in fold_metrics if m.mase is not None]
+    mase = round(sum(mase_values) / len(mase_values), 4) if mase_values else None
     total_points = sum(m.n_points for m in fold_metrics)
     total_mape_points = sum(m.n_mape_points for m in fold_metrics)
 
@@ -66,6 +96,7 @@ def average_metrics(fold_metrics: Sequence[ForecastMetrics]) -> ForecastMetrics:
         mae=round(mae, 4),
         rmse=round(rmse, 4),
         mape=round(mape, 4) if mape is not None else None,
+        mase=mase,
         n_points=total_points,
         n_mape_points=total_mape_points,
     )

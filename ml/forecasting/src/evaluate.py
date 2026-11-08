@@ -59,7 +59,9 @@ def evaluate_candidate(
         train_df = daily_df.iloc[list(fold.train_index)]
         test_df = daily_df.iloc[list(fold.test_index)]
         predictions = forecast_fn(train_df, test_df, horizon)
-        fold_metrics.append(compute_forecast_metrics(test_df["revenue"].tolist(), predictions))
+        fold_metrics.append(
+            compute_forecast_metrics(test_df["revenue"].tolist(), predictions, y_train=train_df["revenue"].tolist())
+        )
 
     return average_metrics(fold_metrics)
 

@@ -10,6 +10,12 @@ prophet>=1.1
 xgboost>=2.0
 pytest>=8.0
 
+# FYP II Phase 4 — Diebold-Mariano test (dm_test.py) needs scipy.stats for
+# the t-distribution p-value. Was already present transitively (via
+# statsmodels/scikit-learn, confirmed at 1.18.0) but is now a direct
+# dependency of this package's own code, so it's pinned here explicitly.
+scipy>=1.11
+
 # FYP II Phase 1 — Malaysian public holiday calendar (malaysian_holidays.py),
 # for Prophet's `holidays` dataframe. Real, library-computed lunar-calendar
 # dates (Hari Raya, CNY, Deepavali) — never hand-guessed. Confirmed installed

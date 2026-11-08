@@ -47,6 +47,43 @@ def test_mismatched_lengths_raise():
         pass
 
 
+def test_mase_is_none_without_y_train():
+    metrics = compute_forecast_metrics([100, 200], [110, 180])
+    assert metrics.mase is None
+
+
+def test_mase_is_none_when_training_history_shorter_than_season():
+    y_train = [10, 20, 30]  # only 3 points, seasonal_period defaults to 7
+    metrics = compute_forecast_metrics([100], [110], y_train=y_train)
+    assert metrics.mase is None
+
+
+def test_mase_known_value_against_seasonal_naive_scale():
+    # 14 days of training, perfectly repeating week-to-week (scale = 0 for
+    # every pair except where it deliberately differs) - construct a scale
+    # we can hand-check instead of a flat series (which would make the
+    # seasonal diff 0 and so MASE undefined/None, not a useful test).
+    y_train = [10, 10, 10, 10, 10, 10, 10, 20, 20, 20, 20, 20, 20, 20]
+    # seasonal_period=7: diffs are |20-10|=10, repeated 7 times -> scale=10
+    y_true = [100, 200]
+    y_pred = [110, 180]  # mae = 15 (same as test_known_mae_rmse_mape)
+    metrics = compute_forecast_metrics(y_true, y_pred, y_train=y_train, seasonal_period=7)
+    assert metrics.mase == 1.5  # mae(15) / scale(10)
+
+
+def test_mase_scale_of_zero_is_treated_as_undefined_not_divide_by_zero():
+    y_train = [50] * 14  # perfectly flat -> every seasonal diff is 0
+    metrics = compute_forecast_metrics([100], [110], y_train=y_train, seasonal_period=7)
+    assert metrics.mase is None
+
+
+def test_average_metrics_averages_mase_across_folds():
+    fold_a = ForecastMetrics(mae=10, rmse=12, mape=5, n_points=5, n_mape_points=5, mase=1.0)
+    fold_b = ForecastMetrics(mae=20, rmse=24, mape=15, n_points=5, n_mape_points=5, mase=3.0)
+    averaged = average_metrics([fold_a, fold_b])
+    assert averaged.mase == 2.0
+
+
 def test_average_metrics_across_folds():
     fold_a = ForecastMetrics(mae=10, rmse=12, mape=5, n_points=5, n_mape_points=5)
     fold_b = ForecastMetrics(mae=20, rmse=24, mape=15, n_points=5, n_mape_points=5)
