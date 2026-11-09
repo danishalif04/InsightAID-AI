@@ -132,3 +132,14 @@ export async function saveRecommendations(recommendations, runId) {
   const { error } = await supabase.from('recommendations').insert(rows)
   if (error) throw error
 }
+
+/**
+ * FYP II Phase 5's "Was this useful?" feedback — logged by `rule_id`
+ * (e.g. 'crisis_critical_response'), not a `recommendations.id` row,
+ * since the recommendation being rated may be shown live and never
+ * explicitly Saved. Requires migration 0011_recommendation_feedback.sql.
+ */
+export async function submitRecommendationFeedback(ruleId, useful) {
+  const { error } = await supabase.from('recommendation_feedback').insert({ rule_id: ruleId, useful })
+  if (error) throw error
+}

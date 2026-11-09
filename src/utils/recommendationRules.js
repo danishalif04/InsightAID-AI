@@ -19,6 +19,19 @@ export const INSUFFICIENT_INFO_TEXT = 'Insufficient information to evaluate this
 
 export const CATEGORIES = ['Marketing', 'Operations', 'Customer Service', 'Product', 'Growth', 'Investment']
 
+/**
+ * Coombs (2007) Situational Crisis Communication Theory response-strategy
+ * labels — see docs/REFERENCES_TO_VERIFY.md for the citation and the
+ * per-rule reasoning (marked [VERIFY], confirm against Coombs' own paper
+ * before citing the exact wording in the dissertation). Only attached to
+ * recommendations that represent an actual public-response POSTURE
+ * decision, never to a diagnostic/investigation step.
+ */
+export const SCCT_STRATEGIES = {
+  rebuild: { label: 'Rebuild', description: 'Accept responsibility; offer compensation or an apology.' },
+  diminish: { label: 'Diminish', description: 'Acknowledge and contextualize while the cause is still being confirmed.' },
+}
+
 const isNumber = (value) => typeof value === 'number' && Number.isFinite(value)
 
 function nonNormalSignal(crisis, id) {
@@ -60,6 +73,7 @@ export function generateRecommendations(context = {}) {
     const volumeLevel = nonNormalSignal(crisis, 'mention_volume_level')
     const volumeVelocity = nonNormalSignal(crisis, 'mention_volume_velocity')
 
+    let investigateComplaintsFired = false
     if (negativeVelocity && (volumeLevel || volumeVelocity)) {
       push({
         id: 'investigate_complaints',
@@ -68,6 +82,7 @@ export function generateRecommendations(context = {}) {
         title: 'Investigate customer complaints',
         evidence: [negativeVelocity.evidence, volumeLevel?.evidence, volumeVelocity?.evidence].filter(Boolean),
       })
+      investigateComplaintsFired = true
     }
 
     if (crisis.riskLevel === 'critical') {
@@ -77,6 +92,23 @@ export function generateRecommendations(context = {}) {
         priority: 'high',
         title: 'Activate crisis response',
         evidence: crisis.triggeredSignals.map((signal) => signal.evidence),
+        scctStrategy: 'rebuild',
+      })
+    } else if (crisis.riskLevel === 'warning' && crisis.dataSufficient && !investigateComplaintsFired) {
+      // Previously a real gap: 'warning' had no dedicated recommendation at
+      // all unless it happened to be the one specific negative-velocity +
+      // volume combination above — a business sitting at e.g. 30/100 from a
+      // rating drop or a one-off negative-ratio spike got nothing. This
+      // covers every other way a risk score can land in the warning band,
+      // using the same real triggered-signal evidence the Crisis Detection
+      // page itself shows, never a fabricated cause.
+      push({
+        id: 'warning_risk_review',
+        category: 'Operations',
+        priority: 'medium',
+        title: 'Review triggered risk signals before they escalate',
+        evidence: crisis.triggeredSignals.map((signal) => signal.evidence),
+        scctStrategy: 'diminish',
       })
     }
 

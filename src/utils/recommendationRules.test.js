@@ -57,8 +57,55 @@ describe('generateRecommendations', () => {
     const criticalCrisis = crisisWith([signal('negative_ratio_level', 'critical')], { riskLevel: 'critical', riskScore: 80 })
     const warningCrisis = crisisWith([signal('negative_ratio_level', 'warning')], { riskLevel: 'warning', riskScore: 30 })
 
-    expect(generateRecommendations({ profile: EXISTING_PROFILE, crisis: criticalCrisis }).some((r) => r.id === 'crisis_critical_response')).toBe(true)
+    const criticalRecs = generateRecommendations({ profile: EXISTING_PROFILE, crisis: criticalCrisis })
+    expect(criticalRecs.some((r) => r.id === 'crisis_critical_response')).toBe(true)
     expect(generateRecommendations({ profile: EXISTING_PROFILE, crisis: warningCrisis }).some((r) => r.id === 'crisis_critical_response')).toBe(false)
+
+    // SCCT (Coombs, 2007) mapping, per docs/REFERENCES_TO_VERIFY.md: a
+    // critical risk level (strong attributed responsibility) maps to the
+    // 'rebuild' response posture, not left unlabelled.
+    expect(criticalRecs.find((r) => r.id === 'crisis_critical_response').scctStrategy).toBe('rebuild')
+  })
+
+  it('reviews triggered signals when risk is warning for a reason other than the complaints combo', () => {
+    const warningCrisis = crisisWith([signal('rating_deterioration', 'warning', 'Average rating dropped.')], {
+      riskLevel: 'warning',
+      riskScore: 30,
+    })
+    const recs = generateRecommendations({ profile: EXISTING_PROFILE, crisis: warningCrisis })
+    const rec = recs.find((r) => r.id === 'warning_risk_review')
+    expect(rec).toBeDefined()
+    expect(rec.priority).toBe('medium')
+    expect(rec.evidence).toContain('Average rating dropped.')
+    // Lower severity, responsibility not yet confirmed -> 'diminish', not 'rebuild'.
+    expect(rec.scctStrategy).toBe('diminish')
+  })
+
+  it('does not attach an SCCT posture to investigate_complaints — it is a diagnostic step, not a public-response decision', () => {
+    const crisis = crisisWith([signal('negative_ratio_velocity', 'warning'), signal('mention_volume_level', 'warning')])
+    const recs = generateRecommendations({ profile: EXISTING_PROFILE, crisis })
+    const rec = recs.find((r) => r.id === 'investigate_complaints')
+    expect(rec).toBeDefined()
+    expect(rec.scctStrategy).toBeUndefined()
+  })
+
+  it('does not duplicate a recommendation when investigate_complaints already covers the warning', () => {
+    const warningCrisis = crisisWith(
+      [signal('negative_ratio_velocity', 'warning'), signal('mention_volume_level', 'warning')],
+      { riskLevel: 'warning', riskScore: 30 }
+    )
+    const recs = generateRecommendations({ profile: EXISTING_PROFILE, crisis: warningCrisis })
+    expect(recs.some((r) => r.id === 'investigate_complaints')).toBe(true)
+    expect(recs.some((r) => r.id === 'warning_risk_review')).toBe(false)
+  })
+
+  it('does not review signals when risk is warning but data was insufficient to trust it', () => {
+    const warningCrisis = crisisWith([signal('rating_deterioration', 'warning')], {
+      riskLevel: 'warning',
+      dataSufficient: false,
+    })
+    const recs = generateRecommendations({ profile: EXISTING_PROFILE, crisis: warningCrisis })
+    expect(recs.some((r) => r.id === 'warning_risk_review')).toBe(false)
   })
 
   it('recommends scaling marketing only when risk is normal, data is sufficient, AND readiness is high', () => {

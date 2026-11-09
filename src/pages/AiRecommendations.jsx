@@ -1,18 +1,32 @@
 import { useEffect, useState } from 'react'
-import { ChevronDown, RefreshCw, SaveAll } from 'lucide-react'
+import { ChevronDown, RefreshCw, SaveAll, ThumbsDown, ThumbsUp } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
 import Skeleton from '@/components/ui/Skeleton'
 import { useNotifications } from '@/hooks/useNotifications'
 import { useMode } from '@/hooks/useMode'
-import { CATEGORIES } from '@/utils/recommendationRules'
-import { getRecommendations, saveRecommendations } from '@/services/recommendationService'
+import { CATEGORIES, SCCT_STRATEGIES } from '@/utils/recommendationRules'
+import { getRecommendations, saveRecommendations, submitRecommendationFeedback } from '@/services/recommendationService'
 
 const PRIORITY_TONE = { high: 'danger', medium: 'warning', low: 'info' }
 
 function RecommendationCard({ recommendation }) {
+  const { notify } = useNotifications()
   const [expanded, setExpanded] = useState(false)
+  const [feedback, setFeedback] = useState(null) // null | 'useful' | 'not_useful' | 'sending'
+  const scct = recommendation.scctStrategy ? SCCT_STRATEGIES[recommendation.scctStrategy] : null
+
+  const handleFeedback = async (useful) => {
+    setFeedback('sending')
+    try {
+      await submitRecommendationFeedback(recommendation.id, useful)
+      setFeedback(useful ? 'useful' : 'not_useful')
+    } catch (error) {
+      setFeedback(null)
+      notify(`Could not record feedback: ${error.message}`, 'error')
+    }
+  }
 
   return (
     <Card bodyClassName="p-5">
@@ -21,6 +35,14 @@ function RecommendationCard({ recommendation }) {
         <Badge tone={PRIORITY_TONE[recommendation.priority]}>
           {recommendation.priority} priority
         </Badge>
+        {scct && (
+          <span title={scct.description}>
+            <Badge tone="info">SCCT: {scct.label}</Badge>
+          </span>
+        )}
+        <span className="ml-auto text-[11px] text-slate-400" title="Rule ID — the exact rule in src/utils/recommendationRules.js that produced this">
+          {recommendation.id}
+        </span>
       </div>
 
       <p className="mt-3 text-sm font-semibold leading-relaxed text-slate-900 dark:text-slate-100">
@@ -34,6 +56,31 @@ function RecommendationCard({ recommendation }) {
           </li>
         ))}
       </ul>
+
+      <div className="mt-3 flex items-center gap-2">
+        <span className="text-xs text-slate-500 dark:text-slate-400">Was this useful?</span>
+        <button
+          type="button"
+          disabled={feedback === 'sending' || feedback === 'useful' || feedback === 'not_useful'}
+          onClick={() => handleFeedback(true)}
+          aria-label="Mark this recommendation as useful"
+          className={`rounded-full p-1.5 transition-colors ${feedback === 'useful' ? 'bg-accent-500/10 text-accent-600 dark:text-accent-400' : 'text-slate-400 hover:bg-canvas hover:text-slate-600 dark:hover:bg-canvas-dark'}`}
+        >
+          <ThumbsUp className="size-3.5" />
+        </button>
+        <button
+          type="button"
+          disabled={feedback === 'sending' || feedback === 'useful' || feedback === 'not_useful'}
+          onClick={() => handleFeedback(false)}
+          aria-label="Mark this recommendation as not useful"
+          className={`rounded-full p-1.5 transition-colors ${feedback === 'not_useful' ? 'bg-danger/10 text-danger' : 'text-slate-400 hover:bg-canvas hover:text-slate-600 dark:hover:bg-canvas-dark'}`}
+        >
+          <ThumbsDown className="size-3.5" />
+        </button>
+        {(feedback === 'useful' || feedback === 'not_useful') && (
+          <span className="text-[11px] text-slate-400">Thanks — recorded.</span>
+        )}
+      </div>
 
       <button
         type="button"
