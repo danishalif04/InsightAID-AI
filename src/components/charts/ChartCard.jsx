@@ -6,6 +6,7 @@ import Badge from '@/components/ui/Badge'
 import Skeleton from '@/components/ui/Skeleton'
 import AsyncSection from '@/components/common/AsyncSection'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
+import { useLowSensoryMode } from '@/hooks/useLowSensoryMode'
 import { downloadCsv } from '@/utils/csvExport'
 import { exportChartAsPng, toggleFullscreen } from '@/utils/chartExport'
 import { fadeInUp } from '@/animations/motionPresets'
@@ -84,7 +85,9 @@ export default function ChartCard({
   children,
 }) {
   const bodyRef = useRef(null)
-  const reducedMotion = useReducedMotion()
+  const osReducedMotion = useReducedMotion()
+  const lowSensory = useLowSensoryMode()
+  const reducedMotion = osReducedMotion || lowSensory
   const [menuOpen, setMenuOpen] = useState(false)
   const [infoOpen, setInfoOpen] = useState(false)
   const [guideOpen, setGuideOpen] = useState(false)

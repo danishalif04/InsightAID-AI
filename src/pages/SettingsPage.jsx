@@ -19,6 +19,7 @@ import Button from '@/components/ui/Button'
 import Dialog from '@/components/ui/Dialog'
 import { Input, Select } from '@/components/ui/Input'
 import Switch from '@/components/ui/Switch'
+import UIModeSwitcher from '@/components/common/UIModeSwitcher'
 import { useAsyncData } from '@/hooks/useAsyncData'
 import { useAuth } from '@/hooks/useAuth'
 import { useNotifications } from '@/hooks/useNotifications'
@@ -231,6 +232,15 @@ function LanguageThemeSection() {
           Dark
         </Button>
       </div>
+
+      <p className="mb-1.5 mt-5 text-xs font-medium text-slate-500 dark:text-slate-400">
+        Accessibility Mode (FYP II Phase 7)
+      </p>
+      <UIModeSwitcher />
+      <p className="mt-2 text-xs italic text-slate-400">
+        Low-Sensory: no motion, muted colours, plain language. Senior / Warga Emas: larger text, higher contrast,
+        Bahasa Melayu by default, optional text-to-speech.
+      </p>
     </Card>
   )
 }

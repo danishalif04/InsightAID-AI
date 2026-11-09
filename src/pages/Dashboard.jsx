@@ -32,6 +32,8 @@ import AsyncSection from '@/components/common/AsyncSection'
 import Skeleton from '@/components/ui/Skeleton'
 import { useAsyncData } from '@/hooks/useAsyncData'
 import { useMode } from '@/hooks/useMode'
+import { useUIMode } from '@/hooks/useUIMode'
+import SeniorModePanel from '@/components/common/SeniorModePanel'
 import { PATHS } from '@/routes/paths'
 import { CHART_COLORS } from '@/theme/chartTheme'
 import { PLATFORM_COLORS as PLATFORM_COLOR_MAP } from '@/config/colorTokens'
@@ -152,9 +154,15 @@ function DashboardBodySkeleton() {
 function DashboardBody({ data }) {
   const kpis = buildKpis(data)
   const platforms = data.platformComparison.map((p) => p.platform)
+  const { uiMode } = useUIMode()
+  const positiveScore = data.sentimentScores?.find((score) => score.id === 'positive') ?? null
 
   return (
     <>
+      {uiMode === 'senior' && (
+        <SeniorModePanel recommendations={data.recommendations} sentimentScore={positiveScore} />
+      )}
+
       {kpis.length === 0 ? (
         <Card>
           <EmptyNote>

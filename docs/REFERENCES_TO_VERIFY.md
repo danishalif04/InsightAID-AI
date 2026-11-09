@@ -21,3 +21,13 @@ Where this is applied in the system: `src/utils/recommendationRules.js`'s crisis
 Where this is applied: `src/config/colorTokens.test.js`'s "stays distinguishable within each category under simulated color blindness" test, and the two real palette fixes it caught (`PLATFORM_COLORS.x`, `CRISIS_COLORS.warning` — see `docs/DESIGN_PRINCIPLES.md`'s color-blind-safe-palette section for the measured before/after numbers).
 
 Also still outstanding from Phase 3/4 (restated from this file's intro, not yet closed): formal citations for Cohen's kappa, Wilson-score confidence intervals, McNemar's test, the Diebold-Mariano test, and bootstrap resampling.
+
+## Phase 7 — Accessibility modes
+
+**W3C WAI (2021). "Making Content Usable for People with Cognitive and Learning Disabilities."** Confirmed real, current W3C guidance (COGA). Applied to Low-Sensory mode's design rationale in `docs/ACCESSIBILITY_MODES.md` — general principles (predictability, plain language, minimal motion) cited at that level, not individual numbered patterns.
+
+**Britto, T., & Pizzolato, E. (2018). "GAIA: uma proposta de guia de recomendações de acessibilidade web com foco em aspectos do autismo."** *Revista Brasileira de Informática na Educação, 26*(2). `[VERIFY]` — confirmed real via a live search (RBIE journal record, DOI/full text not opened in this pass; 28 guidelines, derived from 17 prior works 2005–2015, confirmed by multiple independent citing papers including a 2019 IHC poster and a 2022 ERGODESIGN study). The specific guideline numbers are not individually cited in `docs/ACCESSIBILITY_MODES.md` since the primary RBIE article wasn't read directly — do this before citing a specific guideline number in the dissertation.
+
+**W3C WCAG 2.2 (2023)**, specifically §2.5.5 (Target Size, 44×44px) and §1.4.6 (Contrast, Enhanced/AAA). Confirmed as real, current WCAG 2.2 success criteria (not invented numbers) — not independently re-verified against the W3C spec text in this pass; low risk given these are widely and consistently cited figures, but flag for a final check before submission.
+
+**DOSM (Department of Statistics Malaysia) ageing statistics** — referenced in the master prompt's own Part F as needing verification; **not sourced in this phase at all**. No specific figure was used or invented anywhere in `docs/ACCESSIBILITY_MODES.md` or the Senior-mode implementation — this citation remains fully open, not partially done.

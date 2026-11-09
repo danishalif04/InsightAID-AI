@@ -100,3 +100,58 @@
     @apply bg-accent-200 text-brand-950;
   }
 }
+
+/* ------------------------------------------------------------------
+ * FYP II Phase 7 — UI accessibility modes (src/contexts/UIModeProvider.jsx
+ * toggles these classes on <html>; src/utils/contrastRatio.js / its test
+ * verify the real numbers cited below, nothing here is asserted blind).
+ * ------------------------------------------------------------------ */
+
+/* Low-Sensory / autism-friendly (W3C COGA-informed, docs/ACCESSIBILITY_MODES.md).
+ * Overriding Tailwind's own color custom properties (not re-declaring
+ * utility classes) so every existing `text-slate-*` usage picks this up
+ * automatically, with no per-component change needed. Verified real
+ * contrast: stone-600 on canvas = 7.15:1, on surface = 7.63:1 — both
+ * clear AA, most of AAA too. */
+:where(.ui-low-sensory) {
+  --color-slate-900: #44403c; /* stone-700 */
+  --color-slate-700: #57534e; /* stone-600 */
+  --color-slate-500: #78716c; /* stone-500, 4.50:1 on canvas — exact AA, not below it */
+}
+
+/* No motion at all in this mode, beyond just respecting the OS-level
+ * prefers-reduced-motion signal (src/hooks/useLowSensoryMode.js disables
+ * Framer Motion specifically; this is the CSS-only-transition backstop). */
+.ui-low-sensory *,
+.ui-low-sensory *::before,
+.ui-low-sensory *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Senior / Mod Warga Emas — larger text, more line-height, high contrast,
+ * bigger touch targets. Verified real contrast: near-black on white =
+ * 17.74:1, white on brand-950 = 16.59:1 — both well past AAA's 7:1. */
+.ui-senior {
+  font-size: 18px;
+}
+
+.ui-senior body {
+  line-height: 1.6;
+}
+
+:where(.ui-senior) {
+  --color-slate-900: #111827;
+  --color-slate-700: #111827;
+}
+
+.ui-senior button,
+.ui-senior a,
+.ui-senior input,
+.ui-senior select,
+.ui-senior [role='button'] {
+  min-height: 44px;
+  min-width: 44px;
+}

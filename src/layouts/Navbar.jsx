@@ -1,5 +1,6 @@
 import { Bell, Menu, Moon, Search, Sun } from 'lucide-react'
 import ModeSwitcher from '@/components/common/ModeSwitcher'
+import UIModeSwitcher from '@/components/common/UIModeSwitcher'
 import { useAuth } from '@/hooks/useAuth'
 import { useAsyncData } from '@/hooks/useAsyncData'
 import { getMyProfile } from '@/services/profileService'
@@ -29,6 +30,7 @@ export default function Navbar({ pageTitle, isDark, onToggleTheme, onOpenMobileS
 
       <div className="flex shrink-0 items-center gap-2 sm:gap-3">
         <ModeSwitcher mode={mode} onChange={onModeChange} />
+        <UIModeSwitcher compact />
 
         <label className="relative hidden items-center sm:flex">
           <Search className="pointer-events-none absolute left-3 size-4 text-slate-400" aria-hidden="true" />
