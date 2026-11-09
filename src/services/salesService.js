@@ -10,12 +10,27 @@ import { supabase } from '@/config/supabaseClient'
  * text-bearing templates are), so this is a new read path, not a change
  * to an existing one.
  */
+const PAGE_SIZE = 1000
+
 export async function fetchRawSalesPayloads() {
-  const { data, error } = await supabase
-    .from('raw_data')
-    .select('payload')
-    .eq('template_id', 'sales')
-    .order('row_index', { ascending: true })
-  if (error) throw error
-  return (data ?? []).map((row) => row.payload)
+  // PostgREST caps a single request at its configured max-rows (default
+  // 1000) even without an explicit .limit() — the exact same bug once
+  // found live in supabase/functions/run-forecast/index.ts, where it
+  // silently truncated a 4,087-row sales upload to its first 1,000 rows
+  // (by row_index), freezing the "historical actuals" portion of any
+  // chart built from this at a stale ~17-month-old cutoff. Paginated with
+  // .range() the same way, so this read path can't regress to the same bug.
+  const payloads = []
+  for (let from = 0; ; from += PAGE_SIZE) {
+    const { data, error } = await supabase
+      .from('raw_data')
+      .select('payload')
+      .eq('template_id', 'sales')
+      .order('row_index', { ascending: true })
+      .range(from, from + PAGE_SIZE - 1)
+    if (error) throw error
+    payloads.push(...(data ?? []).map((row) => row.payload))
+    if (!data || data.length < PAGE_SIZE) break
+  }
+  return payloads
 }
