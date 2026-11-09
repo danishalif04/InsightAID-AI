@@ -295,7 +295,7 @@ export default function Onboarding() {
         </div>
         <div className="text-center">
           <Button variant="ghost" size="sm" onClick={() => setStep('choice')}>
-            Skip — keep current ({MODES[mode]?.label ?? 'Business Startup'})
+            Skip — keep current ({MODES[mode]?.label ?? 'Malaysian Local Shop'})
           </Button>
         </div>
       </div>

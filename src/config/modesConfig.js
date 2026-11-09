@@ -7,10 +7,12 @@
  * language, the data-entry adapter each mode points to, and which outputs
  * are prioritized.
  *
- * `startup` = "Local Malaysian Shop" (Business Startup) in the master
- * prompt's wording; `ecommerce` = "E-commerce Startup". The ids are kept
- * as-is (not renamed) so every existing `mode === 'startup'`/`'ecommerce'`
- * check across the codebase keeps working unchanged.
+ * `startup` = "Malaysian Local Shop" (kedai runcit, BM-default, no-data/
+ * AI-assisted); `ecommerce` = "Business Startup" (synthetic-dataset-driven
+ * demo) — relabelled per the 2026-11-09 product-direction update
+ * (knowledge_updated_nov2026.md §14). The ids are kept as-is (not renamed)
+ * so every existing `mode === 'startup'`/`'ecommerce'` check across the
+ * codebase keeps working unchanged.
  */
 
 export const MODE_DETAILS = {

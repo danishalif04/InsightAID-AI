@@ -13,7 +13,7 @@ export const REPORT_TEMPLATE_DEFINITIONS = [
     description: 'Business profile, data availability, current performance, key findings, and recommendations.',
   },
   {
-    name: 'E-Commerce Analytics Report',
+    name: 'Business Startup Analytics Report',
     builderKey: 'ecommerce',
     description: 'Platform performance, customer sentiment, and sales/demand forecast for online-storefront businesses.',
   },

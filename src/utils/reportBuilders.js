@@ -213,7 +213,7 @@ export function buildEcommerceReport(context) {
     point(`${p.platform} avg. engagement`, p.avgEngagement ?? 'n/a'),
   ])
   return {
-    ...baseReport('ecommerce', 'E-Commerce Analytics Report', context),
+    ...baseReport('ecommerce', 'Business Startup Analytics Report', context),
     sections: [
       executiveSummarySection(context),
       businessProfileSection(context),

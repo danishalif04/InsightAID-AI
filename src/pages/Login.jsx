@@ -1,12 +1,23 @@
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Activity } from 'lucide-react'
+import { Activity, Sparkles } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { useAuth } from '@/hooks/useAuth'
 import { PATHS } from '@/routes/paths'
 import { getProfile } from '@/services/businessProfileService'
+
+// Demo-only credentials for a presentation/supervisor walkthrough. Set to
+// [] to hide this panel entirely, e.g. before deploying anywhere actually
+// public. "Main (demo identity)" is the developer's own account, deliberately
+// renamed to a throwaway demo email/password (never the real one) specifically
+// so it could be shown here safely.
+const DEMO_ACCOUNTS = [
+  { label: 'Business Startup demo (Embun Botanica, synthetic data)', email: 'usertest1@insightai.com', password: 'usertest1' },
+  { label: 'Malaysian Local Shop demo (no-data/planning path)', email: 'usertest2@insightai.com', password: 'usertest2' },
+  { label: 'Main (demo identity)', email: 'demotest1@gmail.com', password: 'demotest1' },
+]
 
 export default function Login() {
   const { signIn } = useAuth()
@@ -16,6 +27,11 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
+
+  const fillDemoCredentials = (account) => {
+    setEmail(account.email)
+    setPassword(account.password)
+  }
 
   const handleSubmit = async (event) => {
     event.preventDefault()
@@ -95,6 +111,32 @@ export default function Login() {
             Sign up
           </Link>
         </p>
+
+        {DEMO_ACCOUNTS.length > 0 && (
+          <div className="mt-6 space-y-2 rounded-lg border border-dashed border-line bg-canvas p-3 dark:border-line-dark dark:bg-canvas-dark">
+            <p className="text-center text-xs font-medium text-slate-500 dark:text-slate-400">Demo accounts</p>
+            {DEMO_ACCOUNTS.map((account) => (
+              <div key={account.email} className="flex items-center justify-between gap-2 rounded-md bg-surface px-2.5 py-1.5 text-left dark:bg-surface-dark">
+                <div className="min-w-0">
+                  <p className="truncate text-xs text-slate-500 dark:text-slate-400">{account.label}</p>
+                  <p className="truncate font-mono text-xs text-slate-700 dark:text-slate-200">
+                    {account.email} / {account.password}
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  icon={Sparkles}
+                  className="shrink-0"
+                  onClick={() => fillDemoCredentials(account)}
+                >
+                  Use
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
       </Card>
     </div>
   )
