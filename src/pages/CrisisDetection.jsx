@@ -41,7 +41,7 @@ import FilterProvider from '@/contexts/FilterProvider'
 import { useFilters } from '@/hooks/useFilters'
 import { useAsyncData } from '@/hooks/useAsyncData'
 import { useNotifications } from '@/hooks/useNotifications'
-import { CRISIS_COLORS, PLATFORM_COLORS } from '@/config/colorTokens'
+import { CRISIS_COLORS, FORECAST_COLORS, PLATFORM_COLORS } from '@/config/colorTokens'
 import { RISK_LEVEL_THRESHOLDS } from '@/config/crisisThresholds'
 import {
   buildCrisisDailySeries,
@@ -388,6 +388,7 @@ function CrisisDetectionContent() {
         subtitle="Click any day to see what the system knew at that point — shaded bands are detected episodes"
         method="real"
         methodNote="Risk score re-run per historical day from the same rule engine as the live detector (src/utils/crisisDetection.js), never a separate model."
+        readingGuide="Each point is one day's risk score, 0-100. The shaded bands mark periods the system flagged as a real episode. Click any point to see exactly which signals fired that day."
         height="hero"
         ariaLabel={`Risk score over ${history.length} days, peaking at ${Math.max(0, ...history.map((p) => p.riskScore))} out of 100`}
         status={historyAsync.status}
@@ -443,12 +444,12 @@ function CrisisDetectionContent() {
                   fill: CRISIS_COLORS.critical,
                 }}
               />
-              {viewedDate && <ReferenceLine x={viewedDate} stroke="#7c3aed" strokeWidth={2} />}
+              {viewedDate && <ReferenceLine x={viewedDate} stroke={FORECAST_COLORS.forecast} strokeWidth={2} />}
               <Line
                 type="monotone"
                 dataKey="riskScore"
                 name="Risk score"
-                stroke="#7c3aed"
+                stroke={FORECAST_COLORS.forecast}
                 strokeWidth={2}
                 dot={(props) =>
                   episodes.some(
@@ -468,7 +469,7 @@ function CrisisDetectionContent() {
                 }
                 isAnimationActive={false}
               />
-              <Brush dataKey="date" height={24} travellerWidth={8} stroke="#7c3aed" />
+              <Brush dataKey="date" height={24} travellerWidth={8} stroke={FORECAST_COLORS.forecast} />
             </LineChart>
           </ResponsiveContainer>
         )}
@@ -479,6 +480,7 @@ function CrisisDetectionContent() {
         subtitle="7 signals x every day in range — color intensity = severity, click a cell to time-travel to that day"
         method="real"
         methodNote="Each cell re-runs the same real rule evaluation as the Risk Timeline, one signal at a time."
+        readingGuide="Each row is one of the 7 signals this system checks; each column is a day. A darker cell means that signal was more severe that day. Click a cell to jump to that day on every other chart."
         height={160 + SIGNAL_IDS.length * 20}
         ariaLabel="Heatmap of 7 crisis signals across the selected date range"
         status={historyAsync.status}
@@ -504,6 +506,7 @@ function CrisisDetectionContent() {
         subtitle="Mention volume, negative sentiment, average rating, comment volume, and daily revenue — one crosshair"
         method="real"
         methodNote="Revenue comes from your own uploaded sales data (src/utils/salesSeries.js); everything else from daily_aggregates/processed_data — the same real tables the rest of this page reads."
+        readingGuide="Five real numbers on the same timeline, stacked so you can compare them. Hover anywhere to see all five values for that exact day at once — useful for spotting which one moved first."
         height={5 * 120 + 40}
         ariaLabel="Five synced daily metrics: mentions, negative ratio, average rating, comment volume, and revenue"
         status={stackData.status}
@@ -522,12 +525,12 @@ function CrisisDetectionContent() {
                   color: CRISIS_COLORS.critical,
                   format: (v) => formatPercent(v / 100),
                 },
-                { key: 'avgRating', label: 'Average rating', color: '#0d9488' },
+                { key: 'avgRating', label: 'Average rating', color: FORECAST_COLORS.baseline },
                 { key: 'commentVolume', label: 'Comment volume', color: PLATFORM_COLORS.x },
                 {
                   key: 'revenue',
                   label: 'Daily revenue',
-                  color: '#1e2f29',
+                  color: FORECAST_COLORS.actual,
                   format: (v) => formatCurrencyMYR(v),
                 },
               ]}
@@ -567,6 +570,7 @@ function CrisisDetectionContent() {
         subtitle="Platform -> aspect -> product, for negative posts inside the focused episode"
         method="heuristic"
         methodNote="Aspects come from a transparent multilingual keyword lexicon (src/utils/aspects.js), not a trained classifier — see 'Keyword lexicon (heuristic)'. Product is only shown where a review actually captured one."
+        readingGuide="Read left to right: which platform the complaint came from, what it was actually about, and — where known — which product. A thicker band means more posts took that path."
         height="lg"
         ariaLabel="Sankey diagram from platform through complaint aspect to product for the focused crisis episode"
         status={evidenceRowsAsync.status}
@@ -591,10 +595,10 @@ function CrisisDetectionContent() {
                     const node = sankeyData.nodes[index]
                     const fill =
                       node.category === 'platform'
-                        ? (PLATFORM_COLORS[node.name] ?? '#64748b')
+                        ? (PLATFORM_COLORS[node.name] ?? CRISIS_COLORS.normal)
                         : node.category === 'aspect'
                           ? CRISIS_COLORS.warning
-                          : '#0ea5e9'
+                          : FORECAST_COLORS.scenario
                     return (
                       <rect x={x} y={y} width={width} height={height} fill={fill} fillOpacity={0.9}>
                         <title>{node.name}</title>

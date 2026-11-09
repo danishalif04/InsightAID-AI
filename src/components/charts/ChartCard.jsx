@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Download, ImageIcon, Info, Maximize2, MoreVertical } from 'lucide-react'
+import { Download, HelpCircle, ImageIcon, Info, Maximize2, MoreVertical } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import Skeleton from '@/components/ui/Skeleton'
@@ -53,6 +53,10 @@ function resolveHeight(height) {
  * @param {(data:*) => boolean} [emptyWhen]
  * @param {string} [emptyMessage]
  * @param {string} [unavailableMessage]
+ * @param {string} [readingGuide] plain-language "how to read this chart" text — NOT the data method
+ *   (that's `methodNote`). E.g. "Each dot is one day. Above the dashed line means risk is rising faster
+ *   than normal for this business." Shown behind a separate (?) icon next to the title (Phase 6, FYP II
+ *   master prompt — "every chart must have a 'How to read this chart' (i) popover in plain language").
  * @param {Array<object>|((data:*) => Array<object>)} [csvRows] when provided, enables "Export CSV"
  * @param {string} [csvFilename]
  * @param {import('react').ReactNode} [headerActions] extra controls rendered left of the actions menu (e.g. a chart-mode toggle)
@@ -72,6 +76,7 @@ export default function ChartCard({
   emptyWhen,
   emptyMessage,
   unavailableMessage,
+  readingGuide,
   csvRows,
   csvFilename = 'chart-data.csv',
   headerActions,
@@ -82,9 +87,11 @@ export default function ChartCard({
   const reducedMotion = useReducedMotion()
   const [menuOpen, setMenuOpen] = useState(false)
   const [infoOpen, setInfoOpen] = useState(false)
+  const [guideOpen, setGuideOpen] = useState(false)
   const [exportError, setExportError] = useState(null)
   const menuRef = useRef(null)
   const infoId = useId()
+  const guideId = useId()
   const pixelHeight = resolveHeight(height)
   const badge = method ? METHOD_BADGES[method] : null
 
@@ -136,6 +143,30 @@ export default function ChartCard({
         description={subtitle}
         actions={
           <div className="flex items-center gap-1.5">
+            {readingGuide && (
+              <div className="relative">
+                <button
+                  type="button"
+                  aria-label="How to read this chart"
+                  aria-expanded={guideOpen}
+                  aria-describedby={guideId}
+                  className="flex items-center rounded-lg p-1 text-slate-400 hover:bg-canvas hover:text-slate-700 dark:hover:bg-canvas-dark dark:hover:text-slate-200"
+                  onClick={() => setGuideOpen((open) => !open)}
+                >
+                  <HelpCircle className="size-3.5" aria-hidden="true" />
+                </button>
+                <div
+                  id={guideId}
+                  role="tooltip"
+                  className={`absolute right-0 z-20 mt-2 w-64 rounded-lg border border-line bg-surface p-3 text-xs text-slate-600 shadow-card dark:border-line-dark dark:bg-surface-dark dark:text-slate-300 ${
+                    guideOpen ? 'block' : 'hidden'
+                  }`}
+                >
+                  <p className="mb-1 font-medium text-slate-700 dark:text-slate-200">How to read this chart</p>
+                  {readingGuide}
+                </div>
+              </div>
+            )}
             {badge && (
               <div className="relative">
                 <button

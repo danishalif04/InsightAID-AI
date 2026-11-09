@@ -162,7 +162,7 @@ export default function SocialIntelligence() {
                           axisLine={false}
                           tickLine={false}
                         />
-                        <YAxis tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
+                        <YAxis tick={{ fontSize: 12 }} axisLine={false} tickLine={false} unit=" mentions" />
                         <Tooltip content={<ChartTooltip />} />
                         <Bar
                           dataKey={effectivePlatform}

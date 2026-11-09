@@ -47,7 +47,12 @@ export const SENTIMENT_COLORS = {
 export const PLATFORM_COLORS = {
   shopee: '#f59e0b', // amber-500
   tiktok: '#0ea5e9', // sky-500
-  x: '#6366f1', // indigo-500
+  // Phase 6 chart audit: was indigo-500 (#6366f1) — simulated-CVD check
+  // (src/config/colorblindSimulation.js) found this only 30.1 units from
+  // `tiktok` under protanopia, the weakest pair in this palette. Rose-700
+  // widens that to 73.5/107.8/79.1 across protanopia/deuteranopia/
+  // tritanopia with no new collision introduced (verified in colorTokens.test.js).
+  x: '#be123c', // rose-700
   threads: '#a855f7', // purple-500
 }
 
@@ -57,7 +62,13 @@ export const PLATFORM_COLORS = {
  * BRAND_COLOR's note above. */
 export const CRISIS_COLORS = {
   normal: '#64748b', // slate-500
-  warning: '#d97706', // amber-600 (matches existing --color-warning)
+  // Phase 6 chart audit: was amber-600 (#d97706) — simulated-CVD check
+  // found this only 27.5 units from `critical` under tritanopia, the
+  // weakest pair found across every palette in this file (warning and
+  // critical becoming hard to tell apart is the worst possible place for
+  // that to happen). Yellow-600 widens that to 47.6/32.1/40.0, verified
+  // in colorTokens.test.js.
+  warning: '#ca8a04', // yellow-600
   critical: '#dc2626', // matches existing --color-danger — the ONE unified red
 }
 

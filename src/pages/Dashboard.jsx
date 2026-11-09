@@ -8,8 +8,6 @@ import {
   CartesianGrid,
   Cell,
   Legend,
-  Pie,
-  PieChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -36,18 +34,20 @@ import { useAsyncData } from '@/hooks/useAsyncData'
 import { useMode } from '@/hooks/useMode'
 import { PATHS } from '@/routes/paths'
 import { CHART_COLORS } from '@/theme/chartTheme'
+import { PLATFORM_COLORS as PLATFORM_COLOR_MAP } from '@/config/colorTokens'
 import { capitalize, formatCurrencyMYR, formatDelta } from '@/utils/formatters'
 import { getProfile } from '@/services/businessProfileService'
 import { getDashboardData } from '@/services/dashboardService'
 import BusinessPlanningPanel from '@/components/common/BusinessPlanningPanel'
 
 const ALERT_TONES = { warning: 'warning', critical: 'danger' }
-const PLATFORM_COLORS = [
-  CHART_COLORS.tiktok,
-  CHART_COLORS.x,
-  CHART_COLORS.positive,
-  CHART_COLORS.neutral,
-]
+// Phase 6 chart audit: this used to be a positional array (color depended on
+// render order, not platform identity — could flip between renders, and
+// reused sentiment colors CHART_COLORS.positive/.neutral for an unrelated
+// category). Now a stable per-platform lookup from the one real source of
+// truth (src/config/colorTokens.js), same as Crisis Detection/Social
+// Intelligence already do.
+const platformColor = (platform) => PLATFORM_COLOR_MAP[platform] ?? CHART_COLORS.neutral
 
 function humanizeSignalId(id) {
   return capitalize(id.replace(/_/g, ' '))
@@ -227,33 +227,43 @@ function DashboardBody({ data }) {
           )}
         </Card>
 
-        <Card title="Platform Distribution" description="Mentions by platform">
+        <Card title="Platform Distribution" description="Mentions by platform, ranked highest to lowest">
           {data.platformComparison.length === 0 ? (
             <EmptyNote>No platform data yet.</EmptyNote>
           ) : (
-            <ResponsiveContainer width="100%" height={280}>
-              <PieChart>
-                <Tooltip content={<ChartTooltip />} />
-                <Legend iconType="circle" wrapperStyle={{ fontSize: 12 }} />
-                <Pie
-                  data={data.platformComparison}
-                  dataKey="mentionVolume"
-                  nameKey="platform"
-                  innerRadius={70}
-                  outerRadius={100}
-                  paddingAngle={2}
-                  strokeWidth={2}
-                  stroke="var(--color-surface)"
-                >
-                  {data.platformComparison.map((entry, index) => (
-                    <Cell
-                      key={entry.platform}
-                      fill={PLATFORM_COLORS[index % PLATFORM_COLORS.length]}
+            // Phase 6 chart audit: this was a 4-slice donut. Cleveland &
+            // McGill (1984) rank angle/area judgment below position/length —
+            // and the master prompt explicitly bars any pie/donut past 3
+            // slices. A ranked horizontal bar makes "which platform leads"
+            // readable at a glance instead of requiring angle comparison.
+            // Recharts matches <Cell> children to data points by INDEX, so
+            // the Cell list must iterate the SAME sorted array as `data`.
+            (() => {
+              const ranked = [...data.platformComparison].sort((a, b) => b.mentionVolume - a.mentionVolume)
+              return (
+                <ResponsiveContainer width="100%" height={280}>
+                  <BarChart data={ranked} layout="vertical" margin={{ left: 8, right: 24 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid} horizontal={false} />
+                    <XAxis type="number" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} unit=" mentions" />
+                    <YAxis
+                      type="category"
+                      dataKey="platform"
+                      tickFormatter={capitalize}
+                      tick={{ fontSize: 12 }}
+                      axisLine={false}
+                      tickLine={false}
+                      width={64}
                     />
-                  ))}
-                </Pie>
-              </PieChart>
-            </ResponsiveContainer>
+                    <Tooltip content={<ChartTooltip formatter={(value) => `${value.toLocaleString()} mentions`} />} />
+                    <Bar dataKey="mentionVolume" name="Mentions" radius={[0, 4, 4, 0]}>
+                      {ranked.map((entry) => (
+                        <Cell key={entry.platform} fill={platformColor(entry.platform)} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              )
+            })()
           )}
         </Card>
       </div>
@@ -274,12 +284,12 @@ function DashboardBody({ data }) {
                 <YAxis tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
                 <Tooltip content={<ChartTooltip />} />
                 <Legend iconType="circle" wrapperStyle={{ fontSize: 12 }} />
-                {platforms.map((platform, index) => (
+                {platforms.map((platform) => (
                   <Bar
                     key={platform}
                     dataKey={platform}
                     name={capitalize(platform)}
-                    fill={PLATFORM_COLORS[index % PLATFORM_COLORS.length]}
+                    fill={platformColor(platform)}
                     radius={[4, 4, 0, 0]}
                   />
                 ))}
