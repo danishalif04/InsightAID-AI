@@ -75,10 +75,10 @@ export default function RiskGauge({ riskScore, riskLevel, asOfDate, size = 200 }
       />
 
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <p className="text-3xl font-semibold tabular-nums text-slate-900 dark:text-slate-100">
+        <p className="text-3xl font-semibold tabular-nums text-glow-text">
           {Math.round(riskScore)}
         </p>
-        <p className="text-xs text-slate-400 dark:text-slate-500">/ 100</p>
+        <p className="text-xs text-glow-text/50">/ 100</p>
         <span
           className="mt-1.5 inline-flex items-center gap-1 text-sm font-medium"
           style={{ color: meta.color }}
@@ -86,9 +86,7 @@ export default function RiskGauge({ riskScore, riskLevel, asOfDate, size = 200 }
           <Icon className="size-3.5" aria-hidden="true" />
           {meta.label}
         </span>
-        {asOfDate && (
-          <p className="mt-1 text-[11px] text-slate-400 dark:text-slate-500">as of {asOfDate}</p>
-        )}
+        {asOfDate && <p className="mt-1 text-[11px] text-glow-text/50">as of {asOfDate}</p>}
       </div>
     </div>
   )
