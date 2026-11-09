@@ -78,6 +78,62 @@
   --color-forecast-forecast: #7c3aed;
   --color-forecast-baseline: #0d9488;
   --color-forecast-scenario: #db2777;
+
+  /* ----------------------------------------------------------------
+   * "Dark glow" editorial redesign (src/config/designTokens.js is the
+   * documented source — keep these two in sync by hand, same convention
+   * as the chart tokens above). New surfaces for the redesigned pages;
+   * `muted`/`subtle` are USED EVERYWHERE RIGHT NOW (see the --color-slate-*
+   * overrides below) to fix a real WCAG AA failure Phase 7's axe-core
+   * sweep found, not just a new unused token.
+   * ---------------------------------------------------------------- */
+  /* Light-mode defaults — "dark is the primary design; light mode must
+   * still be clean and readable" (not literally dark chrome in light
+   * mode). Overridden under :where(.dark) below to the real glow values. */
+  --color-glow-bg: #f6f8f7;
+  --color-glow-surface: #ffffff;
+  --color-glow-surface-elevated: #ffffff;
+  --color-glow-border: rgba(0, 0, 0, 0.08);
+  --color-glow-text: #15211c;
+  --color-glow-brand: #16a34a; /* real AA for large/UI use on white — see designTokens.test.js */
+  --color-glow-emerald: #0d9488;
+  --color-glow-mint: #10b981;
+  --color-glow-deep: #064e3b;
+
+  --color-muted: #52635e; /* light-mode default — real 5.96:1+ on canvas/surface */
+  --color-subtle: #5e6e69; /* light-mode default — real 5.04:1+ on canvas/surface */
+
+  --font-ui: 'Manrope', 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-serif-accent: 'Instrument Serif', Georgia, serif;
+}
+
+/* Fixes a real bug (Phase 7's axe-core sweep): Tailwind's own default
+ * slate-400/500 fail AA in several real contexts this app actually uses
+ * them in (light-mode slate-400 on white ≈ 2.56:1; slate-500 on canvas ≈
+ * 4.46:1 in light mode and ≈ 3.83:1 in dark mode against the existing
+ * dark surfaces) — every existing `text-slate-400`/`text-slate-500`
+ * usage across the whole app picks up the fix automatically, no
+ * per-component change needed. Verified: src/config/designTokens.test.js.
+ * `:where()` keeps this at the same, lowest specificity Tailwind's own
+ * utilities use, so nothing here can out-fight a future override. */
+:where(:root) {
+  --color-slate-400: #5e6e69;
+  --color-slate-500: #52635e;
+}
+:where(.dark) {
+  --color-slate-500: #9aa39d;
+
+  /* The real "dark glow" palette — see src/config/designTokens.js
+   * (GLOW_DARK) for the documented source and designTokens.test.js for
+   * the real contrast verification. */
+  --color-glow-bg: #050807;
+  --color-glow-surface: #0a100d;
+  --color-glow-surface-elevated: #0f1713;
+  --color-glow-border: rgba(255, 255, 255, 0.07);
+  --color-glow-text: #f2f5f3;
+  --color-glow-brand: #22c55e;
+  --color-glow-emerald: #10b981;
+  --color-glow-mint: #6ee7b7;
 }
 
 @layer base {

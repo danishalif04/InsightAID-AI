@@ -41,6 +41,7 @@ import { capitalize, formatCurrencyMYR, formatDelta } from '@/utils/formatters'
 import { getProfile } from '@/services/businessProfileService'
 import { getDashboardData } from '@/services/dashboardService'
 import BusinessPlanningPanel from '@/components/common/BusinessPlanningPanel'
+import PageHero from '@/components/ui/PageHero'
 
 const ALERT_TONES = { warning: 'warning', critical: 'danger' }
 // Phase 6 chart audit: this used to be a positional array (color depended on
@@ -429,6 +430,16 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
+      {/* Redesign-v2 foundation demo (docs/redesign-v2/PLAN.md) — PageHero
+          used here as the worked example; the rest of this page's layout
+          is untouched, its own redesign step comes later. */}
+      <PageHero
+        eyebrow="Executive Overview"
+        title="Business Health, at a Glance"
+        highlight="Glance"
+        description="Real sentiment, crisis risk, and revenue signals — recomputed from your own data on every visit."
+      />
+
       {showPlanningPanel ? (
         <div>
           <p className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">

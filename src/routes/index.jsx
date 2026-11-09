@@ -1,5 +1,5 @@
 import { createBrowserRouter } from 'react-router-dom'
-import DashboardLayout from '@/layouts/DashboardLayout'
+import AppShell from '@/components/shell/AppShell'
 import RequireAuth from './RequireAuth'
 import { PATHS } from './paths'
 import * as Pages from './pages'
@@ -14,7 +14,7 @@ export const router = createBrowserRouter([
     children: [
       {
         path: PATHS.dashboard,
-        element: <DashboardLayout />,
+        element: <AppShell />,
         children: [
           { index: true, element: <Pages.Dashboard /> },
           { path: child(PATHS.sentiment), element: <Pages.SentimentAnalysis /> },
