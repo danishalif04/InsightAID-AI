@@ -82,6 +82,12 @@ export default function ChartCard({
   csvFilename = 'chart-data.csv',
   headerActions,
   className = '',
+  // 'default' = the original Card-based chrome every not-yet-redesigned
+  // page still uses; 'glow' = the dark-glow redesign's hero-card treatment
+  // (used by a page once ITS redesign step runs — see docs/redesign-v2/).
+  // Same header/badge/popover/menu/AsyncSection logic either way, only the
+  // outer container's visual chrome changes.
+  surface = 'default',
   children,
 }) {
   const bodyRef = useRef(null)
@@ -137,6 +143,149 @@ export default function ChartCard({
   }
 
   const motionProps = reducedMotion ? {} : fadeInUp
+
+  const bodyNode = (
+    <>
+      {exportError && <p className="mb-2 text-xs text-danger">{exportError}</p>}
+      <div ref={bodyRef} style={{ minHeight: pixelHeight }}>
+        {status === 'loading' ? (
+          <div style={{ height: pixelHeight }}>
+            <Skeleton className="h-full w-full" />
+          </div>
+        ) : (
+          <AsyncSection
+            status={status}
+            data={data}
+            error={error}
+            reload={reload}
+            emptyWhen={emptyWhen}
+            emptyMessage={emptyMessage}
+            unavailableMessage={unavailableMessage}
+          >
+            {(resolvedData) => (
+              // role="img" only wraps actual rendered chart content, never
+              // the error/retry UI — a screen reader must still reach the
+              // Retry button, which role="img" on an ancestor would hide.
+              <div role="img" aria-label={ariaLabel ?? title}>
+                {children(resolvedData)}
+              </div>
+            )}
+          </AsyncSection>
+        )}
+      </div>
+    </>
+  )
+
+  if (surface === 'glow') {
+    return (
+      <motion.div {...motionProps} className={`rounded-3xl border border-glow-border bg-glow-surface-elevated ${className}`}>
+        <div className="flex items-start justify-between gap-4 border-b border-glow-border px-5 py-4">
+          <div>
+            {title && <h2 className="text-sm font-semibold text-glow-text">{title}</h2>}
+            {subtitle && <p className="mt-0.5 text-xs text-glow-text/60">{subtitle}</p>}
+          </div>
+          <div className="flex shrink-0 items-center gap-1.5">
+            {readingGuide && (
+              <div className="relative">
+                <button
+                  type="button"
+                  aria-label="How to read this chart"
+                  aria-expanded={guideOpen}
+                  aria-describedby={guideId}
+                  className="flex items-center rounded-lg p-1 text-glow-text/50 hover:bg-white/5 hover:text-glow-text"
+                  onClick={() => setGuideOpen((open) => !open)}
+                >
+                  <HelpCircle className="size-3.5" aria-hidden="true" />
+                </button>
+                <div
+                  id={guideId}
+                  role="tooltip"
+                  className={`absolute right-0 z-20 mt-2 w-64 rounded-lg border border-glow-border bg-glow-surface p-3 text-xs text-glow-text/70 shadow-xl ${
+                    guideOpen ? 'block' : 'hidden'
+                  }`}
+                >
+                  <p className="mb-1 font-medium text-glow-text">How to read this chart</p>
+                  {readingGuide}
+                </div>
+              </div>
+            )}
+            {badge && (
+              <div className="relative">
+                <button
+                  type="button"
+                  className="flex items-center gap-1"
+                  aria-expanded={infoOpen}
+                  aria-describedby={methodNote ? infoId : undefined}
+                  onClick={() => setInfoOpen((open) => !open)}
+                >
+                  <Badge tone={badge.tone}>{badge.label}</Badge>
+                  {methodNote && <Info className="size-3.5 text-glow-text/50" aria-hidden="true" />}
+                </button>
+                {methodNote && (
+                  <div
+                    id={infoId}
+                    role="tooltip"
+                    className={`absolute right-0 z-20 mt-2 w-64 rounded-lg border border-glow-border bg-glow-surface p-3 text-xs text-glow-text/70 shadow-xl ${
+                      infoOpen ? 'block' : 'hidden'
+                    }`}
+                  >
+                    {methodNote}
+                  </div>
+                )}
+              </div>
+            )}
+            {headerActions}
+            <div className="relative" ref={menuRef}>
+              <button
+                type="button"
+                aria-label="Chart actions"
+                aria-haspopup="menu"
+                aria-expanded={menuOpen}
+                className="rounded-lg p-1.5 text-glow-text/50 hover:bg-white/5 hover:text-glow-text"
+                onClick={() => setMenuOpen((open) => !open)}
+              >
+                <MoreVertical className="size-4" aria-hidden="true" />
+              </button>
+              {menuOpen && (
+                <div
+                  role="menu"
+                  className="absolute right-0 z-20 mt-1 w-44 overflow-hidden rounded-lg border border-glow-border bg-glow-surface py-1 text-sm shadow-xl"
+                >
+                  {csvRows && (
+                    <button
+                      type="button"
+                      role="menuitem"
+                      className="flex w-full items-center gap-2 px-3 py-2 text-left text-glow-text hover:bg-white/5"
+                      onClick={handleExportCsv}
+                    >
+                      <Download className="size-3.5" aria-hidden="true" /> Export CSV
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-glow-text hover:bg-white/5"
+                    onClick={handleExportPng}
+                  >
+                    <ImageIcon className="size-3.5" aria-hidden="true" /> Export PNG
+                  </button>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-glow-text hover:bg-white/5"
+                    onClick={handleFullscreen}
+                  >
+                    <Maximize2 className="size-3.5" aria-hidden="true" /> Fullscreen
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+        <div className="p-5">{bodyNode}</div>
+      </motion.div>
+    )
+  }
 
   return (
     <motion.div {...motionProps}>
@@ -244,33 +393,7 @@ export default function ChartCard({
           </div>
         }
       >
-        {exportError && <p className="mb-2 text-xs text-danger">{exportError}</p>}
-        <div ref={bodyRef} style={{ minHeight: pixelHeight }}>
-          {status === 'loading' ? (
-            <div style={{ height: pixelHeight }}>
-              <Skeleton className="h-full w-full" />
-            </div>
-          ) : (
-            <AsyncSection
-              status={status}
-              data={data}
-              error={error}
-              reload={reload}
-              emptyWhen={emptyWhen}
-              emptyMessage={emptyMessage}
-              unavailableMessage={unavailableMessage}
-            >
-              {(resolvedData) => (
-                // role="img" only wraps actual rendered chart content, never
-                // the error/retry UI — a screen reader must still reach the
-                // Retry button, which role="img" on an ancestor would hide.
-                <div role="img" aria-label={ariaLabel ?? title}>
-                  {children(resolvedData)}
-                </div>
-              )}
-            </AsyncSection>
-          )}
-        </div>
+        {bodyNode}
       </Card>
     </motion.div>
   )

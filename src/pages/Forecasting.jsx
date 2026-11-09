@@ -10,16 +10,19 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import { CheckCircle2, Play, RefreshCw, XCircle } from 'lucide-react'
-import Card from '@/components/ui/Card'
+import { CheckCircle2, Play, RefreshCw, TrendingUp, XCircle } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import ChartTooltip from '@/components/ui/ChartTooltip'
 import ChartCard from '@/components/charts/ChartCard'
 import { renderEventMarkers } from '@/components/charts/EventMarkers'
 import { CHART_HEIGHTS } from '@/components/charts/chartDefaults'
+import PageHero from '@/components/ui/PageHero'
+import StatTile from '@/components/ui/StatTile'
+import EmptyState from '@/components/ui/EmptyState'
 import { useMode } from '@/hooks/useMode'
 import { useNotifications } from '@/hooks/useNotifications'
 import { CHART_COLORS, FORECAST_COLORS } from '@/theme/chartTheme'
+import { GLOW_DARK } from '@/config/designTokens'
 import { formatCurrencyMYR } from '@/utils/formatters'
 import { getBestRow, getLatestForecastRun, runForecast } from '@/services/forecastResultsService'
 import { fetchRawSalesPayloads } from '@/services/salesService'
@@ -104,47 +107,36 @@ export default function Forecasting() {
 
   return (
     <div className="space-y-6">
-      <Card>
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-2">
-            <span className="rounded-full bg-accent-500/10 px-2.5 py-1 text-xs font-medium text-accent-600 dark:text-accent-400">
-              {modeConfig.label}
-            </span>
-            {runId && (
-              <span className="text-xs text-slate-500 dark:text-slate-400">
-                Run {runId} · generated {generatedAt ? new Date(generatedAt).toLocaleString() : '—'}
-              </span>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            <Button icon={RefreshCw} variant="secondary" loading={loading} onClick={loadForecast}>
+      <PageHero
+        eyebrow={modeConfig.label}
+        title="Smart Business Forecasting"
+        highlight="Forecasting"
+        description={
+          runId
+            ? `Latest run generated ${generatedAt ? new Date(generatedAt).toLocaleString() : '—'}.`
+            : 'See where your revenue is headed next, computed straight from your own sales history.'
+        }
+        actions={
+          <>
+            <Button icon={RefreshCw} variant="glowSecondary" loading={loading} onClick={loadForecast}>
               Refresh
             </Button>
-            <Button icon={Play} loading={running} onClick={handleRunForecast}>
+            <Button icon={Play} variant="glowBrand" loading={running} onClick={handleRunForecast}>
               Run Forecasting
             </Button>
-          </div>
-        </div>
-      </Card>
+          </>
+        }
+      />
 
       {loading ? (
-        <Card>
-          <p className="text-sm text-slate-500 dark:text-slate-400">Loading forecast results…</p>
-        </Card>
+        <p className="text-sm text-glow-text/60">Loading forecast results…</p>
       ) : !runId ? (
-        <Card title="No forecasting run yet">
-          <p className="text-sm text-slate-600 dark:text-slate-300">
-            Click <strong>Run Forecasting</strong> above for an instant baseline forecast (moving
-            average) computed from your own uploaded sales data — no setup required.
-          </p>
-          <p className="mt-3 text-sm text-slate-600 dark:text-slate-300">
-            For the fuller model comparison — moving average, ARIMA, Prophet (sales-only and
-            sentiment-enhanced), XGBoost, and LSTM, all evaluated on identical rolling-origin time
-            periods — run <code>ml/notebooks/04_train_forecasting_models.ipynb</code> offline; see{' '}
-            <code>ml/forecasting/README.md</code> for details. The best-performing model from either
-            path is written to <code>forecast_results</code> and shown here automatically.
-          </p>
-        </Card>
+        <EmptyState
+          icon={TrendingUp}
+          message="No forecast yet — click Run Forecasting above for an instant estimate from your own sales history, no setup required."
+          actionLabel="Run Forecasting"
+          onAction={handleRunForecast}
+        />
       ) : (
         <>
           <ChartCard
@@ -157,6 +149,7 @@ export default function Forecasting() {
                 : "This model's own confidence interval, as computed by the forecasting run."
             }
             height="lg"
+            readingGuide="The solid line up to 'today' is your real recorded revenue. After that, the line is predicted, and the shaded band is how much the prediction could realistically be off by — a wider band means less certainty, not an error."
             ariaLabel={`Revenue forecast chart: ${dailySales.length} days of historical actuals followed by a ${best?.forecast_points?.length ?? 0}-day ${modelDisplayName(best ?? { model_type: 'unknown', variant: 'sales_only' })} forecast`}
             status={loading ? 'loading' : 'success'}
             data={chartSeries}
@@ -164,10 +157,17 @@ export default function Forecasting() {
             emptyMessage="No sales or forecast data yet."
             csvRows={chartSeries}
             csvFilename="revenue-forecast.csv"
+            surface="glow"
           >
             {(seriesData) => (
               <ResponsiveContainer width="100%" height={CHART_HEIGHTS.lg}>
                 <AreaChart data={seriesData} margin={{ left: 0 }}>
+                  <defs>
+                    <linearGradient id="forecastActualGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={GLOW_DARK.brandGreen} stopOpacity={0.35} />
+                      <stop offset="100%" stopColor={GLOW_DARK.brandGreen} stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
                   <CartesianGrid
                     strokeDasharray="3 3"
                     stroke={CHART_COLORS.grid}
@@ -196,6 +196,14 @@ export default function Forecasting() {
                   />
                   <Legend iconType="circle" wrapperStyle={{ fontSize: 12 }} />
                   {renderEventMarkers(todayMarker, CHART_COLORS.neutral)}
+                  <Area
+                    dataKey="actual"
+                    stroke="none"
+                    fill="url(#forecastActualGradient)"
+                    legendType="none"
+                    name=""
+                    connectNulls={false}
+                  />
                   <Area
                     dataKey="low"
                     stackId="band"
@@ -237,91 +245,81 @@ export default function Forecasting() {
 
           {best && (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-              <Card bodyClassName="p-5">
-                <p className="text-xs font-medium text-slate-500 dark:text-slate-400">MAE</p>
-                <p className="mt-2 text-2xl font-semibold text-slate-900 dark:text-slate-100">
-                  {formatCurrencyMYR(best.mae)}
-                </p>
-              </Card>
-              <Card bodyClassName="p-5">
-                <p className="text-xs font-medium text-slate-500 dark:text-slate-400">RMSE</p>
-                <p className="mt-2 text-2xl font-semibold text-slate-900 dark:text-slate-100">
-                  {formatCurrencyMYR(best.rmse)}
-                </p>
-              </Card>
-              <Card bodyClassName="p-5">
-                <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+              <StatTile label="MAE" value={best.mae} prefix="RM " />
+              <StatTile label="RMSE" value={best.rmse} prefix="RM " />
+              <div className="rounded-3xl border border-glow-border bg-glow-surface-elevated px-5 py-4">
+                <p className="text-xs font-medium uppercase tracking-wide text-glow-text/50">
                   MAPE (target &lt; {MAPE_TARGET}%)
                 </p>
-                <div className="mt-2 flex items-baseline gap-2">
-                  <p className="text-2xl font-semibold text-slate-900 dark:text-slate-100">
+                <div className="mt-1.5 flex items-baseline gap-2">
+                  <p className="text-3xl font-semibold tabular-nums text-glow-text">
                     {best.mape != null ? `${best.mape}%` : '—'}
                   </p>
                   {best.mape != null &&
                     (best.mape < MAPE_TARGET ? (
-                      <span className="inline-flex items-center gap-1 text-xs font-medium text-accent-600 dark:text-accent-400">
+                      <span className="inline-flex items-center gap-1 text-xs font-medium text-glow-brand">
                         <CheckCircle2 className="size-3.5" aria-hidden="true" />
                         target met
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 text-xs font-medium text-danger">
+                      <span className="inline-flex items-center gap-1 text-xs font-medium text-rose-400">
                         <XCircle className="size-3.5" aria-hidden="true" />
                         target not met
                       </span>
                     ))}
                 </div>
-              </Card>
+              </div>
             </div>
           )}
 
-          <Card
-            title="Model Comparison"
-            description="Every candidate evaluated on the same rolling-origin periods. The best model is never hardcoded — it's whichever row actually scored lowest MAPE."
-          >
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead>
-                  <tr className="border-b border-line text-xs uppercase tracking-wide text-slate-500 dark:border-line-dark dark:text-slate-400">
-                    <th className="py-2 pr-4 font-medium">Model</th>
-                    <th className="py-2 pr-4 font-medium">MAE</th>
-                    <th className="py-2 pr-4 font-medium">RMSE</th>
-                    <th className="py-2 pr-4 font-medium">MAPE</th>
-                    <th className="py-2 font-medium">Result</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {rows.map((row) => (
-                    <tr
-                      key={`${row.model_type}-${row.variant}`}
-                      className="border-b border-line/60 dark:border-line-dark/60"
-                    >
-                      <td className="py-2 pr-4 text-slate-700 dark:text-slate-200">
-                        {modelDisplayName(row)}
-                      </td>
-                      <td className="py-2 pr-4 text-slate-600 dark:text-slate-300">
-                        {formatCurrencyMYR(row.mae)}
-                      </td>
-                      <td className="py-2 pr-4 text-slate-600 dark:text-slate-300">
-                        {formatCurrencyMYR(row.rmse)}
-                      </td>
-                      <td className="py-2 pr-4 text-slate-600 dark:text-slate-300">
-                        {row.mape != null ? `${row.mape}%` : '—'}
-                      </td>
-                      <td className="py-2">
-                        {row.is_best ? (
-                          <span className="rounded-full bg-accent-500/10 px-2 py-0.5 text-xs font-medium text-accent-600 dark:text-accent-400">
-                            Best
-                          </span>
-                        ) : (
-                          <span className="text-xs text-slate-400 dark:text-slate-500">—</span>
-                        )}
-                      </td>
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+            <div className="rounded-3xl border border-glow-border bg-glow-surface-elevated p-5 lg:col-span-2">
+              <h2 className="text-sm font-semibold text-glow-text">Model Comparison</h2>
+              <p className="mt-0.5 text-xs text-glow-text/60">
+                Every candidate evaluated on the same time periods — nothing here is hardcoded.
+              </p>
+              <div className="mt-4 overflow-x-auto">
+                <table className="w-full text-left text-sm">
+                  <thead>
+                    <tr className="border-b border-glow-border text-xs uppercase tracking-wide text-glow-text/50">
+                      <th className="py-2 pr-4 font-medium">Model</th>
+                      <th className="py-2 pr-4 font-medium">MAE</th>
+                      <th className="py-2 pr-4 font-medium">RMSE</th>
+                      <th className="py-2 pr-4 font-medium">MAPE</th>
+                      <th className="py-2 font-medium">Result</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {rows.map((row) => (
+                      <tr key={`${row.model_type}-${row.variant}`} className="border-b border-glow-border/60">
+                        <td className="py-2 pr-4 text-glow-text/90">{modelDisplayName(row)}</td>
+                        <td className="py-2 pr-4 text-glow-text/70">{formatCurrencyMYR(row.mae)}</td>
+                        <td className="py-2 pr-4 text-glow-text/70">{formatCurrencyMYR(row.rmse)}</td>
+                        <td className="py-2 pr-4 text-glow-text/70">{row.mape != null ? `${row.mape}%` : '—'}</td>
+                        <td className="py-2">
+                          {row.is_best ? (
+                            <span className="rounded-full bg-glow-brand/15 px-2 py-0.5 text-xs font-medium text-glow-brand">
+                              Best
+                            </span>
+                          ) : (
+                            <span className="text-xs text-glow-text/40">—</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </Card>
+            <div className="rounded-3xl border border-glow-border bg-glow-surface-elevated p-5">
+              <h2 className="text-sm font-semibold text-glow-text">How this is decided</h2>
+              <p className="mt-2 text-sm text-glow-text/60">
+                Every model is tested the same way — trained on your past data, then checked against
+                days it hasn&apos;t seen yet. The one that predicted closest to what actually happened
+                wins. Never a fixed choice.
+              </p>
+            </div>
+          </div>
         </>
       )}
     </div>

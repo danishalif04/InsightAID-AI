@@ -7,7 +7,7 @@ import { useMotionAllowed } from '@/hooks/useMotionAllowed'
  * final value immediately rather than an incomplete count). `value` must
  * be a real finite number; a non-numeric/null value renders an em dash,
  * never a fabricated count-up to 0. */
-export default function StatTile({ label, value, unit = '', decimals = 0, delta }) {
+export default function StatTile({ label, value, prefix = '', unit = '', decimals = 0, delta }) {
   const motionAllowed = useMotionAllowed()
   const [display, setDisplay] = useState(motionAllowed && typeof value === 'number' ? 0 : value)
   const nodeRef = useRef(null)
@@ -39,6 +39,7 @@ export default function StatTile({ label, value, unit = '', decimals = 0, delta 
     >
       <p className="text-xs font-medium uppercase tracking-wide text-glow-text/50">{label}</p>
       <p className="mt-1.5 text-3xl font-semibold tabular-nums text-glow-text">
+        {formatted !== '—' && prefix}
         {formatted}
         {formatted !== '—' && unit}
       </p>
