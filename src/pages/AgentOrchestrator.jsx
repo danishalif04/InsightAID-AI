@@ -1,13 +1,17 @@
 import { useState } from 'react'
-import { Send } from 'lucide-react'
+import { Send, Wrench } from 'lucide-react'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
 import { Textarea } from '@/components/ui/Input'
 import PageHero from '@/components/ui/PageHero'
+import EmptyState from '@/components/ui/EmptyState'
+import { useAsyncData } from '@/hooks/useAsyncData'
 import { useMode } from '@/hooks/useMode'
 import { useNotifications } from '@/hooks/useNotifications'
 import { routeQuestion } from '@/utils/agentRouting'
+import { TOOL_REGISTRY } from '@/utils/agentToolRegistry'
 import { askAgent, getAgentFacts } from '@/services/agentOrchestratorService'
+import { listInvestigations, runInvestigation } from '@/services/agentInvestigationService'
 
 function GlowSection({ title, description, children, className = '' }) {
   return (
@@ -32,6 +36,27 @@ export default function AgentOrchestrator() {
   const [question, setQuestion] = useState('')
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState(null)
+
+  const [investigationQuestion, setInvestigationQuestion] = useState('')
+  const [investigationLoading, setInvestigationLoading] = useState(false)
+  const [investigationResult, setInvestigationResult] = useState(null)
+  const { data: history, status: historyStatus, reload: reloadHistory } = useAsyncData(listInvestigations, [])
+
+  const handleInvestigate = async () => {
+    const trimmed = investigationQuestion.trim()
+    if (!trimmed) return
+    setInvestigationLoading(true)
+    setInvestigationResult(null)
+    try {
+      const outcome = await runInvestigation(trimmed)
+      setInvestigationResult(outcome)
+      reloadHistory()
+    } catch (error) {
+      notify(error.message ?? 'Could not run that investigation right now.')
+    } finally {
+      setInvestigationLoading(false)
+    }
+  }
 
   const handleAsk = async () => {
     const trimmed = question.trim()
@@ -123,6 +148,94 @@ export default function AgentOrchestrator() {
           </details>
         </GlowSection>
       )}
+
+      <div className="pt-2">
+        <h2 className="text-base font-semibold text-glow-text">Agent Foundation — real Manager Agent</h2>
+        <p className="mt-1 text-xs text-glow-text/50">
+          Everything below is a different, newer piece: a real Manager Agent that decides whether a controlled
+          tool is relevant, calls it at most once, and persists every step to an inspectable investigation log —
+          not just keyword routing. Still a minimal foundation, not the full multi-agent architecture.
+        </p>
+      </div>
+
+      <GlowSection title="Controlled tool registry" description="The Manager Agent may only call tools listed here — nothing else exists for it to use">
+        <ul className="space-y-2">
+          {Object.values(TOOL_REGISTRY).map((tool) => (
+            <li key={tool.name} className="flex items-start gap-2 rounded-xl border border-glow-border p-3 text-xs">
+              <Wrench className="mt-0.5 size-3.5 shrink-0 text-glow-brand" aria-hidden="true" />
+              <div>
+                <span className="font-medium text-glow-text/80">{tool.label}</span>
+                <p className="mt-0.5 text-glow-text/50">{tool.description}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </GlowSection>
+
+      <GlowSection title="Ask the Manager Agent" description="A real tool call (or an honest 'not relevant'), logged step by step">
+        <Textarea
+          rows={3}
+          placeholder="e.g. What is my break-even point?"
+          value={investigationQuestion}
+          onChange={(event) => setInvestigationQuestion(event.target.value)}
+        />
+        <div className="mt-3 flex justify-end">
+          <Button
+            icon={Send}
+            variant="glowBrand"
+            loading={investigationLoading}
+            disabled={!investigationQuestion.trim()}
+            onClick={handleInvestigate}
+          >
+            Investigate
+          </Button>
+        </div>
+      </GlowSection>
+
+      {investigationResult && (
+        <GlowSection title="Investigation result">
+          <div className="flex items-center gap-2">
+            <Badge tone={investigationResult.toolCalled ? 'brand' : 'neutral'}>
+              {investigationResult.toolCalled ?? 'No tool called'}
+            </Badge>
+          </div>
+          <p className="mt-4 text-sm leading-relaxed text-glow-text/90">{investigationResult.finalAnswer}</p>
+          <ol className="mt-4 space-y-1.5 text-xs text-glow-text/50">
+            {investigationResult.tasks.map((task) => (
+              <li key={task.step_number}>
+                <span className="font-medium text-glow-text/70">Step {task.step_number}:</span> {task.description}{' '}
+                <span className="italic">({task.status})</span>
+              </li>
+            ))}
+          </ol>
+        </GlowSection>
+      )}
+
+      <GlowSection title="Investigation history" description="Every past investigation for this account, persisted and inspectable">
+        {historyStatus === 'success' && (!history || history.length === 0) && (
+          <EmptyState message="No investigations yet — ask the Manager Agent a question above." />
+        )}
+        {history && history.length > 0 && (
+          <ul className="space-y-3">
+            {history.map((investigation) => (
+              <li key={investigation.id} className="rounded-xl border border-glow-border p-3 text-xs">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-medium text-glow-text/80">{investigation.question}</span>
+                  <Badge tone={investigation.status === 'completed' ? 'success' : investigation.status === 'failed' ? 'danger' : 'neutral'}>
+                    {investigation.status}
+                  </Badge>
+                </div>
+                {investigation.final_answer && <p className="mt-2 text-glow-text/60">{investigation.final_answer}</p>}
+                {investigation.toolLogs.length > 0 && (
+                  <p className="mt-2 text-glow-text/40">
+                    Tool called: {investigation.toolLogs.map((log) => log.tool_name).join(', ')}
+                  </p>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </GlowSection>
     </div>
   )
 }
