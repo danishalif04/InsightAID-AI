@@ -29,6 +29,7 @@ export const router = createBrowserRouter([
           { path: child(PATHS.onboarding), element: <Pages.Onboarding /> },
           { path: child(PATHS.modelPerformance), element: <Pages.ModelPerformance /> },
           { path: child(PATHS.agentOrchestrator), element: <Pages.AgentOrchestrator /> },
+          { path: child(PATHS.financialPlanning), element: <Pages.FinancialPlanning /> },
           { path: '*', element: <Pages.NotFound /> },
         ],
       },
