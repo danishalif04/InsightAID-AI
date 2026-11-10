@@ -23,6 +23,22 @@ export const TOOL_REGISTRY = {
     inputSchema: {}, // no parameters — operates only on the caller's own business_assumptions row
     readOnly: true,
   },
+  startup_capital_summary: {
+    name: 'startup_capital_summary',
+    label: 'Startup Capital Summary',
+    description:
+      "Reads the user's own saved startup capital plan (one-off setup costs + available capital) and computes the total estimated capital needed and any funding gap. Read-only, no approval gate required.",
+    inputSchema: {},
+    readOnly: true,
+  },
+  simulate_price_change: {
+    name: 'simulate_price_change',
+    label: 'Simulate Price Change',
+    description:
+      "Recalculates gross margin and break-even using a hypothetical selling price instead of the saved one, with every other saved assumption unchanged. Read-only — the saved price is never modified, so no approval gate is required.",
+    inputSchema: { new_selling_price: 'number' },
+    readOnly: true,
+  },
 }
 
 /** @param {string} toolName @returns {{valid: boolean, errors: string[]}} */
@@ -34,6 +50,14 @@ export function validateToolCall(toolName, input = {}) {
   const allowedKeys = Object.keys(tool.inputSchema)
   for (const key of Object.keys(input ?? {})) {
     if (!allowedKeys.includes(key)) errors.push(`Unexpected input field "${key}" for tool "${toolName}".`)
+  }
+  for (const [key, type] of Object.entries(tool.inputSchema)) {
+    const value = (input ?? {})[key]
+    if (value === undefined) {
+      errors.push(`Missing required input field "${key}" for tool "${toolName}".`)
+    } else if (type === 'number' && (typeof value !== 'number' || !Number.isFinite(value))) {
+      errors.push(`Input field "${key}" for tool "${toolName}" must be a finite number.`)
+    }
   }
   return { valid: errors.length === 0, errors }
 }
