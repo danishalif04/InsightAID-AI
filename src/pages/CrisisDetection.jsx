@@ -36,6 +36,7 @@ import { renderCrisisBands } from '@/components/charts/CrisisBands'
 import {
   AXIS_LINE_DEFAULTS,
   AXIS_TICK_DEFAULTS,
+  CHART_HEIGHTS,
   GRID_DEFAULTS,
 } from '@/components/charts/chartDefaults'
 import FilterProvider from '@/contexts/FilterProvider'
@@ -441,7 +442,7 @@ function CrisisDetectionContent() {
         csvFilename="crisis-risk-timeline.csv"
       >
         {() => (
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height={CHART_HEIGHTS.hero}>
             <LineChart
               data={history}
               margin={{ left: -20, top: 8, right: 8, bottom: 0 }}
@@ -623,7 +624,7 @@ function CrisisDetectionContent() {
           if (!sankeyData) return null
           return (
             <>
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height={CHART_HEIGHTS.lg}>
                 <Sankey
                   data={sankeyData}
                   nodePadding={16}
