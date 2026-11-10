@@ -31,7 +31,16 @@ describe('normalizeSalesRow', () => {
       revenue: 249,
       discount: 0,
       cost: 89.27,
+      imageUrl: null,
     })
+  })
+
+  it('reads an optional image_url column when present, trimmed; null when absent (never guessed)', () => {
+    expect(normalizeSalesRow({ ...REAL_SAMPLE, image_url: '  https://example.com/rice-water.jpg  ' }).imageUrl).toBe(
+      'https://example.com/rice-water.jpg'
+    )
+    expect(normalizeSalesRow(REAL_SAMPLE).imageUrl).toBeNull()
+    expect(normalizeSalesRow({ ...REAL_SAMPLE, image_url: '   ' }).imageUrl).toBeNull()
   })
 
   it('returns null when revenue is missing', () => {
@@ -128,6 +137,18 @@ describe('computeProductBreakdown / computeCategoryBreakdown', () => {
     const breakdown = computeProductBreakdown(rows)
     expect(breakdown[0]).toMatchObject({ product: 'Serum', revenue: 400, units: 4, cost: 150 })
     expect(breakdown[1].product).toBe('Cleanser')
+  })
+
+  it('carries the first real image_url seen for a product through to the breakdown; null when none of its rows have one', () => {
+    const withImage = normalizeSalesRows([
+      { date: '2026-01-01', product: 'Serum', revenue: '100', image_url: 'https://example.com/serum.jpg' },
+      { date: '2026-01-02', product: 'Serum', revenue: '100' },
+    ])
+    const breakdown = computeProductBreakdown(withImage)
+    expect(breakdown[0].imageUrl).toBe('https://example.com/serum.jpg')
+
+    // None of the original `rows` fixture rows have an image_url.
+    expect(computeProductBreakdown(rows)[0].imageUrl).toBeNull()
   })
 
   it('groups categories across products', () => {

@@ -43,6 +43,15 @@ export function normalizeSalesRow(raw) {
     revenue,
     discount: toNumber(raw.discount),
     cost: toNumber(raw.cost),
+    // Not a canonical sales-template column (src/utils/csvTemplates.js) —
+    // an OPTIONAL extra column some uploads carry. `raw_data.payload`
+    // already preserves every uploaded column verbatim regardless
+    // (dataPipelineService.js's "preserve raw" rule), so reading it here
+    // adds display capability without any ingestion/schema change. A row
+    // with no image_url column (e.g. the real Embun Botanica upload,
+    // which has none) simply carries `imageUrl: null` — never a broken
+    // image, never a guessed stock photo standing in for a real product.
+    imageUrl: typeof raw.image_url === 'string' && raw.image_url.trim() ? raw.image_url.trim() : null,
   }
 }
 
@@ -101,11 +110,15 @@ function groupBy(rows, field) {
   for (const row of rows) {
     const key = row[field]
     if (!key) continue
-    if (!groups.has(key)) groups.set(key, { key, revenue: 0, units: 0, cost: 0 })
+    if (!groups.has(key)) groups.set(key, { key, revenue: 0, units: 0, cost: 0, imageUrl: null })
     const bucket = groups.get(key)
     bucket.revenue += row.revenue
     if (row.quantitySold != null) bucket.units += row.quantitySold
     if (row.cost != null) bucket.cost += row.cost
+    // First real image_url seen for this product/category wins — rows for
+    // the same product should carry the same image anyway, this just
+    // avoids assuming row order.
+    if (!bucket.imageUrl && row.imageUrl) bucket.imageUrl = row.imageUrl
   }
   return [...groups.values()]
     .map((bucket) => ({
@@ -117,6 +130,7 @@ function groupBy(rows, field) {
         bucket.revenue > 0
           ? Math.round(((bucket.revenue - bucket.cost) / bucket.revenue) * 1000) / 10
           : null,
+      imageUrl: bucket.imageUrl,
     }))
     .sort((a, b) => b.revenue - a.revenue)
 }

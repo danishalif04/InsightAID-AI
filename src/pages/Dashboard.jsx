@@ -87,6 +87,33 @@ const RANK_BAR_TONES = {
  * relative to the TOP product's revenue (shared across both lists) so a
  * reader can visually compare a "low performing" bar's real distance from
  * the best performer, not just rank it against its own list's max. */
+/** Real product photo when the uploaded sales data carries one (an
+ * optional `image_url` column — see salesSeries.js's normalizeSalesRow),
+ * a plain package icon otherwise. Never a stock/guessed image standing in
+ * for a real product — the real Embun Botanica account has no image_url
+ * column at all, so every one of its products correctly falls back to
+ * the icon rather than showing anything fabricated. `onError` also falls
+ * back to the icon if a given URL 404s/fails to load, rather than
+ * showing a broken-image glyph. */
+function ProductThumb({ imageUrl, product }) {
+  const [failed, setFailed] = useState(false)
+  if (!imageUrl || failed) {
+    return (
+      <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-glow-surface text-glow-text/30">
+        <PackageSearch className="size-4" aria-hidden="true" />
+      </span>
+    )
+  }
+  return (
+    <img
+      src={imageUrl}
+      alt={product}
+      className="size-8 shrink-0 rounded-lg object-cover"
+      onError={() => setFailed(true)}
+    />
+  )
+}
+
 function ProductRankList({ heading, tone, products, maxRevenue }) {
   const { bar, text } = RANK_BAR_TONES[tone]
   return (
@@ -95,8 +122,9 @@ function ProductRankList({ heading, tone, products, maxRevenue }) {
       <ul className="mt-3 space-y-3">
         {products.map((item) => (
           <li key={item.product}>
-            <div className="mb-1 flex items-center justify-between gap-2 text-xs">
-              <span className="truncate font-medium text-glow-text/80">{item.product}</span>
+            <div className="mb-1 flex items-center gap-2 text-xs">
+              <ProductThumb imageUrl={item.imageUrl} product={item.product} />
+              <span className="min-w-0 flex-1 truncate font-medium text-glow-text/80">{item.product}</span>
               <span className={`shrink-0 font-semibold ${text}`}>{formatCurrencyMYR(item.revenue)}</span>
             </div>
             <div className="h-2 w-full overflow-hidden rounded-full bg-glow-surface">
