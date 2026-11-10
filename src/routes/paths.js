@@ -16,4 +16,5 @@ export const PATHS = {
   modelPerformance: '/model-performance',
   agentOrchestrator: '/agent-orchestrator',
   financialPlanning: '/financial-planning',
+  actionCentre: '/action-centre',
 }

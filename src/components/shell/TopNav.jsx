@@ -47,6 +47,7 @@ const NAV_GROUPS = [
     items: [
       { label: 'Dataset Management', path: PATHS.datasets },
       { label: 'Reports', path: PATHS.reports },
+      { label: 'Action Centre', path: PATHS.actionCentre },
     ],
   },
 ]

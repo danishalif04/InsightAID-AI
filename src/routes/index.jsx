@@ -30,6 +30,7 @@ export const router = createBrowserRouter([
           { path: child(PATHS.modelPerformance), element: <Pages.ModelPerformance /> },
           { path: child(PATHS.agentOrchestrator), element: <Pages.AgentOrchestrator /> },
           { path: child(PATHS.financialPlanning), element: <Pages.FinancialPlanning /> },
+          { path: child(PATHS.actionCentre), element: <Pages.ActionCentre /> },
           { path: '*', element: <Pages.NotFound /> },
         ],
       },

@@ -147,3 +147,28 @@ export async function submitRecommendationFeedback(ruleId, useful) {
   const { error } = await supabase.from('recommendation_feedback').insert({ rule_id: ruleId, useful })
   if (error) throw error
 }
+
+/**
+ * AI Business Action Centre (knowledge_updated_nov2026.md item 6) — lists
+ * previously-Saved recommendations (same `recommendations` table
+ * saveRecommendations() writes to) with their status. Only rows the owner
+ * explicitly saved appear here, same as AiRecommendations.jsx's own
+ * "Saved" concept — a recommendation shown live and never saved has
+ * nothing to track yet.
+ */
+export async function listActionCentreItems() {
+  const { data, error } = await supabase.from('recommendations').select('*').order('generated_at', { ascending: false })
+  if (error) throw error
+  return data ?? []
+}
+
+/**
+ * The only state transition this app ever makes automatically-adjacent:
+ * the OWNER explicitly accepts or dismisses here. Accepting never
+ * triggers any automated change (no price edit, no supplier contact) —
+ * it only records the owner's decision for their own tracking.
+ */
+export async function updateActionCentreStatus(id, status) {
+  const { error } = await supabase.from('recommendations').update({ status }).eq('id', id)
+  if (error) throw error
+}
