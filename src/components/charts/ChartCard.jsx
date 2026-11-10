@@ -178,7 +178,10 @@ export default function ChartCard({
 
   if (surface === 'glow') {
     return (
-      <motion.div {...motionProps} className={`rounded-3xl border border-glow-border bg-glow-surface-elevated ${className}`}>
+      <motion.div
+        {...motionProps}
+        className={`rounded-3xl border border-glow-border bg-glow-surface-elevated shadow-[0_0_0_1px_rgba(34,197,94,0.05),0_16px_48px_-20px_rgba(34,197,94,0.3)] ${className}`}
+      >
         <div className="flex items-start justify-between gap-4 border-b border-glow-border px-5 py-4">
           <div>
             {title && <h2 className="text-sm font-semibold text-glow-text">{title}</h2>}

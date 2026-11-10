@@ -35,19 +35,23 @@ export default function StatTile({ label, value, prefix = '', unit = '', decimal
   return (
     <div
       ref={nodeRef}
-      className="rounded-3xl border border-glow-border bg-glow-surface-elevated px-5 py-4"
+      className="rounded-3xl border border-glow-border bg-glow-surface-elevated px-5 py-4 shadow-[0_0_0_1px_rgba(34,197,94,0.06),0_12px_32px_-16px_rgba(34,197,94,0.35)]"
     >
       <p className="text-xs font-medium uppercase tracking-wide text-glow-text/50">{label}</p>
-      <p className="mt-1.5 text-3xl font-semibold tabular-nums text-glow-text">
+      <p className="mt-1.5 text-4xl font-bold tracking-tight tabular-nums text-glow-text">
         {formatted !== '—' && prefix}
         {formatted}
         {formatted !== '—' && unit}
       </p>
       {delta != null && (
-        <p className={`mt-1 text-xs font-medium ${delta >= 0 ? 'text-glow-brand' : 'text-rose-400'}`}>
+        <span
+          className={`mt-2 inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-xs font-semibold ${
+            delta >= 0 ? 'bg-glow-brand/15 text-glow-brand' : 'bg-rose-500/15 text-rose-400'
+          }`}
+        >
           {delta >= 0 ? '+' : ''}
           {delta}
-        </p>
+        </span>
       )}
     </div>
   )
