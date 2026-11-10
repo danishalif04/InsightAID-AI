@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useId, useMemo, useState } from 'react'
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { Heart, Users } from 'lucide-react'
 import Badge from '@/components/ui/Badge'
@@ -29,6 +29,7 @@ function GlowSection({ title, description, children, className = '' }) {
 export default function SocialIntelligence() {
   const { status, data, error, reload } = useAsyncData(getSocialIntelligenceData, [])
   const [selectedPlatform, setSelectedPlatform] = useState(null)
+  const gradientId = useId()
 
   const platforms = data?.platformComparison.map((p) => p.platform) ?? []
   const effectivePlatform =
@@ -135,11 +136,17 @@ export default function SocialIntelligence() {
               {(d) => (
                 <ResponsiveContainer width="100%" height={CHART_HEIGHTS.md}>
                   <BarChart data={d.mentionVolumeSeries} margin={{ left: -20 }}>
+                    <defs>
+                      <linearGradient id={`${gradientId}-bar`} x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor={platformColor} stopOpacity={0.95} />
+                        <stop offset="100%" stopColor={platformColor} stopOpacity={0.35} />
+                      </linearGradient>
+                    </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid} vertical={false} />
                     <XAxis dataKey="date" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
                     <YAxis tick={{ fontSize: 12 }} axisLine={false} tickLine={false} unit=" mentions" />
                     <Tooltip content={<ChartTooltip />} />
-                    <Bar dataKey={effectivePlatform} name="Mentions" fill={platformColor} radius={[4, 4, 0, 0]} />
+                    <Bar dataKey={effectivePlatform} name="Mentions" fill={`url(#${gradientId}-bar)`} radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               )}

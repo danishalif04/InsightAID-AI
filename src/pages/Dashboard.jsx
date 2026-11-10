@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   Area,
@@ -157,6 +157,7 @@ function DashboardBody({ data }) {
   const platforms = data.platformComparison.map((p) => p.platform)
   const { uiMode } = useUIMode()
   const positiveScore = data.sentimentScores?.find((score) => score.id === 'positive') ?? null
+  const gradientId = useId()
 
   return (
     <>
@@ -181,7 +182,7 @@ function DashboardBody({ data }) {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Card
           title="Sentiment Trend"
-          description="Last 14 days, by sentiment label"
+          description="Last 14 days, by sentiment label — shows whether customer sentiment is improving or worsening over time; each day's three bands always add up to 100%."
           className="lg:col-span-2"
         >
           {data.sentimentTrend.length === 0 ? (
@@ -189,6 +190,20 @@ function DashboardBody({ data }) {
           ) : (
             <ResponsiveContainer width="100%" height={280}>
               <AreaChart data={data.sentimentTrend} margin={{ left: -20 }}>
+                <defs>
+                  <linearGradient id={`${gradientId}-positive`} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={CHART_COLORS.positive} stopOpacity={0.45} />
+                    <stop offset="100%" stopColor={CHART_COLORS.positive} stopOpacity={0.03} />
+                  </linearGradient>
+                  <linearGradient id={`${gradientId}-neutral`} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={CHART_COLORS.neutral} stopOpacity={0.4} />
+                    <stop offset="100%" stopColor={CHART_COLORS.neutral} stopOpacity={0.03} />
+                  </linearGradient>
+                  <linearGradient id={`${gradientId}-negative`} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={CHART_COLORS.negative} stopOpacity={0.4} />
+                    <stop offset="100%" stopColor={CHART_COLORS.negative} stopOpacity={0.03} />
+                  </linearGradient>
+                </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid} vertical={false} />
                 <XAxis dataKey="date" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 12 }} axisLine={false} tickLine={false} unit="%" />
@@ -204,8 +219,7 @@ function DashboardBody({ data }) {
                   name="Positive"
                   stackId="sentiment"
                   stroke={CHART_COLORS.positive}
-                  fill={CHART_COLORS.positive}
-                  fillOpacity={0.25}
+                  fill={`url(#${gradientId}-positive)`}
                   strokeWidth={2}
                   connectNulls={false}
                 />
@@ -215,8 +229,7 @@ function DashboardBody({ data }) {
                   name="Neutral"
                   stackId="sentiment"
                   stroke={CHART_COLORS.neutral}
-                  fill={CHART_COLORS.neutral}
-                  fillOpacity={0.25}
+                  fill={`url(#${gradientId}-neutral)`}
                   strokeWidth={2}
                   connectNulls={false}
                 />
@@ -226,8 +239,7 @@ function DashboardBody({ data }) {
                   name="Negative"
                   stackId="sentiment"
                   stroke={CHART_COLORS.negative}
-                  fill={CHART_COLORS.negative}
-                  fillOpacity={0.25}
+                  fill={`url(#${gradientId}-negative)`}
                   strokeWidth={2}
                   connectNulls={false}
                 />
@@ -236,7 +248,10 @@ function DashboardBody({ data }) {
           )}
         </Card>
 
-        <Card title="Platform Distribution" description="Mentions by platform, ranked highest to lowest">
+        <Card
+          title="Platform Distribution"
+          description="Mentions by platform, ranked highest to lowest — shows which channel generates the most conversation right now, so attention or budget can follow it."
+        >
           {data.platformComparison.length === 0 ? (
             <EmptyNote>No platform data yet.</EmptyNote>
           ) : (
@@ -280,7 +295,7 @@ function DashboardBody({ data }) {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Card
           title="Daily Mention Volume"
-          description="Mentions by platform, last 7 days"
+          description="Mentions by platform, last 7 days — a sudden same-day spike across platforms is often the first visible sign of a developing issue."
           className="lg:col-span-2"
         >
           {data.mentionVolumeSeries.length === 0 ? (

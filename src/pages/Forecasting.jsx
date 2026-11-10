@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useId, useState } from 'react'
 import {
   Area,
   AreaChart,
@@ -56,6 +56,7 @@ function modelDisplayName(row) {
 export default function Forecasting() {
   const { modeConfig } = useMode()
   const { notify } = useNotifications()
+  const gradientId = useId()
   const [loading, setLoading] = useState(true)
   const [running, setRunning] = useState(false)
   const [runId, setRunId] = useState(null)
@@ -163,9 +164,13 @@ export default function Forecasting() {
               <ResponsiveContainer width="100%" height={CHART_HEIGHTS.lg}>
                 <AreaChart data={seriesData} margin={{ left: 0 }}>
                   <defs>
-                    <linearGradient id="forecastActualGradient" x1="0" y1="0" x2="0" y2="1">
+                    <linearGradient id={`${gradientId}-actual`} x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stopColor={GLOW_DARK.brandGreen} stopOpacity={0.35} />
                       <stop offset="100%" stopColor={GLOW_DARK.brandGreen} stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id={`${gradientId}-predicted`} x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={FORECAST_COLORS.forecast} stopOpacity={0.3} />
+                      <stop offset="100%" stopColor={FORECAST_COLORS.forecast} stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid
@@ -199,7 +204,15 @@ export default function Forecasting() {
                   <Area
                     dataKey="actual"
                     stroke="none"
-                    fill="url(#forecastActualGradient)"
+                    fill={`url(#${gradientId}-actual)`}
+                    legendType="none"
+                    name=""
+                    connectNulls={false}
+                  />
+                  <Area
+                    dataKey="predicted"
+                    stroke="none"
+                    fill={`url(#${gradientId}-predicted)`}
                     legendType="none"
                     name=""
                     connectNulls={false}
