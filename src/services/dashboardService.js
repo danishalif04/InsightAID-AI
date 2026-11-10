@@ -1,4 +1,5 @@
 import { fetchDailyAggregates, fetchProcessedRows } from './socialDataService'
+import { fetchRawSalesPayloads } from './salesService'
 import { buildContext } from './recommendationService'
 import { getBestRow, getLatestForecastRun } from './forecastResultsService'
 import { generateRecommendations } from '@/utils/recommendationRules'
@@ -9,7 +10,10 @@ import {
   computeSentimentTrend,
   computeTrendingHashtags,
 } from '@/utils/socialAnalytics'
+import { computeProductBreakdown, normalizeSalesRows } from '@/utils/salesSeries'
 import { composeExecutiveSummary } from '@/utils/executiveSummary'
+
+const TOP_BOTTOM_COUNT = 5
 
 /**
  * Assembles the whole Dashboard page's data in one pass.
@@ -35,11 +39,12 @@ import { composeExecutiveSummary } from '@/utils/executiveSummary'
  * "not available," never the whole dashboard.
  */
 export async function getDashboardData(mode) {
-  const [processedRows, dailyAggregateRows, context, forecastRun] = await Promise.all([
+  const [processedRows, dailyAggregateRows, context, forecastRun, salesPayloads] = await Promise.all([
     fetchProcessedRows(),
     fetchDailyAggregates({ days: 30 }),
     buildContext(mode).catch(() => ({ mode, profile: { exists: false, values: {}, provenance: {} }, crisis: null, dataReadiness: null })),
     getLatestForecastRun().catch(() => ({ runId: null, rows: [] })),
+    fetchRawSalesPayloads().catch(() => []),
   ])
 
   const { crisis } = context
@@ -47,12 +52,23 @@ export async function getDashboardData(mode) {
   const bestForecastRow = getBestRow(forecastRun.rows)
   const recommendations = generateRecommendations(context)
 
+  // Ranked by revenue, highest first (computeProductBreakdown's own sort —
+  // see salesSeries.js). Top/bottom N of the SAME list, not two separate
+  // queries, so "low performing" never shows a product that doesn't also
+  // have real sales rows. A business with <=2*N products naturally has the
+  // two slices overlap; the page's empty/short-list handling covers that.
+  const productBreakdown = computeProductBreakdown(normalizeSalesRows(salesPayloads))
+  const topProducts = productBreakdown.slice(0, TOP_BOTTOM_COUNT)
+  const bottomProducts = productBreakdown.slice(-TOP_BOTTOM_COUNT).reverse()
+
   return {
     sentimentScores,
     sentimentTrend: computeSentimentTrend(dailyAggregateRows, 14),
     platformComparison: computePlatformComparison(processedRows, dailyAggregateRows),
     mentionVolumeSeries: computeMentionVolumeSeries(dailyAggregateRows, 7),
     trendingHashtags: computeTrendingHashtags(processedRows, 6),
+    topProducts,
+    bottomProducts,
     crisis,
     bestForecastRow,
     recommendations: recommendations.slice(0, 3),

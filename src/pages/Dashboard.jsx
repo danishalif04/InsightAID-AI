@@ -19,6 +19,7 @@ import {
   ClipboardList,
   Hash,
   Lightbulb,
+  PackageSearch,
   RefreshCw,
   Sparkles,
   X,
@@ -69,6 +70,43 @@ function GlowSection({ title, description, children, className = '' }) {
       {title && <h2 className="text-sm font-semibold text-glow-text">{title}</h2>}
       {description && <p className="mt-0.5 text-xs text-glow-text/60">{description}</p>}
       <div className={title || description ? 'mt-4' : ''}>{children}</div>
+    </div>
+  )
+}
+
+const RANK_BAR_TONES = {
+  brand: { bar: 'bg-glow-brand', text: 'text-glow-brand' },
+  rose: { bar: 'bg-rose-400', text: 'text-rose-400' },
+}
+
+/** Ranked bar-fill list — same visual pattern Social Intelligence's
+ * Trending Hashtags already uses, reused here for "Product Performance"
+ * instead of a Recharts bar chart, since this is just two short (<=5-row)
+ * ranked lists, not a chart that benefits from axes/gridlines. Width is
+ * relative to the TOP product's revenue (shared across both lists) so a
+ * reader can visually compare a "low performing" bar's real distance from
+ * the best performer, not just rank it against its own list's max. */
+function ProductRankList({ heading, tone, products, maxRevenue }) {
+  const { bar, text } = RANK_BAR_TONES[tone]
+  return (
+    <div>
+      <p className="text-xs font-medium uppercase tracking-wide text-glow-text/50">{heading}</p>
+      <ul className="mt-3 space-y-3">
+        {products.map((item) => (
+          <li key={item.product}>
+            <div className="mb-1 flex items-center justify-between gap-2 text-xs">
+              <span className="truncate font-medium text-glow-text/80">{item.product}</span>
+              <span className={`shrink-0 font-semibold ${text}`}>{formatCurrencyMYR(item.revenue)}</span>
+            </div>
+            <div className="h-2 w-full overflow-hidden rounded-full bg-glow-surface">
+              <div
+                className={`h-full rounded-full ${bar}`}
+                style={{ width: `${maxRevenue > 0 ? Math.max(4, (item.revenue / maxRevenue) * 100) : 0}%` }}
+              />
+            </div>
+          </li>
+        ))}
+      </ul>
     </div>
   )
 }
@@ -334,6 +372,30 @@ function DashboardBody({ data }) {
           )}
         </GlowSection>
       </div>
+
+      <GlowSection
+        title="Product Performance"
+        description="Ranked by real revenue from your uploaded sales data — not units sold, so a cheap, high-volume item doesn't outrank a pricier one it's actually behind."
+      >
+        {data.topProducts.length === 0 ? (
+          <EmptyState icon={PackageSearch} message="No product-level sales data yet — upload a sales dataset with a product column via Dataset Management." />
+        ) : (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <ProductRankList
+              heading="Top performing"
+              tone="brand"
+              products={data.topProducts}
+              maxRevenue={data.topProducts[0]?.revenue ?? 1}
+            />
+            <ProductRankList
+              heading="Low performing"
+              tone="rose"
+              products={data.bottomProducts}
+              maxRevenue={data.topProducts[0]?.revenue ?? 1}
+            />
+          </div>
+        )}
+      </GlowSection>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <GlowSection
