@@ -1,6 +1,17 @@
 # InsightAid AI — API / Data Source Integration
 
-Format follows FYP2.md §83. Each source is a modular adapter in `src/adapters/` (FYP2.md §38, §66) — every source is checked independently via `getAllSourceStatuses()` in `src/adapters/registry.js`, and one source failing or being unreachable never affects the others (see `registry.test.js`). Status values are always one of FYP2.md §39's real vocabulary (`CONNECTED`/`NOT_CONFIGURED`/`AUTH_REQUIRED`/`RATE_LIMITED`/`ERROR`/`DISABLED`) — no source in this project has ever returned a fabricated `CONNECTED`.
+> **Update**: per an explicit user decision, the Threads, X, TikTok,
+> Shopee Affiliate, Lazada Affiliate, and TikTok Shop Affiliate adapters
+> documented below were REMOVED from the live app (no longer in
+> `src/adapters/registry.js`, no longer shown in Dataset Management) —
+> their files and the two Edge Functions they called
+> (`sync-threads-mentions`, `sync-x-mentions`) were deleted outright.
+> Only Sales Data and Shopee (dataset mode, non-affiliate) remain. This
+> document is kept as a real historical record of the research into each
+> platform's API access (useful for the dissertation's methodology
+> section) — it does NOT describe the current live app.
+>
+> Format follows FYP2.md §83. Each source is a modular adapter in `src/adapters/` (FYP2.md §38, §66) — every source is checked independently via `getAllSourceStatuses()` in `src/adapters/registry.js`, and one source failing or being unreachable never affects the others (see `registry.test.js`). Status values are always one of FYP2.md §39's real vocabulary (`CONNECTED`/`NOT_CONFIGURED`/`AUTH_REQUIRED`/`RATE_LIMITED`/`ERROR`/`DISABLED`) — no source in this project has ever returned a fabricated `CONNECTED`.
 
 **Current status as of this writing:** Sales Data and Shopee are backed by our own database and can be genuinely `CONNECTED`. Threads is a real, working integration (own-account posts and replies, confirmed against a live call). X is real code, unconfirmed against a real API call (Free-tier credentials). TikTok has no credentials and correctly reports `NOT_CONFIGURED`.
 

@@ -1,24 +1,21 @@
 import { SOURCE_STATUS } from './sourceStatus'
 import { salesDataAdapter } from './salesDataAdapter'
 import { shopeeAdapter } from './shopeeAdapter'
-import { tiktokAdapter } from './tiktokAdapter'
-import { xAdapter } from './xAdapter'
-import { threadsAdapter } from './threadsAdapter'
-import { shopeeAffiliateAdapter } from './shopeeAffiliateAdapter'
-import { lazadaAffiliateAdapter } from './lazadaAffiliateAdapter'
-import { tiktokShopAdapter } from './tiktokShopAdapter'
 
-/** Every registered source, in the order shown in Dataset Management. */
-export const SOURCE_ADAPTERS = [
-  salesDataAdapter,
-  shopeeAdapter,
-  tiktokAdapter,
-  xAdapter,
-  threadsAdapter,
-  shopeeAffiliateAdapter,
-  lazadaAffiliateAdapter,
-  tiktokShopAdapter,
-]
+/**
+ * Every registered source, in the order shown in Dataset Management.
+ *
+ * Previously also listed tiktokAdapter/xAdapter/threadsAdapter/
+ * shopeeAffiliateAdapter/lazadaAffiliateAdapter/tiktokShopAdapter — removed
+ * by explicit user request ("remove threads, x, tiktok, shopee affiliate
+ * api, lazada affiliate, tiktok shop affiliate api from the dataset
+ * management page"). shopeeAdapter (dataset-mode, non-affiliate — real
+ * uploaded Shopee review/social rows) was NOT in that list and stays.
+ * The removed adapters' own files (and their now-orphaned helpers/edge
+ * functions) were deleted outright rather than just unregistered, since
+ * nothing else referenced them — see the commit this change shipped in.
+ */
+export const SOURCE_ADAPTERS = [salesDataAdapter, shopeeAdapter]
 
 /**
  * Checks every adapter's status independently (FYP2.md §66 — one source

@@ -3,37 +3,19 @@ import { SOURCE_STATUS } from './sourceStatus'
 
 vi.mock('./salesDataAdapter', () => ({ salesDataAdapter: { id: 'sales', name: 'Sales Data', checkStatus: vi.fn() } }))
 vi.mock('./shopeeAdapter', () => ({ shopeeAdapter: { id: 'shopee', name: 'Shopee (Dataset Mode)', checkStatus: vi.fn() } }))
-vi.mock('./tiktokAdapter', () => ({ tiktokAdapter: { id: 'tiktok', name: 'TikTok API', checkStatus: vi.fn() } }))
-vi.mock('./xAdapter', () => ({ xAdapter: { id: 'x', name: 'X API', checkStatus: vi.fn() } }))
-vi.mock('./threadsAdapter', () => ({ threadsAdapter: { id: 'threads', name: 'Threads API', checkStatus: vi.fn() } }))
-vi.mock('./shopeeAffiliateAdapter', () => ({ shopeeAffiliateAdapter: { id: 'shopee_affiliate', name: 'Shopee Affiliate API', checkStatus: vi.fn() } }))
-vi.mock('./lazadaAffiliateAdapter', () => ({ lazadaAffiliateAdapter: { id: 'lazada_affiliate', name: 'Lazada Affiliate API', checkStatus: vi.fn() } }))
-vi.mock('./tiktokShopAdapter', () => ({ tiktokShopAdapter: { id: 'tiktok_shop', name: 'TikTok Shop API', checkStatus: vi.fn() } }))
 
 describe('getAllSourceStatuses', () => {
   it('returns a status for every adapter even when one throws (FYP2.md §66 failure isolation)', async () => {
     const { salesDataAdapter } = await import('./salesDataAdapter')
     const { shopeeAdapter } = await import('./shopeeAdapter')
-    const { tiktokAdapter } = await import('./tiktokAdapter')
-    const { xAdapter } = await import('./xAdapter')
-    const { threadsAdapter } = await import('./threadsAdapter')
-    const { shopeeAffiliateAdapter } = await import('./shopeeAffiliateAdapter')
-    const { lazadaAffiliateAdapter } = await import('./lazadaAffiliateAdapter')
-    const { tiktokShopAdapter } = await import('./tiktokShopAdapter')
 
     salesDataAdapter.checkStatus.mockResolvedValue({ status: SOURCE_STATUS.CONNECTED, lastSync: null, recordCount: 5 })
     shopeeAdapter.checkStatus.mockRejectedValue(new Error('network down'))
-    tiktokAdapter.checkStatus.mockResolvedValue({ status: SOURCE_STATUS.NOT_CONFIGURED, lastSync: null, recordCount: 0 })
-    xAdapter.checkStatus.mockResolvedValue({ status: SOURCE_STATUS.NOT_CONFIGURED, lastSync: null, recordCount: 0 })
-    threadsAdapter.checkStatus.mockResolvedValue({ status: SOURCE_STATUS.NOT_CONFIGURED, lastSync: null, recordCount: 0 })
-    shopeeAffiliateAdapter.checkStatus.mockResolvedValue({ status: SOURCE_STATUS.NOT_CONFIGURED, lastSync: null, recordCount: 0 })
-    lazadaAffiliateAdapter.checkStatus.mockResolvedValue({ status: SOURCE_STATUS.NOT_CONFIGURED, lastSync: null, recordCount: 0 })
-    tiktokShopAdapter.checkStatus.mockResolvedValue({ status: SOURCE_STATUS.NOT_CONFIGURED, lastSync: null, recordCount: 0 })
 
     const { getAllSourceStatuses } = await import('./registry')
     const results = await getAllSourceStatuses()
 
-    expect(results).toHaveLength(8)
+    expect(results).toHaveLength(2)
 
     const sales = results.find((r) => r.id === 'sales')
     expect(sales.status).toBe(SOURCE_STATUS.CONNECTED)
@@ -42,11 +24,6 @@ describe('getAllSourceStatuses', () => {
     const shopee = results.find((r) => r.id === 'shopee')
     expect(shopee.status).toBe(SOURCE_STATUS.ERROR)
     expect(shopee.detail).toMatch(/network down/)
-
-    // Every other adapter is completely unaffected by shopee's failure.
-    expect(results.find((r) => r.id === 'tiktok').status).toBe(SOURCE_STATUS.NOT_CONFIGURED)
-    expect(results.find((r) => r.id === 'x').status).toBe(SOURCE_STATUS.NOT_CONFIGURED)
-    expect(results.find((r) => r.id === 'threads').status).toBe(SOURCE_STATUS.NOT_CONFIGURED)
   })
 
   it('never fabricates a CONNECTED status for an adapter that failed', async () => {
@@ -54,13 +31,7 @@ describe('getAllSourceStatuses', () => {
     salesDataAdapter.checkStatus.mockRejectedValue(new Error('boom'))
 
     const { shopeeAdapter } = await import('./shopeeAdapter')
-    const { tiktokAdapter } = await import('./tiktokAdapter')
-    const { xAdapter } = await import('./xAdapter')
-    const { threadsAdapter } = await import('./threadsAdapter')
     shopeeAdapter.checkStatus.mockResolvedValue({ status: SOURCE_STATUS.NOT_CONFIGURED, lastSync: null, recordCount: 0 })
-    tiktokAdapter.checkStatus.mockResolvedValue({ status: SOURCE_STATUS.NOT_CONFIGURED, lastSync: null, recordCount: 0 })
-    xAdapter.checkStatus.mockResolvedValue({ status: SOURCE_STATUS.NOT_CONFIGURED, lastSync: null, recordCount: 0 })
-    threadsAdapter.checkStatus.mockResolvedValue({ status: SOURCE_STATUS.NOT_CONFIGURED, lastSync: null, recordCount: 0 })
 
     const { getAllSourceStatuses } = await import('./registry')
     const results = await getAllSourceStatuses()
