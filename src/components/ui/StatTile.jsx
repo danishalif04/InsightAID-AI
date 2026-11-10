@@ -1,13 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
 import { animate } from 'framer-motion'
 import { useMotionAllowed } from '@/hooks/useMotionAllowed'
+import InfoPopover from './InfoPopover'
 
 /** Large KPI tile with a count-up animation (skipped outright when motion
  * is disallowed — Low-Sensory mode or prefers-reduced-motion — showing the
  * final value immediately rather than an incomplete count). `value` must
  * be a real finite number; a non-numeric/null value renders an em dash,
- * never a fabricated count-up to 0. */
-export default function StatTile({ label, value, prefix = '', unit = '', decimals = 0, delta }) {
+ * never a fabricated count-up to 0. `guide`, when given, renders the same
+ * (?) info icon ChartCard's charts already use (see InfoPopover) — optional,
+ * since not every KPI needs explaining. */
+export default function StatTile({ label, value, prefix = '', unit = '', decimals = 0, delta, guide }) {
   const motionAllowed = useMotionAllowed()
   const [display, setDisplay] = useState(motionAllowed && typeof value === 'number' ? 0 : value)
   const nodeRef = useRef(null)
@@ -37,7 +40,10 @@ export default function StatTile({ label, value, prefix = '', unit = '', decimal
       ref={nodeRef}
       className="rounded-3xl border border-glow-border bg-glow-surface-elevated px-5 py-4 shadow-[0_0_0_1px_rgba(34,197,94,0.06),0_12px_32px_-16px_rgba(34,197,94,0.35)]"
     >
-      <p className="text-xs font-medium uppercase tracking-wide text-glow-text/50">{label}</p>
+      <p className="flex items-center gap-1 text-xs font-medium uppercase tracking-wide text-glow-text/50">
+        {label}
+        {guide && <InfoPopover guide={guide} label={`About ${label}`} />}
+      </p>
       <p className="mt-1.5 text-4xl font-bold tracking-tight tabular-nums text-glow-text">
         {formatted !== '—' && prefix}
         {formatted}

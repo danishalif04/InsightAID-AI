@@ -33,6 +33,7 @@ import { CHART_HEIGHTS } from '@/components/charts/chartDefaults'
 import StatTile from '@/components/ui/StatTile'
 import EmptyState from '@/components/ui/EmptyState'
 import PageHero from '@/components/ui/PageHero'
+import InfoPopover from '@/components/ui/InfoPopover'
 import AsyncSection from '@/components/common/AsyncSection'
 import Skeleton from '@/components/ui/Skeleton'
 import { useAsyncData } from '@/hooks/useAsyncData'
@@ -169,12 +170,19 @@ function DashboardBody({ data }) {
               value={positiveScore.value}
               unit="%"
               delta={positiveScore.delta != null ? Math.round(positiveScore.delta * 10) / 10 : null}
+              guide="Share of recent reviews/posts classified positive, from the rating-heuristic sentiment model. The delta compares against the prior period of the same length."
             />
           )}
 
           {crisis && (
             <div className="rounded-3xl border border-glow-border bg-glow-surface-elevated px-5 py-4 shadow-[0_0_0_1px_rgba(34,197,94,0.06),0_12px_32px_-16px_rgba(34,197,94,0.35)]">
-              <p className="text-xs font-medium uppercase tracking-wide text-glow-text/50">Crisis Risk</p>
+              <p className="flex items-center gap-1 text-xs font-medium uppercase tracking-wide text-glow-text/50">
+                Crisis Risk
+                <InfoPopover
+                  label="About Crisis Risk"
+                  guide="A 0-100 score from 7 real signals (negative-sentiment level/velocity, mention-volume level/velocity, rating deterioration, sentiment anomaly, review-volume anomaly), each compared against this business's own recent baseline — never a fixed threshold. See Crisis Detection for the full breakdown."
+                />
+              </p>
               <p className={`mt-1.5 text-4xl font-bold tracking-tight ${RISK_TONES[crisis.riskLevel] ?? 'text-glow-text'}`}>
                 {capitalize(crisis.riskLevel)}
               </p>
@@ -186,7 +194,13 @@ function DashboardBody({ data }) {
 
           {lastForecastPoint?.predicted != null && (
             <div className="rounded-3xl border border-glow-border bg-glow-surface-elevated px-5 py-4 shadow-[0_0_0_1px_rgba(34,197,94,0.06),0_12px_32px_-16px_rgba(34,197,94,0.35)]">
-              <p className="text-xs font-medium uppercase tracking-wide text-glow-text/50">Revenue Forecast</p>
+              <p className="flex items-center gap-1 text-xs font-medium uppercase tracking-wide text-glow-text/50">
+                Revenue Forecast
+                <InfoPopover
+                  label="About Revenue Forecast"
+                  guide="The next predicted day's revenue from this account's best-performing forecasting model run (see Forecasting for the full comparison). MAPE is that model's average forecast error on past data — lower is more accurate."
+                />
+              </p>
               <p className="mt-1.5 text-4xl font-bold tracking-tight tabular-nums text-glow-text">
                 {formatCurrencyMYR(lastForecastPoint.predicted)}
               </p>

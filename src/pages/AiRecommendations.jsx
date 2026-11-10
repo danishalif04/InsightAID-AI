@@ -5,6 +5,7 @@ import Button from '@/components/ui/Button'
 import Skeleton from '@/components/ui/Skeleton'
 import PageHero from '@/components/ui/PageHero'
 import EmptyState from '@/components/ui/EmptyState'
+import InfoPopover from '@/components/ui/InfoPopover'
 import { useNotifications } from '@/hooks/useNotifications'
 import { useMode } from '@/hooks/useMode'
 import { CATEGORIES, SCCT_STRATEGIES } from '@/utils/recommendationRules'
@@ -12,10 +13,15 @@ import { getRecommendations, saveRecommendations, submitRecommendationFeedback }
 
 const PRIORITY_TONE = { high: 'danger', medium: 'warning', low: 'info' }
 
-function GlowSection({ title, description, children, className = '' }) {
+function GlowSection({ title, description, guide, children, className = '' }) {
   return (
     <div className={`rounded-3xl border border-glow-border bg-glow-surface-elevated p-5 sm:p-6 ${className}`}>
-      {title && <h2 className="text-sm font-semibold text-glow-text">{title}</h2>}
+      {title && (
+        <h2 className="flex items-center gap-1 text-sm font-semibold text-glow-text">
+          {title}
+          {guide && <InfoPopover guide={guide} label={`About ${title}`} />}
+        </h2>
+      )}
       {description && <p className="mt-0.5 text-xs text-glow-text/60">{description}</p>}
       <div className={title || description ? 'mt-4' : ''}>{children}</div>
     </div>
@@ -218,6 +224,7 @@ export default function AiRecommendations() {
       <GlowSection
         title="Business Context"
         description="Factors these recommendations may consider. Anything not on file reads exactly as such — never guessed."
+        guide="Each factor comes from one of three places: what you entered directly in Onboarding/Settings, a default assumption used only when nothing was provided, or 'Insufficient information' when neither exists — the rule engine never invents a value to fill a gap."
       >
         {loading ? (
           <div className="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2">

@@ -5,6 +5,7 @@ import Button from '@/components/ui/Button'
 import Table from '@/components/ui/Table'
 import Dialog from '@/components/ui/Dialog'
 import PageHero from '@/components/ui/PageHero'
+import InfoPopover from '@/components/ui/InfoPopover'
 import { useNotifications } from '@/hooks/useNotifications'
 import { useMode } from '@/hooks/useMode'
 import { parseCsv } from '@/utils/csvParser'
@@ -30,10 +31,15 @@ const CONNECTION_STATUS_META = {
   [SOURCE_STATUS.DISABLED]: { label: 'Disabled', tone: 'neutral', icon: WifiOff },
 }
 
-function GlowSection({ title, description, children, className = '' }) {
+function GlowSection({ title, description, guide, children, className = '' }) {
   return (
     <div className={`rounded-3xl border border-glow-border bg-glow-surface-elevated p-5 sm:p-6 ${className}`}>
-      {title && <h2 className="text-sm font-semibold text-glow-text">{title}</h2>}
+      {title && (
+        <h2 className="flex items-center gap-1 text-sm font-semibold text-glow-text">
+          {title}
+          {guide && <InfoPopover guide={guide} label={`About ${title}`} />}
+        </h2>
+      )}
       {description && <p className="mt-0.5 text-xs text-glow-text/60">{description}</p>}
       <div className={title || description ? 'mt-4' : ''}>{children}</div>
     </div>
@@ -320,14 +326,20 @@ export default function DatasetManagement() {
         )}
       </GlowSection>
 
-      <GlowSection title="Storage Usage" description="Detected language mix across ingested text">
+      <GlowSection title="Storage & Language Mix" description="Storage quota, plus the detected language mix across everything ingested so far">
         <div className="flex items-center gap-2 text-sm italic text-glow-text/50">
           <HardDrive className="size-4 text-glow-text/40" aria-hidden="true" />
           Unavailable — storage quota is Supabase project infrastructure, not something this app's client-side
           credentials can query.
         </div>
 
-        <p className="mt-5 mb-2 text-xs font-medium text-glow-text/50">Language detection breakdown</p>
+        <p className="mt-5 mb-2 flex items-center gap-1 text-xs font-medium text-glow-text/50">
+          Language detection breakdown
+          <InfoPopover
+            label="About language detection"
+            guide="A rule-based detector, not a trained language-ID model: character-ratio for Chinese, function-word matching for Malay/English. Text with a comparable mix of both Malay and English function words is tagged 'ms-en' (code-mixed) rather than forced into one language."
+          />
+        </p>
         {languageBreakdown === null ? (
           <p className="text-sm text-glow-text/60">Loading…</p>
         ) : languageBreakdown.length === 0 ? (

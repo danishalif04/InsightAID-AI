@@ -1,6 +1,7 @@
 import Badge from '@/components/ui/Badge'
 import PageHero from '@/components/ui/PageHero'
 import EmptyState from '@/components/ui/EmptyState'
+import InfoPopover from '@/components/ui/InfoPopover'
 import AsyncSection from '@/components/common/AsyncSection'
 import { Gauge } from 'lucide-react'
 import { useAsyncData } from '@/hooks/useAsyncData'
@@ -10,10 +11,15 @@ import { latestPerModelVariant, summarizeCrisisPerformance, summarizeForecastCom
 const MODEL_TYPE_LABELS = { xlmr: 'XLM-RoBERTa', mbert: 'mBERT', tfidf_lr: 'TF-IDF + Logistic Regression' }
 const EVAL_PATH_LABELS = { original_language: 'Original Language', translate_to_english: 'Translate to English' }
 
-function GlowSection({ title, description, children, className = '' }) {
+function GlowSection({ title, description, guide, children, className = '' }) {
   return (
     <div className={`rounded-3xl border border-glow-border bg-glow-surface-elevated p-5 sm:p-6 ${className}`}>
-      {title && <h2 className="text-sm font-semibold text-glow-text">{title}</h2>}
+      {title && (
+        <h2 className="flex items-center gap-1 text-sm font-semibold text-glow-text">
+          {title}
+          {guide && <InfoPopover guide={guide} label={`About ${title}`} />}
+        </h2>
+      )}
       {description && <p className="mt-0.5 text-xs text-glow-text/60">{description}</p>}
       <div className={title || description ? 'mt-4' : ''}>{children}</div>
     </div>
@@ -50,7 +56,13 @@ function SentimentModelCard({ row }) {
 
       {row.confusion_matrix && (
         <div className="mt-4">
-          <p className="text-xs font-medium text-glow-text/50">Confusion Matrix (rows = true, cols = predicted)</p>
+          <p className="flex items-center gap-1 text-xs font-medium text-glow-text/50">
+            Confusion Matrix (rows = true, cols = predicted)
+            <InfoPopover
+              label="About the confusion matrix"
+              guide="Each row is what a review's REAL label was (negative/neutral/positive, in that order); each column is what the model PREDICTED. Numbers on the diagonal (top-left to bottom-right) are correct predictions — the higher those are relative to the rest of their row, the better the model is at that class."
+            />
+          </p>
           <div className="mt-1.5 overflow-x-auto">
             <table className="text-xs">
               <tbody>
@@ -113,7 +125,11 @@ export default function ModelPerformance() {
 
           return (
             <>
-              <GlowSection title="Sentiment Models" description="Model, version, accuracy, precision, recall, F1, confusion matrix, language performance">
+              <GlowSection
+                title="Sentiment Models"
+                description="Model, version, accuracy, precision, recall, F1, confusion matrix, language performance"
+                guide="Accuracy: share of all reviews classified correctly. Precision: of the reviews predicted a given class, how many actually were. Recall: of the reviews that actually were a given class, how many were caught. F1: the balance of precision and recall into one number. All four are macro-averaged across positive/neutral/negative equally, not weighted by how common each class is."
+              >
                 {sentimentModels.length === 0 ? (
                   <EmptyState
                     icon={Gauge}
@@ -128,7 +144,11 @@ export default function ModelPerformance() {
                 )}
               </GlowSection>
 
-              <GlowSection title="Forecast Models" description="Baseline (sales-only) vs. sentiment-enhanced Prophet — MAE, RMSE, MAPE, improvement">
+              <GlowSection
+                title="Forecast Models"
+                description="Baseline (sales-only) vs. sentiment-enhanced Prophet — MAE, RMSE, MAPE, improvement"
+                guide="MAE/RMSE: average forecast error in real currency units (RMSE penalizes big misses more). MAPE: average error as a percentage of actual revenue — this project's target is under 15%. Improvement compares the sentiment-enhanced model against the sales-only baseline; a real result here can be negative (sentiment-enhancement doesn't always help) and is reported either way, never hidden."
+              >
                 {!forecastComparison ? (
                   <NotYetEvaluated>
                     Not yet evaluated — no forecasting run has produced a Prophet result yet. See ml/forecasting/README.md.
