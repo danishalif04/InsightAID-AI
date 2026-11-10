@@ -2,6 +2,7 @@ import { Building2, Lightbulb, PackageSearch } from 'lucide-react'
 import StatTile from '@/components/ui/StatTile'
 import { calculateBreakEven, calculateGrossMarginPercent, buildScenario } from '@/utils/scenarioEngine'
 import { calculateReadiness } from '@/utils/dataReadiness'
+import { calculateCapabilities } from '@/utils/capabilityMapping'
 
 /**
  * "My Business at a Glance" — Malaysian Local Shop's first screen after
@@ -44,6 +45,7 @@ export default function BusinessOverviewCard({ values = {} }) {
   const breakEven = calculateBreakEven(values)
   const grossMarginPercent = calculateGrossMarginPercent(expected.revenue, expected.grossProfit)
   const readiness = calculateReadiness({ values })
+  const capabilities = calculateCapabilities(readiness)
 
   const businessName = values.business_name || 'Your Business'
   const category = values.industry || values.product_category || null
@@ -115,6 +117,16 @@ export default function BusinessOverviewCard({ values = {} }) {
           {readiness.checklist.some((item) => !item.met) &&
             ` ${readiness.checklist.filter((item) => !item.met).map((item) => item.label).join(', ')} still needed for fuller analysis.`}
         </p>
+        <ul className="mt-3 grid grid-cols-1 gap-1.5 border-t border-glow-border pt-3 sm:grid-cols-2">
+          {capabilities.map((row) => (
+            <li key={row.capability} className="flex items-center justify-between gap-2 text-[11px]">
+              <span className="text-glow-text/60">{row.capability}</span>
+              <span className={row.available ? 'font-medium text-glow-brand' : 'text-glow-text/30'}>
+                {row.available ? 'Available' : 'Not yet'}
+              </span>
+            </li>
+          ))}
+        </ul>
       </div>
 
       <div className="mt-4 flex items-start gap-2.5 rounded-2xl border border-glow-border bg-glow-brand/5 p-4">
