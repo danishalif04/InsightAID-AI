@@ -70,15 +70,16 @@ async function fetchWithRetry(url: string, init: RequestInit): Promise<Response>
   return response!
 }
 
-/**
- * Sends one prompt, returns the raw text response. Throws
- * AIProviderNotConfiguredError / AIUpstreamError / AIMalformedResponseError
- * — callers decide what each means for their own NOT_CONFIGURED/
- * UPSTREAM_ERROR/UPSTREAM_MALFORMED response shape, same contract every
- * caller already had before this was extracted.
- */
-export async function callAIChat(
-  prompt: string,
+export interface ChatMessage {
+  role: 'system' | 'user' | 'assistant'
+  content: string
+}
+
+/** Shared send — both callAIChat (single prompt) and callAIChatMessages
+ * (full multi-turn history, used by chat-assistant) go through this so the
+ * fetch/retry/error-mapping logic exists exactly once. */
+async function sendChatCompletion(
+  messages: ChatMessage[],
   { temperature = 0.3, jsonMode = true }: { temperature?: number; jsonMode?: boolean } = {}
 ): Promise<string> {
   if (!isConfigured()) throw new AIProviderNotConfiguredError()
@@ -94,7 +95,7 @@ export async function callAIChat(
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
       body: JSON.stringify({
         model,
-        messages: [{ role: 'user', content: prompt }],
+        messages,
         temperature,
         ...(jsonMode ? { response_format: { type: 'json_object' } } : {}),
       }),
@@ -115,4 +116,30 @@ export async function callAIChat(
   const text = payload?.choices?.[0]?.message?.content
   if (typeof text !== 'string') throw new AIMalformedResponseError('no choices[0].message.content in response')
   return text
+}
+
+/**
+ * Sends one prompt, returns the raw text response. Throws
+ * AIProviderNotConfiguredError / AIUpstreamError / AIMalformedResponseError
+ * — callers decide what each means for their own NOT_CONFIGURED/
+ * UPSTREAM_ERROR/UPSTREAM_MALFORMED response shape, same contract every
+ * caller already had before this was extracted.
+ */
+export async function callAIChat(
+  prompt: string,
+  opts: { temperature?: number; jsonMode?: boolean } = {}
+): Promise<string> {
+  return sendChatCompletion([{ role: 'user', content: prompt }], opts)
+}
+
+/**
+ * Same as callAIChat, but for a full multi-turn conversation (e.g. a
+ * system prompt + running user/assistant history) instead of a single
+ * one-off prompt — used by chat-assistant. Same error contract.
+ */
+export async function callAIChatMessages(
+  messages: ChatMessage[],
+  opts: { temperature?: number; jsonMode?: boolean } = {}
+): Promise<string> {
+  return sendChatCompletion(messages, opts)
 }

@@ -11,7 +11,6 @@ import {
   Settings as SettingsIcon,
   Sun,
   User,
-  Zap,
 } from 'lucide-react'
 import { PATHS } from '@/routes/paths'
 import { useAuth } from '@/hooks/useAuth'
@@ -213,14 +212,6 @@ export default function TopNav({
               className="rounded-full p-2 text-glow-text/70 transition-colors hover:bg-white/5 hover:text-glow-text"
             >
               <Search className="size-4" aria-hidden="true" />
-            </button>
-            <button
-              type="button"
-              aria-label="Open AI assistant"
-              title="AI assistant"
-              className="rounded-full p-2 text-glow-text/70 transition-colors hover:bg-white/5 hover:text-glow-text"
-            >
-              <Zap className="size-4" aria-hidden="true" />
             </button>
             <button
               type="button"

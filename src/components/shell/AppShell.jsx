@@ -6,6 +6,7 @@ import { useNotifications } from '@/hooks/useNotifications'
 import { MODES } from '@/constants/modes'
 import { glowBackground } from '@/config/designTokens'
 import PageLoader from '@/components/common/PageLoader'
+import ChatAssistant from '@/components/common/ChatAssistant'
 import TopNav from './TopNav'
 import MobileNavSheet from './MobileNavSheet'
 
@@ -58,6 +59,8 @@ export default function AppShell() {
       <footer className="relative overflow-hidden border-t border-glow-border px-6 py-10 text-center">
         <p className="select-none text-4xl font-bold tracking-tight text-glow-text/5 sm:text-6xl">InsightAid</p>
       </footer>
+
+      <ChatAssistant />
     </div>
   )
 }
