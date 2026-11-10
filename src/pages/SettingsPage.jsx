@@ -14,7 +14,7 @@ import {
   SlidersHorizontal,
   User,
 } from 'lucide-react'
-import Card from '@/components/ui/Card'
+import PageHero from '@/components/ui/PageHero'
 import Button from '@/components/ui/Button'
 import Dialog from '@/components/ui/Dialog'
 import { Input, Select } from '@/components/ui/Input'
@@ -52,8 +52,18 @@ const SECTIONS = [
   { id: 'about', label: 'About', icon: Info },
 ]
 
+function GlowSection({ title, description, children, className = '' }) {
+  return (
+    <div className={`rounded-3xl border border-glow-border bg-glow-surface-elevated p-5 sm:p-6 ${className}`}>
+      {title && <h2 className="text-sm font-semibold text-glow-text">{title}</h2>}
+      {description && <p className="mt-0.5 text-xs text-glow-text/60">{description}</p>}
+      <div className={title || description ? 'mt-4' : ''}>{children}</div>
+    </div>
+  )
+}
+
 function SectionLoading() {
-  return <p className="text-sm text-slate-500 dark:text-slate-400">Loading…</p>
+  return <p className="text-sm text-glow-text/60">Loading…</p>
 }
 
 function ProfileSection() {
@@ -63,11 +73,6 @@ function ProfileSection() {
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    // No `if (profile)` guard - every other section here sets its form
-    // unconditionally with `?? ''` defaults. A real account with no
-    // `profiles` row yet (maybeSingle() legitimately resolves to null)
-    // left this section stuck on "Loading..." forever, since form was
-    // never set at all for that case.
     setForm({ full_name: profile?.full_name ?? '', email: profile?.email ?? '', role: profile?.role ?? '', phone: profile?.phone ?? '' })
   }, [profile])
 
@@ -88,12 +93,12 @@ function ProfileSection() {
   if (!form) return <SectionLoading />
 
   return (
-    <Card title="Profile">
+    <GlowSection title="Profile">
       <div className="flex items-center gap-4">
-        <span className="flex size-16 items-center justify-center rounded-full bg-brand-950 text-lg font-semibold text-white">
+        <span className="flex size-16 items-center justify-center rounded-full bg-glow-brand/15 text-lg font-semibold text-glow-brand">
           {initialsFromName(form.full_name)}
         </span>
-        <Button variant="secondary" size="sm" icon={Camera} onClick={() => notify('Photo upload is not implemented yet.', 'info')}>
+        <Button variant="glowSecondary" size="sm" icon={Camera} onClick={() => notify('Photo upload is not implemented yet.', 'info')}>
           Change Photo
         </Button>
       </div>
@@ -103,10 +108,10 @@ function ProfileSection() {
         <Input label="Role" value={form.role} onChange={update('role')} />
         <Input label="Phone" value={form.phone} onChange={update('phone')} />
       </div>
-      <Button className="mt-6" loading={saving} onClick={handleSave}>
+      <Button variant="glowBrand" className="mt-6" loading={saving} onClick={handleSave}>
         Save Changes
       </Button>
-    </Card>
+    </GlowSection>
   )
 }
 
@@ -137,17 +142,17 @@ function CompanySection() {
   if (!form) return <SectionLoading />
 
   return (
-    <Card title="Company">
+    <GlowSection title="Company">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Input label="Company Name" value={form.name} onChange={update('name')} />
         <Input label="Industry" value={form.industry} onChange={update('industry')} />
         <Input label="Company Size" value={form.size} onChange={update('size')} />
         <Input label="Website" value={form.website} onChange={update('website')} />
       </div>
-      <Button className="mt-6" loading={saving} onClick={handleSave}>
+      <Button variant="glowBrand" className="mt-6" loading={saving} onClick={handleSave}>
         Save Changes
       </Button>
-    </Card>
+    </GlowSection>
   )
 }
 
@@ -174,8 +179,8 @@ function NotificationsSection() {
   if (!notifications) return <SectionLoading />
 
   return (
-    <Card title="Notifications">
-      <div className="divide-y divide-line dark:divide-line-dark">
+    <GlowSection title="Notifications">
+      <div className="divide-y divide-glow-border">
         {NOTIFICATION_PREFERENCE_DEFINITIONS.map((item) => (
           <Switch
             key={item.id}
@@ -186,7 +191,7 @@ function NotificationsSection() {
           />
         ))}
       </div>
-    </Card>
+    </GlowSection>
   )
 }
 
@@ -212,7 +217,7 @@ function LanguageThemeSection() {
   }
 
   return (
-    <Card title="Language & Theme">
+    <GlowSection title="Language & Theme">
       {language === null ? (
         <SectionLoading />
       ) : (
@@ -223,25 +228,25 @@ function LanguageThemeSection() {
         </Select>
       )}
 
-      <p className="mb-1.5 mt-5 text-xs font-medium text-slate-500 dark:text-slate-400">Theme</p>
+      <p className="mb-1.5 mt-5 text-xs font-medium text-glow-text/50">Theme</p>
       <div className="flex gap-2">
-        <Button variant={!isDark ? 'primary' : 'secondary'} size="sm" onClick={() => isDark && toggleTheme()}>
+        <Button variant={!isDark ? 'glowBrand' : 'glowSecondary'} size="sm" onClick={() => isDark && toggleTheme()}>
           Light
         </Button>
-        <Button variant={isDark ? 'primary' : 'secondary'} size="sm" icon={Moon} onClick={() => !isDark && toggleTheme()}>
+        <Button variant={isDark ? 'glowBrand' : 'glowSecondary'} size="sm" icon={Moon} onClick={() => !isDark && toggleTheme()}>
           Dark
         </Button>
       </div>
 
-      <p className="mb-1.5 mt-5 text-xs font-medium text-slate-500 dark:text-slate-400">
+      <p className="mb-1.5 mt-5 text-xs font-medium text-glow-text/50">
         Accessibility Mode (FYP II Phase 7)
       </p>
       <UIModeSwitcher />
-      <p className="mt-2 text-xs italic text-slate-400">
+      <p className="mt-2 text-xs italic text-glow-text/40">
         Low-Sensory: no motion, muted colours, plain language. Senior / Warga Emas: larger text, higher contrast,
         Bahasa Melayu by default, optional text-to-speech.
       </p>
-    </Card>
+    </GlowSection>
   )
 }
 
@@ -249,8 +254,8 @@ function ApiKeysSection() {
   const { data: apiKeys } = useAsyncData(getApiKeys, [])
 
   return (
-    <Card title="API Keys">
-      <p className="text-sm italic text-slate-500 dark:text-slate-400">
+    <GlowSection title="API Keys">
+      <p className="text-sm italic text-glow-text/50">
         Unavailable — external integration credentials (TikTok, X, Threads, Gemini) are stored as Supabase Edge
         Function secrets, never exposed to the frontend (same pattern as every Edge Function in this project). There
         is no safe way to display or regenerate them from this page.
@@ -258,13 +263,13 @@ function ApiKeysSection() {
       {apiKeys && apiKeys.length > 0 && (
         <ul className="mt-4 space-y-2">
           {apiKeys.map((key) => (
-            <li key={key.id} className="text-xs text-slate-500 dark:text-slate-400">
+            <li key={key.id} className="text-xs text-glow-text/50">
               {key.name}: {key.masked_value}
             </li>
           ))}
         </ul>
       )}
-    </Card>
+    </GlowSection>
   )
 }
 
@@ -296,22 +301,22 @@ function SecuritySection() {
   }
 
   return (
-    <Card title="Security">
+    <GlowSection title="Security">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Input label="Current Password" type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} />
         <Input label="New Password" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
         <Input label="Confirm New Password" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
       </div>
-      <Button className="mt-4" loading={saving} onClick={handleUpdatePassword}>
+      <Button variant="glowBrand" className="mt-4" loading={saving} onClick={handleUpdatePassword}>
         Update Password
       </Button>
-      <div className="mt-6 border-t border-line pt-4 dark:border-line-dark">
-        <p className="text-sm font-medium text-slate-800 dark:text-slate-100">Two-Factor Authentication</p>
-        <p className="mt-1 text-sm italic text-slate-500 dark:text-slate-400">
+      <div className="mt-6 border-t border-glow-border pt-4">
+        <p className="text-sm font-medium text-glow-text">Two-Factor Authentication</p>
+        <p className="mt-1 text-sm italic text-glow-text/50">
           Unavailable — MFA enrollment is not implemented yet.
         </p>
       </div>
-    </Card>
+    </GlowSection>
   )
 }
 
@@ -338,8 +343,8 @@ function ModelConfigSection() {
   }
 
   return (
-    <Card title="Model & Detection">
-      <p className="text-sm text-slate-600 dark:text-slate-300">
+    <GlowSection title="Model & Detection">
+      <p className="text-sm text-glow-text/70">
         No trained sentiment model is deployed yet — sentiment for reviews with a star rating comes from a
         documented heuristic (<code>rating_heuristic_v1</code>), never a real model claim. See{' '}
         <code>docs/SENTIMENT_MODEL.md</code> for current status.
@@ -361,7 +366,7 @@ function ModelConfigSection() {
             </Select>
           </div>
           <label className="mt-4 block text-sm">
-            <span className="mb-1.5 flex items-center justify-between text-xs font-medium text-slate-500 dark:text-slate-400">
+            <span className="mb-1.5 flex items-center justify-between text-xs font-medium text-glow-text/50">
               <span>Confidence Threshold (saved preference)</span>
               <span>{modelConfig.confidenceThreshold}%</span>
             </span>
@@ -371,19 +376,19 @@ function ModelConfigSection() {
               max={99}
               value={modelConfig.confidenceThreshold}
               onChange={(event) => setModelConfig((current) => ({ ...current, confidenceThreshold: Number(event.target.value) }))}
-              className="w-full accent-accent-500"
+              className="w-full accent-glow-brand"
             />
           </label>
-          <p className="mt-2 text-xs italic text-slate-400">
+          <p className="mt-2 text-xs italic text-glow-text/40">
             Saved for your account, but not yet applied to live crisis-detection thresholds (see{' '}
             <code>src/config/crisisThresholds.js</code>, currently fixed for every user).
           </p>
-          <Button className="mt-6" loading={saving} onClick={handleSave}>
+          <Button variant="glowBrand" className="mt-6" loading={saving} onClick={handleSave}>
             Save Changes
           </Button>
         </>
       )}
-    </Card>
+    </GlowSection>
   )
 }
 
@@ -430,8 +435,8 @@ function DatabaseSection() {
 
   return (
     <>
-      <Card title="Database">
-        <p className="text-sm italic text-slate-500 dark:text-slate-400">
+      <GlowSection title="Database">
+        <p className="text-sm italic text-glow-text/50">
           This app uses one shared Supabase project with row-level security — there is no per-user connection string
           to show.
         </p>
@@ -442,18 +447,18 @@ function DatabaseSection() {
             <option value="weekly">Weekly</option>
           </Select>
         )}
-        <p className="mt-4 text-sm italic text-slate-500 dark:text-slate-400">
+        <p className="mt-4 text-sm italic text-glow-text/50">
           Unavailable — on-demand backups are a Supabase project-admin operation, not something this app's
           client-side credentials can trigger.
         </p>
-        <Button className="mt-6" variant="secondary" icon={RefreshCw} onClick={handleRefresh}>
+        <Button className="mt-6" variant="glowSecondary" icon={RefreshCw} onClick={handleRefresh}>
           Refresh
         </Button>
-      </Card>
+      </GlowSection>
 
-      <Card title="Danger Zone" className="mt-6">
-        <p className="text-sm font-medium text-slate-800 dark:text-slate-100">Reset Session</p>
-        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+      <GlowSection title="Danger Zone" className="mt-6">
+        <p className="text-sm font-medium text-glow-text">Reset Session</p>
+        <p className="mt-1 text-sm text-glow-text/60">
           Full fresh start: permanently deletes every dataset you've uploaded (sales, reviews, social), everything
           visually derived from it (forecast results, Crisis Detection's logged history, saved AI Recommendations),
           and your Business Profile — then signs you out. The next sign-in starts from the onboarding "Do you have
@@ -462,7 +467,7 @@ function DatabaseSection() {
         <Button className="mt-4" variant="danger" onClick={() => setConfirmOpen(true)}>
           Reset Session
         </Button>
-      </Card>
+      </GlowSection>
 
       <Dialog
         open={confirmOpen}
@@ -490,30 +495,30 @@ function DatabaseSection() {
 
 function AboutSection() {
   return (
-    <Card title="About InsightAid AI">
+    <GlowSection title="About InsightAid AI">
       <dl className="space-y-3 text-sm">
         <div className="flex justify-between gap-4">
-          <dt className="text-slate-500 dark:text-slate-400">Version</dt>
-          <dd className="font-medium text-slate-800 dark:text-slate-100">{ABOUT_INFO.version}</dd>
+          <dt className="text-glow-text/50">Version</dt>
+          <dd className="font-medium text-glow-text">{ABOUT_INFO.version}</dd>
         </div>
-        <div className="flex flex-col gap-1 border-t border-line pt-3 dark:border-line-dark">
-          <dt className="text-slate-500 dark:text-slate-400">Full Title</dt>
-          <dd className="font-medium text-slate-800 dark:text-slate-100">{ABOUT_INFO.fullTitle}</dd>
+        <div className="flex flex-col gap-1 border-t border-glow-border pt-3">
+          <dt className="text-glow-text/50">Full Title</dt>
+          <dd className="font-medium text-glow-text">{ABOUT_INFO.fullTitle}</dd>
         </div>
-        <div className="flex justify-between gap-4 border-t border-line pt-3 dark:border-line-dark">
-          <dt className="text-slate-500 dark:text-slate-400">Student</dt>
-          <dd className="font-medium text-slate-800 dark:text-slate-100">{ABOUT_INFO.student}</dd>
+        <div className="flex justify-between gap-4 border-t border-glow-border pt-3">
+          <dt className="text-glow-text/50">Student</dt>
+          <dd className="font-medium text-glow-text">{ABOUT_INFO.student}</dd>
         </div>
-        <div className="flex justify-between gap-4 border-t border-line pt-3 dark:border-line-dark">
-          <dt className="text-slate-500 dark:text-slate-400">Supervisor</dt>
-          <dd className="font-medium text-slate-800 dark:text-slate-100">{ABOUT_INFO.supervisor}</dd>
+        <div className="flex justify-between gap-4 border-t border-glow-border pt-3">
+          <dt className="text-glow-text/50">Supervisor</dt>
+          <dd className="font-medium text-glow-text">{ABOUT_INFO.supervisor}</dd>
         </div>
-        <div className="flex justify-between gap-4 border-t border-line pt-3 dark:border-line-dark">
-          <dt className="text-slate-500 dark:text-slate-400">Institution</dt>
-          <dd className="text-right font-medium text-slate-800 dark:text-slate-100">{ABOUT_INFO.institution}</dd>
+        <div className="flex justify-between gap-4 border-t border-glow-border pt-3">
+          <dt className="text-glow-text/50">Institution</dt>
+          <dd className="text-right font-medium text-glow-text">{ABOUT_INFO.institution}</dd>
         </div>
       </dl>
-    </Card>
+    </GlowSection>
   )
 }
 
@@ -534,27 +539,31 @@ export default function SettingsPage() {
   const ActiveSection = SECTION_CONTENT[active]
 
   return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[220px_1fr]">
-      <nav className="space-y-1" aria-label="Settings sections">
-        {SECTIONS.map(({ id, label, icon: Icon }) => (
-          <button
-            key={id}
-            type="button"
-            onClick={() => setActive(id)}
-            className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors ${
-              active === id
-                ? 'bg-accent-500 text-white'
-                : 'text-slate-600 hover:bg-canvas dark:text-slate-300 dark:hover:bg-canvas-dark'
-            }`}
-          >
-            <Icon className="size-4 shrink-0" aria-hidden="true" />
-            {label}
-          </button>
-        ))}
-      </nav>
+    <div className="space-y-6">
+      <PageHero eyebrow="Account" title="Settings" highlight="Settings" description="Profile, company, notifications, accessibility, and account-level controls." />
 
-      <div>
-        <ActiveSection />
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[220px_1fr]">
+        <nav className="space-y-1" aria-label="Settings sections">
+          {SECTIONS.map(({ id, label, icon: Icon }) => (
+            <button
+              key={id}
+              type="button"
+              onClick={() => setActive(id)}
+              className={`flex w-full items-center gap-2.5 rounded-full px-3 py-2 text-left text-sm font-medium transition-colors ${
+                active === id
+                  ? 'bg-glow-brand text-glow-bg'
+                  : 'text-glow-text/70 hover:bg-white/5'
+              }`}
+            >
+              <Icon className="size-4 shrink-0" aria-hidden="true" />
+              {label}
+            </button>
+          ))}
+        </nav>
+
+        <div>
+          <ActiveSection />
+        </div>
       </div>
     </div>
   )

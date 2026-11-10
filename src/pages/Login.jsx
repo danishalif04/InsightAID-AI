@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Activity, Sparkles } from 'lucide-react'
-import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { useAuth } from '@/hooks/useAuth'
 import { PATHS } from '@/routes/paths'
 import { getProfile } from '@/services/businessProfileService'
+import { glowBackground } from '@/config/designTokens'
 
 // Demo-only credentials for a presentation/supervisor walkthrough. Set to
 // [] to hide this panel entirely, e.g. before deploying anywhere actually
@@ -70,74 +70,111 @@ export default function Login() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-brand-950 px-4">
-      <Card className="w-full max-w-sm" bodyClassName="p-8">
-        <div className="flex flex-col items-center gap-2 text-center">
-          <span className="flex size-10 items-center justify-center rounded-full bg-brand-950">
-            <Activity className="size-5 text-accent-400" aria-hidden="true" />
-          </span>
-          <h1 className="font-display text-lg font-semibold text-slate-900 dark:text-slate-100">
-            Sign in to InsightAid
-          </h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400">AI Intelligence for your business</p>
+    <div className="relative min-h-screen bg-glow-bg">
+      <div
+        className="pointer-events-none fixed inset-x-0 top-0 h-[480px]"
+        style={{ background: glowBackground() }}
+        aria-hidden="true"
+      />
+
+      <div className="relative mx-auto grid min-h-screen max-w-6xl grid-cols-1 lg:grid-cols-2">
+        {/* Brand panel — hidden on small screens, the form is what matters there */}
+        <div className="hidden flex-col justify-between p-12 lg:flex">
+          <div className="flex items-center gap-2">
+            <span className="flex size-9 items-center justify-center rounded-full bg-glow-brand/15">
+              <Activity className="size-4 text-glow-brand" aria-hidden="true" />
+            </span>
+            <span className="text-sm font-semibold uppercase tracking-wide text-glow-text/70">InsightAid AI</span>
+          </div>
+          <div>
+            <h1 className="text-[2.75rem] font-semibold leading-[1.05] tracking-tight text-glow-text" style={{ fontFamily: 'var(--font-ui)' }}>
+              Decisions, backed by{' '}
+              <em className="not-italic text-glow-brand" style={{ fontFamily: 'var(--font-serif-accent)', fontStyle: 'italic' }}>
+                evidence
+              </em>
+              .
+            </h1>
+            <p className="mt-4 max-w-sm text-sm leading-relaxed text-glow-text/60">
+              Multilingual sentiment, sales forecasting, and crisis detection for early-stage businesses —
+              every number traceable back to your own data.
+            </p>
+          </div>
+          <p className="text-xs text-glow-text/30">
+            An Intelligent Decision Support System for Data-Driven Business Analytics in Early-Stage Startups
+          </p>
         </div>
 
-        <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
-          <Input
-            label="Email"
-            type="email"
-            autoComplete="email"
-            required
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-          />
-          <Input
-            label="Password"
-            type="password"
-            autoComplete="current-password"
-            required
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-          />
-          {error && <p className="text-sm text-danger">{error}</p>}
-          <Button type="submit" loading={loading} className="w-full">
-            Sign In
-          </Button>
-        </form>
+        {/* Form panel */}
+        <div className="flex items-center justify-center p-4 sm:p-8">
+          <div className="w-full max-w-sm rounded-3xl border border-glow-border bg-glow-surface-elevated p-8">
+            <div className="flex flex-col items-center gap-2 text-center lg:hidden">
+              <span className="flex size-10 items-center justify-center rounded-full bg-glow-brand/15">
+                <Activity className="size-5 text-glow-brand" aria-hidden="true" />
+              </span>
+            </div>
+            <h2 className="text-center text-lg font-semibold text-glow-text lg:text-left">
+              Sign in to InsightAid
+            </h2>
+            <p className="mt-1 text-center text-sm text-glow-text/50 lg:text-left">AI Intelligence for your business</p>
 
-        <p className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
-          Don&apos;t have an account?{' '}
-          <Link to={PATHS.signup} className="font-medium text-accent-600 hover:underline dark:text-accent-400">
-            Sign up
-          </Link>
-        </p>
+            <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
+              <Input
+                label="Email"
+                type="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+              />
+              <Input
+                label="Password"
+                type="password"
+                autoComplete="current-password"
+                required
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+              />
+              {error && <p className="text-sm text-danger">{error}</p>}
+              <Button type="submit" variant="glowBrand" loading={loading} className="w-full">
+                Sign In
+              </Button>
+            </form>
 
-        {DEMO_ACCOUNTS.length > 0 && (
-          <div className="mt-6 space-y-2 rounded-lg border border-dashed border-line bg-canvas p-3 dark:border-line-dark dark:bg-canvas-dark">
-            <p className="text-center text-xs font-medium text-slate-500 dark:text-slate-400">Demo accounts</p>
-            {DEMO_ACCOUNTS.map((account) => (
-              <div key={account.email} className="flex items-center justify-between gap-2 rounded-md bg-surface px-2.5 py-1.5 text-left dark:bg-surface-dark">
-                <div className="min-w-0">
-                  <p className="truncate text-xs text-slate-500 dark:text-slate-400">{account.label}</p>
-                  <p className="truncate font-mono text-xs text-slate-700 dark:text-slate-200">
-                    {account.email} / {account.password}
-                  </p>
-                </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  icon={Sparkles}
-                  className="shrink-0"
-                  onClick={() => fillDemoCredentials(account)}
-                >
-                  Use
-                </Button>
+            <p className="mt-6 text-center text-sm text-glow-text/50">
+              Don&apos;t have an account?{' '}
+              <Link to={PATHS.signup} className="font-medium text-glow-brand hover:underline">
+                Sign up
+              </Link>
+            </p>
+
+            {DEMO_ACCOUNTS.length > 0 && (
+              <div className="mt-6 space-y-2 rounded-2xl border border-dashed border-glow-border bg-white/[0.02] p-3">
+                <p className="text-center text-xs font-medium text-glow-text/50">Demo accounts</p>
+                {DEMO_ACCOUNTS.map((account) => (
+                  <div key={account.email} className="flex items-center justify-between gap-2 rounded-xl bg-white/[0.03] px-2.5 py-1.5 text-left">
+                    <div className="min-w-0">
+                      <p className="truncate text-xs text-glow-text/50">{account.label}</p>
+                      <p className="truncate font-mono text-xs text-glow-text/80">
+                        {account.email} / {account.password}
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="glowSecondary"
+                      size="sm"
+                      icon={Sparkles}
+                      className="shrink-0"
+                      onClick={() => fillDemoCredentials(account)}
+                    >
+                      Use
+                    </Button>
+                  </div>
+                ))}
               </div>
-            ))}
+            )}
           </div>
-        )}
-      </Card>
+        </div>
+      </div>
     </div>
   )
 }
