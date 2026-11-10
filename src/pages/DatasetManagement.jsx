@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { AlertCircle, CheckCircle2, Database, Download, HardDrive, RefreshCw, UploadCloud, Wifi, WifiOff } from 'lucide-react'
-import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
 import Table from '@/components/ui/Table'
 import Dialog from '@/components/ui/Dialog'
+import PageHero from '@/components/ui/PageHero'
 import { useNotifications } from '@/hooks/useNotifications'
 import { useMode } from '@/hooks/useMode'
 import { parseCsv } from '@/utils/csvParser'
@@ -28,6 +28,16 @@ const CONNECTION_STATUS_META = {
   [SOURCE_STATUS.RATE_LIMITED]: { label: 'Rate Limited', tone: 'warning', icon: AlertCircle },
   [SOURCE_STATUS.ERROR]: { label: 'Error', tone: 'danger', icon: AlertCircle },
   [SOURCE_STATUS.DISABLED]: { label: 'Disabled', tone: 'neutral', icon: WifiOff },
+}
+
+function GlowSection({ title, description, children, className = '' }) {
+  return (
+    <div className={`rounded-3xl border border-glow-border bg-glow-surface-elevated p-5 sm:p-6 ${className}`}>
+      {title && <h2 className="text-sm font-semibold text-glow-text">{title}</h2>}
+      {description && <p className="mt-0.5 text-xs text-glow-text/60">{description}</p>}
+      <div className={title || description ? 'mt-4' : ''}>{children}</div>
+    </div>
+  )
 }
 
 function formatTimestamp(value) {
@@ -226,7 +236,14 @@ export default function DatasetManagement() {
 
   return (
     <div className="space-y-6">
-      <Card
+      <PageHero
+        eyebrow="Pipeline"
+        title="Dataset Management"
+        highlight="Dataset"
+        description="Upload, sync, and export the real data every other page reads from — nothing here is simulated."
+      />
+
+      <GlowSection
         title="Upload Dataset"
         description="CSV, JSON, or Excel — up to 100 MB per file. Matches a known template (Sales, Reviews, Social, Product, Expenses) automatically where possible, including common column-name variants; anything that doesn't match is still stored, just not deeply analyzed."
       >
@@ -237,22 +254,18 @@ export default function DatasetManagement() {
           }}
           onDragLeave={() => setDragActive(false)}
           onDrop={handleDrop}
-          className={`flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-10 text-center transition-colors ${
-            dragActive
-              ? 'border-accent-500 bg-accent-50 dark:bg-accent-500/10'
-              : 'border-line dark:border-line-dark'
+          className={`flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-10 text-center transition-colors ${
+            dragActive ? 'border-glow-brand bg-glow-brand/10' : 'border-glow-border'
           }`}
         >
-          <UploadCloud className="size-8 text-accent-500" aria-hidden="true" />
-          <p className="mt-3 text-sm font-medium text-slate-700 dark:text-slate-200">
-            Drag and drop files here, or click to browse
-          </p>
-          <p className="mt-1 text-xs text-slate-400">CSV, JSON, or Excel (.xlsx/.xls)</p>
+          <UploadCloud className="size-8 text-glow-brand" aria-hidden="true" />
+          <p className="mt-3 text-sm font-medium text-glow-text">Drag and drop files here, or click to browse</p>
+          <p className="mt-1 text-xs text-glow-text/40">CSV, JSON, or Excel (.xlsx/.xls)</p>
           <div className="mt-4 flex flex-wrap justify-center gap-2">
-            <Button variant="secondary" size="sm" onClick={() => fileInputRef.current?.click()}>
+            <Button variant="glowSecondary" size="sm" onClick={() => fileInputRef.current?.click()}>
               Browse Files
             </Button>
-            <Button variant="secondary" size="sm" icon={Database} loading={seeding} onClick={handleSeedSample}>
+            <Button variant="glowSecondary" size="sm" icon={Database} loading={seeding} onClick={handleSeedSample}>
               Load Sample Dataset
             </Button>
           </div>
@@ -265,33 +278,33 @@ export default function DatasetManagement() {
             onChange={(event) => event.target.files && handleFiles(event.target.files)}
           />
         </div>
-      </Card>
+      </GlowSection>
 
-      <Card title="Data Source Status" description="Every source is checked independently — one failing never affects the others">
+      <GlowSection title="Data Source Status" description="Every source is checked independently — one failing never affects the others">
         {loadingSources ? (
-          <p className="text-sm text-slate-500 dark:text-slate-400">Checking source status…</p>
+          <p className="text-sm text-glow-text/60">Checking source status…</p>
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             {visibleSources.map((source) => {
               const meta = CONNECTION_STATUS_META[source.status]
               const StatusIcon = meta.icon
               return (
-                <div key={source.id} className="rounded-lg border border-line p-4 dark:border-line-dark">
+                <div key={source.id} className="rounded-2xl border border-glow-border bg-white/[0.02] p-4">
                   <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-2 text-sm font-medium text-slate-800 dark:text-slate-100">
+                    <span className="flex items-center gap-2 text-sm font-medium text-glow-text">
                       <StatusIcon
-                        className={`size-4 ${source.status === SOURCE_STATUS.CONNECTED ? 'text-accent-500' : 'text-slate-400'}`}
+                        className={`size-4 ${source.status === SOURCE_STATUS.CONNECTED ? 'text-glow-brand' : 'text-glow-text/40'}`}
                         aria-hidden="true"
                       />
                       {source.name}
                     </span>
                     <Badge tone={meta.tone}>{meta.label}</Badge>
                   </div>
-                  <p className="mt-2 text-xs text-slate-400">{formatTimestamp(source.lastSync)}</p>
-                  <p className="text-xs text-slate-400">{source.recordCount ?? 0} record(s)</p>
-                  {source.detail && <p className="mt-1 text-xs text-warning">{source.detail}</p>}
+                  <p className="mt-2 text-xs text-glow-text/40">{formatTimestamp(source.lastSync)}</p>
+                  <p className="text-xs text-glow-text/40">{source.recordCount ?? 0} record(s)</p>
+                  {source.detail && <p className="mt-1 text-xs text-amber-400">{source.detail}</p>}
                   <Button
-                    variant="secondary"
+                    variant="glowSecondary"
                     size="sm"
                     icon={RefreshCw}
                     loading={syncingId === source.id}
@@ -305,29 +318,29 @@ export default function DatasetManagement() {
             })}
           </div>
         )}
-      </Card>
+      </GlowSection>
 
-      <Card title="Storage Usage" description="Detected language mix across ingested text">
-        <div className="flex items-center gap-2 text-sm italic text-slate-500 dark:text-slate-400">
-          <HardDrive className="size-4 text-slate-400" aria-hidden="true" />
+      <GlowSection title="Storage Usage" description="Detected language mix across ingested text">
+        <div className="flex items-center gap-2 text-sm italic text-glow-text/50">
+          <HardDrive className="size-4 text-glow-text/40" aria-hidden="true" />
           Unavailable — storage quota is Supabase project infrastructure, not something this app's client-side
           credentials can query.
         </div>
 
-        <p className="mt-5 mb-2 text-xs font-medium text-slate-500 dark:text-slate-400">Language detection breakdown</p>
+        <p className="mt-5 mb-2 text-xs font-medium text-glow-text/50">Language detection breakdown</p>
         {languageBreakdown === null ? (
-          <p className="text-sm text-slate-500 dark:text-slate-400">Loading…</p>
+          <p className="text-sm text-glow-text/60">Loading…</p>
         ) : languageBreakdown.length === 0 ? (
-          <p className="text-sm text-slate-500 dark:text-slate-400">No text data ingested yet.</p>
+          <p className="text-sm text-glow-text/60">No text data ingested yet.</p>
         ) : (
           <div className="space-y-2">
             {languageBreakdown.map((item, index) => (
               <div key={item.code}>
                 <div className="mb-1 flex items-center justify-between text-xs">
-                  <span className="font-medium text-slate-700 dark:text-slate-200">{item.language}</span>
-                  <span className="text-slate-500 dark:text-slate-400">{item.percent}%</span>
+                  <span className="font-medium text-glow-text/80">{item.language}</span>
+                  <span className="text-glow-text/50">{item.percent}%</span>
                 </div>
-                <div className="h-2 w-full overflow-hidden rounded-full bg-line dark:bg-line-dark">
+                <div className="h-2 w-full overflow-hidden rounded-full bg-white/5">
                   <div
                     className="h-full rounded-full"
                     style={{ width: `${item.percent}%`, backgroundColor: ['#22c55e', '#60a5fa', '#a8a29e', '#f59e0b', '#94a3b8'][index % 5] }}
@@ -337,15 +350,15 @@ export default function DatasetManagement() {
             ))}
           </div>
         )}
-      </Card>
+      </GlowSection>
 
-      <Card
+      <GlowSection
         title="ML Training Data Export"
         description="Real rows from processed_data/daily_aggregates, shaped to match the offline training pipelines in ml/sentiment and ml/forecasting. Nothing is trained here — this only exports what's already been ingested."
       >
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <Button
-            variant="secondary"
+            variant="glowSecondary"
             size="sm"
             icon={Download}
             loading={exportingId === 'sentiment'}
@@ -354,7 +367,7 @@ export default function DatasetManagement() {
             Sentiment Training CSV
           </Button>
           <Button
-            variant="secondary"
+            variant="glowSecondary"
             size="sm"
             icon={Download}
             loading={exportingId === 'forecast_sales'}
@@ -363,7 +376,7 @@ export default function DatasetManagement() {
             Forecast Sales CSV
           </Button>
           <Button
-            variant="secondary"
+            variant="glowSecondary"
             size="sm"
             icon={Download}
             loading={exportingId === 'forecast_regressors'}
@@ -379,9 +392,9 @@ export default function DatasetManagement() {
             Forecast Sentiment Regressors CSV
           </Button>
         </div>
-      </Card>
+      </GlowSection>
 
-      <Card title="Recent Imports" description="Real uploads and sample data run through the pipeline this session">
+      <GlowSection title="Recent Imports" description="Real uploads and sample data run through the pipeline this session">
         <Table
           columns={[
             { key: 'file', label: 'File' },
@@ -407,7 +420,7 @@ export default function DatasetManagement() {
                 <button
                   type="button"
                   onClick={() => setReportDialog(row)}
-                  className="text-xs font-medium text-accent-600 hover:underline dark:text-accent-400"
+                  className="text-xs font-medium text-glow-brand hover:underline"
                 >
                   View report
                 </button>
@@ -418,7 +431,7 @@ export default function DatasetManagement() {
           getRowKey={(row) => row.id}
           emptyMessage="No datasets imported yet this session — upload a file or load the sample dataset above."
         />
-      </Card>
+      </GlowSection>
 
       <Dialog open={Boolean(reportDialog)} onClose={() => setReportDialog(null)} title={`Validation report — ${reportDialog?.file ?? ''}`}>
         {reportDialog && (
