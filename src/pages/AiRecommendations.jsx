@@ -102,18 +102,18 @@ function RecommendationCard({ recommendation }) {
       </button>
       {expanded && (
         <div className="mt-2 rounded-2xl bg-white/[0.03] p-3 text-xs leading-relaxed text-glow-text/70">
-          {recommendation.explainedBy === 'gemini' ? (
+          {recommendation.explainedBy === 'grok' ? (
             <>
               <p>{recommendation.rationale}</p>
               {recommendation.context && <p className="mt-2">{recommendation.context}</p>}
               <p className="mt-2 text-[11px] text-glow-text/40">
-                Explained by Gemini, from the evidence above only.
+                Explained by Grok, from the evidence above only.
               </p>
             </>
           ) : (
             <p className="text-glow-text/50">
-              Gemini explanation unavailable right now — this recommendation is shown from the rule
-              engine's evidence above, which is always real regardless of Gemini's availability.
+              Grok explanation unavailable right now — this recommendation is shown from the rule
+              engine's evidence above, which is always real regardless of Grok's availability.
             </p>
           )}
         </div>
@@ -130,7 +130,7 @@ export default function AiRecommendations() {
   const [saving, setSaving] = useState(false)
   const [recommendations, setRecommendations] = useState([])
   const [businessContext, setBusinessContext] = useState([])
-  const [geminiAvailable, setGeminiAvailable] = useState(true)
+  const [explainerAvailable, setExplainerAvailable] = useState(true)
 
   const load = async () => {
     setLoading(true)
@@ -138,7 +138,7 @@ export default function AiRecommendations() {
       const result = await getRecommendations(mode)
       setRecommendations(result.recommendations)
       setBusinessContext(result.businessContext)
-      setGeminiAvailable(result.geminiAvailable)
+      setExplainerAvailable(result.explainerAvailable)
     } catch (error) {
       notify(`Could not generate recommendations: ${error.message}`)
     } finally {
@@ -207,9 +207,9 @@ export default function AiRecommendations() {
             </button>
           ))}
         </div>
-        {!loading && !geminiAvailable && recommendations.length > 0 && (
+        {!loading && !explainerAvailable && recommendations.length > 0 && (
           <p className="mt-3 text-xs text-glow-text/50">
-            Gemini explanations are unavailable right now — recommendations below are still real,
+            Grok explanations are unavailable right now — recommendations below are still real,
             rule-based results.
           </p>
         )}
