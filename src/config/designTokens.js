@@ -52,12 +52,19 @@ export const GLOW_LIGHT = {
   brandGreen: '#16A34A', // existing --color-accent-600, darkened for AA on white
 }
 
-/** Glow spotlight — a radial gradient positioned at the top of a page,
- * low-opacity emerald, per the "nextra-hero" reference's lighting mood.
- * Returned as a CSS `background` value so callers (AppShell, PageHero)
- * don't need to know the exact gradient stops. */
-export function glowBackground({ opacity = 0.18 } = {}) {
-  return `radial-gradient(60% 50% at 50% -10%, rgba(16, 185, 129, ${opacity}) 0%, rgba(16, 185, 129, 0) 70%)`
+/** Glow spotlight — layered radial gradients positioned at the top
+ * corners of a page, low-opacity brand green/emerald/mint, per the
+ * "nextra-hero" reference's lighting mood. Returned as a CSS
+ * `background` value (multiple comma-separated gradients stack as
+ * layers) so callers (AppShell, PageHero) don't need to know the
+ * exact stops. `isDark` softens the opacity in light mode so it reads
+ * as ambient light rather than a colored haze over white content. */
+export function glowBackground({ isDark = true } = {}) {
+  const o = isDark ? [0.22, 0.14] : [0.1, 0.06]
+  return [
+    `radial-gradient(55% 60% at 18% -10%, rgba(34, 197, 94, ${o[0]}) 0%, rgba(34, 197, 94, 0) 70%)`,
+    `radial-gradient(50% 55% at 88% 0%, rgba(110, 231, 183, ${o[1]}) 0%, rgba(110, 231, 183, 0) 70%)`,
+  ].join(', ')
 }
 
 export const TYPEFACE = {
