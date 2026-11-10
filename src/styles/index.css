@@ -175,6 +175,20 @@
   --color-slate-500: #78716c; /* stone-500, 4.50:1 on canvas — exact AA, not below it */
 }
 
+/* The dark-glow redesign (post-Phase-7) moved every page off the
+ * `text-slate-*`/`bg-slate-*` classes the override above targets, onto
+ * `--color-glow-*` tokens instead — so on every redesigned page,
+ * switching into Low-Sensory mode had stopped visibly changing
+ * anything. Fixed by also turning off the decorative glow gradient
+ * (AppShell.jsx's `.page-glow-backdrop`) here: a saturated, animated-
+ * feeling color wash behind the whole page is exactly the kind of
+ * unnecessary visual intensity COGA's guidance (cited above) asks to
+ * reduce, so removing it is a real fit for this mode's own rationale,
+ * not just "something that happens to change." */
+.ui-low-sensory .page-glow-backdrop {
+  opacity: 0;
+}
+
 /* No motion at all in this mode, beyond just respecting the OS-level
  * prefers-reduced-motion signal (src/hooks/useLowSensoryMode.js disables
  * Framer Motion specifically; this is the CSS-only-transition backstop). */

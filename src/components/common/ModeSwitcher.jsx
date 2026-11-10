@@ -1,35 +1,30 @@
 import { MODES } from '@/constants/modes'
 
-/** Two-option segmented control — switches the active business context (FYP2.md §7–§9). */
-export default function ModeSwitcher({ mode, onChange }) {
+/**
+ * A read-only badge showing THIS account's one business pathway — not a
+ * switcher. The pathway (`user_preferences.workspace_mode`) is decided
+ * once, at onboarding (Onboarding.jsx's handleChooseWorkspaceMode), and
+ * is meant to stay fixed for that account from then on: a demo account
+ * set up as "Malaysian Local Shop" should never be flippable into
+ * "Business Startup" mid-session just by clicking a tab — that changes
+ * which data/rules/content the whole app shows. Previously rendered
+ * BOTH options as a clickable segmented control; `onChange` is accepted
+ * for backward API compatibility with TopNav/MobileNavSheet but is no
+ * longer wired to anything interactive here.
+ */
+export default function ModeSwitcher({ mode }) {
+  const option = MODES[mode] ?? Object.values(MODES)[0]
+  const Icon = option.icon
+
   return (
     <div
-      role="tablist"
-      aria-label="Business mode"
-      className="flex items-center gap-0.5 rounded-full border border-line bg-canvas p-0.5 dark:border-line-dark dark:bg-canvas-dark"
+      role="status"
+      aria-label="Business mode (fixed for this account)"
+      title={option.description}
+      className="flex items-center gap-1.5 rounded-full border border-line bg-canvas px-2.5 py-1.5 text-xs font-medium text-accent-700 dark:border-line-dark dark:bg-canvas-dark dark:text-accent-400"
     >
-      {Object.values(MODES).map((option) => {
-        const Icon = option.icon
-        const isActive = option.id === mode
-        return (
-          <button
-            key={option.id}
-            type="button"
-            role="tab"
-            aria-selected={isActive}
-            title={option.description}
-            onClick={() => onChange(option.id)}
-            className={`flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-xs font-medium transition-colors sm:px-3 ${
-              isActive
-                ? 'bg-accent-500 text-white'
-                : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100'
-            }`}
-          >
-            <Icon className="size-3.5 shrink-0" aria-hidden="true" />
-            <span className="hidden sm:inline">{option.shortLabel}</span>
-          </button>
-        )
-      })}
+      <Icon className="size-3.5 shrink-0" aria-hidden="true" />
+      <span className="hidden sm:inline">{option.shortLabel}</span>
     </div>
   )
 }

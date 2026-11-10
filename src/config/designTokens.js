@@ -60,7 +60,7 @@ export const GLOW_LIGHT = {
  * exact stops. `isDark` softens the opacity in light mode so it reads
  * as ambient light rather than a colored haze over white content. */
 export function glowBackground({ isDark = true } = {}) {
-  const o = isDark ? [0.22, 0.14] : [0.1, 0.06]
+  const o = isDark ? [0.3, 0.2] : [0.16, 0.1]
   return [
     `radial-gradient(55% 60% at 18% -10%, rgba(34, 197, 94, ${o[0]}) 0%, rgba(34, 197, 94, 0) 70%)`,
     `radial-gradient(50% 55% at 88% 0%, rgba(110, 231, 183, ${o[1]}) 0%, rgba(110, 231, 183, 0) 70%)`,

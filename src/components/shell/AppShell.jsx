@@ -30,7 +30,7 @@ export default function AppShell() {
   return (
     <div className="relative min-h-screen bg-glow-bg">
       <div
-        className="pointer-events-none fixed inset-x-0 top-0 h-[640px]"
+        className="page-glow-backdrop pointer-events-none fixed inset-x-0 top-0 h-[640px]"
         style={{ background: glowBackground({ isDark }) }}
         aria-hidden="true"
       />
