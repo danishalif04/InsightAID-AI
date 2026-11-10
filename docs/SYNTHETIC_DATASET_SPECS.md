@@ -17,6 +17,21 @@ account's data already exists, nothing to regenerate):
 - 1,516 review rows, 3 languages (EN/BM/ZH), ratings skew positive
 - Platforms: Shopee, TikTok, X
 
+**Onboarding path for both new scenarios: "I have datasets" (`has_data`),
+not "I don't have data."** Both accounts upload real-looking CSVs through
+Dataset Management, the same way Embun Botanica did — neither is meant to
+demo the no-data/AI-assisted planning path (that path is already covered
+by the existing `usertest2` account). Set this explicitly during each
+account's Onboarding flow when creating them.
+
+**Suggested demo accounts** (same naming convention as the existing
+`usertest1`/`usertest2`, next two unused numbers):
+
+| Account | Scenario | Pathway | Onboarding path |
+|---|---|---|---|
+| `usertest3@insightai.com` / `usertest3` | Malaysian Local Eatery (F&B) | Malaysian Local Shop | I have datasets |
+| `usertest4@insightai.com` / `usertest4` | Fashion E-commerce | Business Startup | I have datasets |
+
 ---
 
 ## Scenario 2 — Malaysian Local Eatery (F&B)
