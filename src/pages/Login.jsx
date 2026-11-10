@@ -14,8 +14,10 @@ import { glowBackground } from '@/config/designTokens'
 // renamed to a throwaway demo email/password (never the real one) specifically
 // so it could be shown here safely.
 const DEMO_ACCOUNTS = [
-  { label: 'Business Startup demo (Embun Botanica, synthetic data)', email: 'usertest1@insightai.com', password: 'usertest1' },
+  { label: 'Business Startup demo (Embun Botanica, real uploaded data)', email: 'usertest1@insightai.com', password: 'usertest1' },
   { label: 'Malaysian Local Shop demo (no-data/planning path)', email: 'usertest2@insightai.com', password: 'usertest2' },
+  { label: 'Malaysian Local Shop demo (Kedai Makan Pak Long, synthetic data)', email: 'usertest3@insightai.com', password: 'usertest3' },
+  { label: 'Business Startup demo (Kasual Thread Co., synthetic data)', email: 'usertest4@insightai.com', password: 'usertest4' },
   { label: 'Main (demo identity)', email: 'demotest1@gmail.com', password: 'demotest1' },
 ]
 
