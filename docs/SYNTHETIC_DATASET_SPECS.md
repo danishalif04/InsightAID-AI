@@ -32,6 +32,15 @@ account's Onboarding flow when creating them.
 | `usertest3@insightai.com` / `usertest3` | Malaysian Local Eatery (F&B) | Malaysian Local Shop | I have datasets |
 | `usertest4@insightai.com` / `usertest4` | Fashion E-commerce | Business Startup | I have datasets |
 
+**New since this doc was first written: an optional `image_url` column
+on the `sales` template.** The app now shows a real product photo in
+its Product Performance view when this column is present (falls back
+to a plain icon when it's blank or a URL fails to load — never a fake
+or guessed image). See `docs/GENERATE_SYNTHETIC_DATASETS_PROMPT.md` for
+the exact sourcing rules (must be real, verified, free-to-use stock
+photos, one genuine visual match per product, same URL repeated across
+that product's rows).
+
 ---
 
 ## Scenario 2 — Malaysian Local Eatery (F&B)
