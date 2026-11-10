@@ -1,5 +1,6 @@
 /** Single source of truth for every route path in the app. */
 export const PATHS = {
+  welcome: '/welcome',
   login: '/login',
   signup: '/signup',
   dashboard: '/',

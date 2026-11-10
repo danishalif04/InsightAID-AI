@@ -7,6 +7,7 @@ import * as Pages from './pages'
 const child = (path) => path.replace(/^\//, '')
 
 export const router = createBrowserRouter([
+  { path: PATHS.welcome, element: <Pages.Welcome /> },
   { path: PATHS.login, element: <Pages.Login /> },
   { path: PATHS.signup, element: <Pages.Signup /> },
   {

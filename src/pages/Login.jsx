@@ -146,6 +146,11 @@ export default function Login() {
                 Sign up
               </Link>
             </p>
+            <p className="mt-2 text-center text-xs text-glow-text/40">
+              <Link to={PATHS.welcome} className="hover:underline hover:text-glow-text/60">
+                Learn more about InsightAid AI
+              </Link>
+            </p>
 
             {DEMO_ACCOUNTS.length > 0 && (
               <div className="mt-6 space-y-2 rounded-2xl border border-dashed border-glow-border bg-white/[0.02] p-3">

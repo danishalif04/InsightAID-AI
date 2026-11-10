@@ -5,6 +5,7 @@ import { lazy } from 'react'
  * chunk and renders inside the layout's <Suspense> boundary.
  * (Kept separate from the router config so Fast Refresh stays clean.)
  */
+export const Welcome = lazy(() => import('@/pages/Welcome'))
 export const Login = lazy(() => import('@/pages/Login'))
 export const Signup = lazy(() => import('@/pages/Signup'))
 export const Dashboard = lazy(() => import('@/pages/Dashboard'))

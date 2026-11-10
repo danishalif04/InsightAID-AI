@@ -1,0 +1,24 @@
+# Cloudflare Workers config for deploying this Vite/React SPA as static
+# assets (Workers Static Assets — Cloudflare's current recommended path
+# for a static site, NOT Cloudflare Pages; the official "Deploy to
+# Cloudflare" button only supports Workers, confirmed via
+# https://developers.cloudflare.com/workers/configuration/deploy-button/).
+#
+# Assets-only: no custom Worker script (`main`) is needed just to serve a
+# built SPA — Workers Static Assets can serve `./dist` directly.
+#
+# IMPORTANT for anyone deploying their OWN copy via the "Deploy to
+# Cloudflare" button on /welcome: this repo's build needs
+# VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY as BUILD-TIME environment
+# variables (see .env.example). These must point at YOUR OWN Supabase
+# project, created separately — never this project's real credentials,
+# which are not and should never be committed anywhere in this repo.
+# Cloudflare's deploy flow will prompt for required env vars/secrets
+# during setup.
+
+name = "insightaid-ai"
+compatibility_date = "2026-11-10"
+
+[assets]
+directory = "./dist"
+not_found_handling = "single-page-application"
