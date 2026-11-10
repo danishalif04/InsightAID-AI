@@ -51,6 +51,9 @@ import { getDashboardData } from '@/services/dashboardService'
 import BusinessPlanningPanel from '@/components/common/BusinessPlanningPanel'
 import BusinessOverviewCard from '@/components/common/BusinessOverviewCard'
 import BusinessFinancialHealthSection from '@/components/common/BusinessFinancialHealthSection'
+import BusinessWhatIfSimulator from '@/components/common/BusinessWhatIfSimulator'
+import StartupCapitalPlanner from '@/components/common/StartupCapitalPlanner'
+import CostPressureAnalysis from '@/components/common/CostPressureAnalysis'
 
 const ALERT_TONES = { warning: 'warning', critical: 'danger' }
 const RISK_TONES = { normal: 'text-glow-brand', warning: 'text-amber-400', critical: 'text-rose-400' }
@@ -569,6 +572,9 @@ export default function Dashboard() {
             <>
               <BusinessOverviewCard values={businessProfile.values} />
               <BusinessFinancialHealthSection values={businessProfile.values} />
+              <BusinessWhatIfSimulator values={businessProfile.values} />
+              <CostPressureAnalysis values={businessProfile.values} />
+              <StartupCapitalPlanner />
             </>
           )}
           <p className="mb-3 text-sm font-semibold text-glow-text">Business Planning Mode</p>
