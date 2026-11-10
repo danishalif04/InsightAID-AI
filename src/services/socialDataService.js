@@ -38,10 +38,31 @@ export async function fetchLanguages() {
 }
 
 /**
+ * The most recent `date` this user actually has in daily_aggregates, or
+ * null if they have none yet. A demo/uploaded dataset's last real day is
+ * frozen at upload time — it does not keep advancing with wall-clock
+ * "today" the way a live-ingesting production account would. Anchoring
+ * a "last N days" window on `new Date()` instead of this meant every
+ * such window could silently drift entirely past the real data (found
+ * live: an account's data ended 2026-10-21, and by 2026-11-10 "last 14
+ * days" was entirely after that date, so every query returned zero rows
+ * even though the data was there) — not a parsing/pipeline bug, a wrong
+ * anchor. Fixing it here fixes every caller (Dashboard, Reports,
+ * Sentiment Analysis, Social Intelligence) at once.
+ */
+async function fetchLatestAggregateDate() {
+  const { data, error } = await supabase
+    .from('daily_aggregates')
+    .select('date')
+    .order('date', { ascending: false })
+    .limit(1)
+  if (error) throw error
+  return data?.[0]?.date ?? null
+}
+
+/**
  * `from`/`to` (ISO date strings), when given, take priority over `days` —
- * same FilterProvider-range use case as fetchProcessedRows above. Calling
- * this exactly as before (`{ days }` or no args) behaves identically to
- * before this change.
+ * same FilterProvider-range use case as fetchProcessedRows above.
  */
 export async function fetchDailyAggregates({ days = 30, from = null, to = null } = {}) {
   let query = supabase
@@ -53,9 +74,10 @@ export async function fetchDailyAggregates({ days = 30, from = null, to = null }
   if (from) {
     query = query.gte('date', from)
   } else {
-    const since = new Date()
-    since.setDate(since.getDate() - days)
-    query = query.gte('date', since.toISOString().slice(0, 10))
+    const latest = await fetchLatestAggregateDate()
+    const anchor = latest ? new Date(latest) : new Date()
+    anchor.setDate(anchor.getDate() - days)
+    query = query.gte('date', anchor.toISOString().slice(0, 10))
   }
   if (to) query = query.lte('date', to)
 
