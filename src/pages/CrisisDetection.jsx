@@ -26,6 +26,7 @@ import PageHero from '@/components/ui/PageHero'
 import EmptyState from '@/components/ui/EmptyState'
 import ChartTooltip from '@/components/ui/ChartTooltip'
 import ChartCard from '@/components/charts/ChartCard'
+import GranularityToggle from '@/components/ui/GranularityToggle'
 import RiskGauge from '@/components/charts/RiskGauge'
 import SignalMatrix from '@/components/charts/SignalMatrix'
 import SyncedStack from '@/components/charts/SyncedStack'
@@ -53,6 +54,7 @@ import {
   saveCrisisEvent,
 } from '@/services/crisisService'
 import { fetchProcessedRows } from '@/services/socialDataService'
+import { aggregateToMonthly } from '@/utils/chartGranularity'
 import { fetchRawSalesPayloads } from '@/services/salesService'
 import { computeDailySalesSeries, normalizeSalesRows } from '@/utils/salesSeries'
 import {
@@ -219,6 +221,8 @@ function CrisisDetectionContent() {
   const { filters, resolvedRange } = useFilters()
   const [saving, setSaving] = useState(false)
   const [viewedDate, setViewedDate] = useState(null)
+  const [granularity, setGranularity] = useState('day')
+  const isMonthly = granularity === 'month'
 
   const platformsKey = (filters.platforms ?? []).join(',')
 
@@ -238,6 +242,14 @@ function CrisisDetectionContent() {
   const logAsync = useAsyncData(getCrisisHistory, [])
 
   const history = useMemo(() => historyAsync.data?.history ?? [], [historyAsync.data])
+  // Month view averages riskScore per calendar month, over whatever date
+  // range the FilterBar above already has selected (that control decides
+  // WHICH days to look at; this toggle only decides how to bucket them).
+  // Rendered as a simpler read-only line below — episode bands, the
+  // click-to-view-a-day interaction, and the Brush are all inherently
+  // day-grained concepts that don't have a meaningful monthly equivalent,
+  // so Month view intentionally doesn't fake them.
+  const monthlyHistory = useMemo(() => aggregateToMonthly(history, { avgKeys: ['riskScore'] }), [history])
   const episodes = historyAsync.data?.episodes ?? []
   const dailySalesSeries = useMemo(() => salesAsync.data ?? [], [salesAsync.data])
   const availablePlatforms = useMemo(
@@ -421,10 +433,14 @@ function CrisisDetectionContent() {
       <ChartCard
         surface="glow"
         title="Risk Timeline"
-        subtitle="Click any day to see what the system knew at that point — shaded bands are detected episodes"
+        subtitle={
+          isMonthly
+            ? 'Average risk score by calendar month — click-to-view-a-day, episode bands, and the range brush only apply in Day view.'
+            : 'Click any day to see what the system knew at that point — shaded bands are detected episodes'
+        }
         method="real"
         methodNote="Risk score re-run per historical day from the same rule engine as the live detector (src/utils/crisisDetection.js), never a separate model."
-        readingGuide="Each point is one day's risk score, 0-100. The shaded bands mark periods the system flagged as a real episode. Click any point to see exactly which signals fired that day."
+        readingGuide="Each point is one day's risk score, 0-100. The shaded bands mark periods the system flagged as a real episode. Click any point to see exactly which signals fired that day. Switch to Month for a longer-range average."
         height="hero"
         ariaLabel={`Risk score over ${history.length} days, peaking at ${Math.max(0, ...history.map((p) => p.riskScore))} out of 100`}
         status={historyAsync.status}
@@ -440,75 +456,108 @@ function CrisisDetectionContent() {
           }))
         }
         csvFilename="crisis-risk-timeline.csv"
+        headerActions={<GranularityToggle value={granularity} onChange={setGranularity} />}
       >
-        {() => (
-          <ResponsiveContainer width="100%" height={CHART_HEIGHTS.hero}>
-            <LineChart
-              data={history}
-              margin={{ left: -20, top: 8, right: 8, bottom: 0 }}
-              onClick={(event) => event?.activeLabel && setViewedDate(event.activeLabel)}
-            >
-              <CartesianGrid {...GRID_DEFAULTS} />
-              <XAxis dataKey="date" tick={AXIS_TICK_DEFAULTS} {...AXIS_LINE_DEFAULTS} />
-              <YAxis
-                domain={[0, 100]}
-                tick={AXIS_TICK_DEFAULTS}
-                {...AXIS_LINE_DEFAULTS}
-                width={32}
-              />
-              <Tooltip content={<ChartTooltip formatter={(value) => `${value}/100`} />} />
-              {renderCrisisBands(episodes)}
-              <ReferenceLine
-                y={RISK_LEVEL_THRESHOLDS.warning}
-                stroke={CRISIS_COLORS.warning}
-                strokeDasharray="4 2"
-                label={{
-                  value: 'Warning',
-                  position: 'insideTopRight',
-                  fontSize: 11,
-                  fill: CRISIS_COLORS.warning,
-                }}
-              />
-              <ReferenceLine
-                y={RISK_LEVEL_THRESHOLDS.critical}
-                stroke={CRISIS_COLORS.critical}
-                strokeDasharray="4 2"
-                label={{
-                  value: 'Critical',
-                  position: 'insideTopRight',
-                  fontSize: 11,
-                  fill: CRISIS_COLORS.critical,
-                }}
-              />
-              {viewedDate && <ReferenceLine x={viewedDate} stroke={FORECAST_COLORS.forecast} strokeWidth={2} />}
-              <Line
-                type="monotone"
-                dataKey="riskScore"
-                name="Risk score"
-                stroke={FORECAST_COLORS.forecast}
-                strokeWidth={2}
-                dot={(props) =>
-                  episodes.some(
-                    (episode) =>
-                      props.payload.date >= episode.start && props.payload.date <= episode.end
-                  ) ? (
-                    <circle
-                      key={props.payload.date}
-                      cx={props.cx}
-                      cy={props.cy}
-                      r={3}
-                      fill={CRISIS_COLORS.critical}
-                    />
-                  ) : (
-                    <circle key={props.payload.date} r={0} />
-                  )
-                }
-                isAnimationActive={false}
-              />
-              <Brush dataKey="date" height={24} travellerWidth={8} stroke={FORECAST_COLORS.forecast} />
-            </LineChart>
-          </ResponsiveContainer>
-        )}
+        {() =>
+          isMonthly ? (
+            <ResponsiveContainer width="100%" height={CHART_HEIGHTS.hero}>
+              <LineChart data={monthlyHistory} margin={{ left: -20, top: 8, right: 8, bottom: 0 }}>
+                <CartesianGrid {...GRID_DEFAULTS} />
+                <XAxis dataKey="label" tick={AXIS_TICK_DEFAULTS} {...AXIS_LINE_DEFAULTS} />
+                <YAxis domain={[0, 100]} tick={AXIS_TICK_DEFAULTS} {...AXIS_LINE_DEFAULTS} width={32} />
+                <Tooltip content={<ChartTooltip formatter={(value) => `${value}/100`} />} />
+                <ReferenceLine
+                  y={RISK_LEVEL_THRESHOLDS.warning}
+                  stroke={CRISIS_COLORS.warning}
+                  strokeDasharray="4 2"
+                  label={{ value: 'Warning', position: 'insideTopRight', fontSize: 11, fill: CRISIS_COLORS.warning }}
+                />
+                <ReferenceLine
+                  y={RISK_LEVEL_THRESHOLDS.critical}
+                  stroke={CRISIS_COLORS.critical}
+                  strokeDasharray="4 2"
+                  label={{ value: 'Critical', position: 'insideTopRight', fontSize: 11, fill: CRISIS_COLORS.critical }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="riskScore"
+                  name="Avg. risk score"
+                  stroke={FORECAST_COLORS.forecast}
+                  strokeWidth={2}
+                  dot={{ r: 3, fill: FORECAST_COLORS.forecast }}
+                  isAnimationActive={false}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <ResponsiveContainer width="100%" height={CHART_HEIGHTS.hero}>
+              <LineChart
+                data={history}
+                margin={{ left: -20, top: 8, right: 8, bottom: 0 }}
+                onClick={(event) => event?.activeLabel && setViewedDate(event.activeLabel)}
+              >
+                <CartesianGrid {...GRID_DEFAULTS} />
+                <XAxis dataKey="date" tick={AXIS_TICK_DEFAULTS} {...AXIS_LINE_DEFAULTS} />
+                <YAxis
+                  domain={[0, 100]}
+                  tick={AXIS_TICK_DEFAULTS}
+                  {...AXIS_LINE_DEFAULTS}
+                  width={32}
+                />
+                <Tooltip content={<ChartTooltip formatter={(value) => `${value}/100`} />} />
+                {renderCrisisBands(episodes)}
+                <ReferenceLine
+                  y={RISK_LEVEL_THRESHOLDS.warning}
+                  stroke={CRISIS_COLORS.warning}
+                  strokeDasharray="4 2"
+                  label={{
+                    value: 'Warning',
+                    position: 'insideTopRight',
+                    fontSize: 11,
+                    fill: CRISIS_COLORS.warning,
+                  }}
+                />
+                <ReferenceLine
+                  y={RISK_LEVEL_THRESHOLDS.critical}
+                  stroke={CRISIS_COLORS.critical}
+                  strokeDasharray="4 2"
+                  label={{
+                    value: 'Critical',
+                    position: 'insideTopRight',
+                    fontSize: 11,
+                    fill: CRISIS_COLORS.critical,
+                  }}
+                />
+                {viewedDate && <ReferenceLine x={viewedDate} stroke={FORECAST_COLORS.forecast} strokeWidth={2} />}
+                <Line
+                  type="monotone"
+                  dataKey="riskScore"
+                  name="Risk score"
+                  stroke={FORECAST_COLORS.forecast}
+                  strokeWidth={2}
+                  dot={(props) =>
+                    episodes.some(
+                      (episode) =>
+                        props.payload.date >= episode.start && props.payload.date <= episode.end
+                    ) ? (
+                      <circle
+                        key={props.payload.date}
+                        cx={props.cx}
+                        cy={props.cy}
+                        r={3}
+                        fill={CRISIS_COLORS.critical}
+                      />
+                    ) : (
+                      <circle key={props.payload.date} r={0} />
+                    )
+                  }
+                  isAnimationActive={false}
+                />
+                <Brush dataKey="date" height={24} travellerWidth={8} stroke={FORECAST_COLORS.forecast} />
+              </LineChart>
+            </ResponsiveContainer>
+          )
+        }
       </ChartCard>
 
       <ChartCard

@@ -10,11 +10,13 @@ import ChartTooltip from '@/components/ui/ChartTooltip'
 import PageHero from '@/components/ui/PageHero'
 import EmptyState from '@/components/ui/EmptyState'
 import ChartCard from '@/components/charts/ChartCard'
+import GranularityToggle from '@/components/ui/GranularityToggle'
 import { useAsyncData } from '@/hooks/useAsyncData'
 import { useNotifications } from '@/hooks/useNotifications'
 import { CHART_COLORS } from '@/theme/chartTheme'
 import { formatDelta } from '@/utils/formatters'
 import { downloadCsv } from '@/utils/csvExport'
+import { aggregateToMonthly } from '@/utils/chartGranularity'
 import { getSentimentAnalysisData } from '@/services/sentimentAnalysisService'
 
 const LANGUAGE_LABELS = { en: 'EN', ms: 'MY', zh: 'ZH', 'ms-en': 'MY/EN', unknown: '—' }
@@ -43,8 +45,13 @@ export default function SentimentAnalysis() {
   // Index into sentimentScoresSeries, not a date string — null means
   // "no explicit pick yet", which resolves to the latest (today) day below.
   const [selectedDayIndex, setSelectedDayIndex] = useState(null)
+  const [granularity, setGranularity] = useState('day')
 
-  const { status, data, error, reload } = useAsyncData(getSentimentAnalysisData, [])
+  const { status, data, error, reload } = useAsyncData(
+    () => getSentimentAnalysisData({ granularity }),
+    [granularity]
+  )
+  const isMonthly = granularity === 'month'
 
   const scoresSeries = data?.sentimentScoresSeries ?? []
   const activeIndex = selectedDayIndex != null && selectedDayIndex < scoresSeries.length
@@ -175,11 +182,11 @@ export default function SentimentAnalysis() {
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
             <ChartCard
               title="Sentiment Trend"
-              subtitle="Last 7 days, by sentiment label"
-              readingGuide="Pick a day above to see that day's exact split; use this chart to spot when sentiment started shifting."
+              subtitle={isMonthly ? 'By calendar month, by sentiment label' : 'Last 7 days, by sentiment label'}
+              readingGuide="Pick a day above to see that day's exact split; use this chart to spot when sentiment started shifting. Switch Day/Month to zoom out to a longer trend (the day-picker above only applies in Day view)."
               surface="glow"
               height="lg"
-              ariaLabel="Sentiment trend line chart over the last 7 days, positive, neutral, and negative"
+              ariaLabel={`Sentiment trend line chart, by ${granularity}, positive, neutral, and negative`}
               className="lg:col-span-2"
               status={status}
               data={data}
@@ -187,15 +194,20 @@ export default function SentimentAnalysis() {
               reload={reload}
               emptyWhen={(d) => d.sentimentTrend.length === 0}
               emptyMessage="No sentiment history yet."
+              headerActions={<GranularityToggle value={granularity} onChange={setGranularity} />}
             >
-              {(d) => (
+              {(d) => {
+                const trendData = isMonthly
+                  ? aggregateToMonthly(d.sentimentTrend, { avgKeys: ['positive', 'neutral', 'negative'] })
+                  : d.sentimentTrend
+                return (
                 <ResponsiveContainer width="100%" height={CHART_HEIGHTS.lg}>
-                  <LineChart data={d.sentimentTrend} margin={{ left: -20 }}>
+                  <LineChart data={trendData} margin={{ left: -20 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid} vertical={false} />
-                    <XAxis dataKey="date" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
+                    <XAxis dataKey="label" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
                     <YAxis tick={{ fontSize: 12 }} axisLine={false} tickLine={false} unit="%" />
                     <Tooltip content={<ChartTooltip formatter={(value) => (value != null ? `${value}%` : '—')} />} />
-                    {activeDay && !isLatestDay && (
+                    {!isMonthly && activeDay && !isLatestDay && (
                       <ReferenceLine x={activeDay.label} stroke={CHART_COLORS.forecast} strokeDasharray="4 4" label={{ value: 'Viewing', position: 'top', fontSize: 11, fill: CHART_COLORS.forecast }} />
                     )}
                     <Line type="monotone" dataKey="positive" name="Positive" stroke={CHART_COLORS.positive} strokeWidth={2} dot={false} connectNulls={false} />
@@ -203,7 +215,8 @@ export default function SentimentAnalysis() {
                     <Line type="monotone" dataKey="negative" name="Negative" stroke={CHART_COLORS.negative} strokeWidth={2} dot={false} connectNulls={false} />
                   </LineChart>
                 </ResponsiveContainer>
-              )}
+                )
+              }}
             </ChartCard>
 
             <GlowSection title="Emotion Analysis" description="Breakdown of detected emotions">

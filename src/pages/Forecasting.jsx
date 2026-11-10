@@ -19,6 +19,7 @@ import { CHART_HEIGHTS } from '@/components/charts/chartDefaults'
 import PageHero from '@/components/ui/PageHero'
 import StatTile from '@/components/ui/StatTile'
 import EmptyState from '@/components/ui/EmptyState'
+import GranularityToggle from '@/components/ui/GranularityToggle'
 import { useMode } from '@/hooks/useMode'
 import { useNotifications } from '@/hooks/useNotifications'
 import { CHART_COLORS, FORECAST_COLORS } from '@/theme/chartTheme'
@@ -31,6 +32,7 @@ import {
   mergeActualsWithForecast,
   normalizeSalesRows,
 } from '@/utils/salesSeries'
+import { aggregateToMonthly } from '@/utils/chartGranularity'
 
 const MODEL_LABELS = {
   moving_average: 'Moving Average',
@@ -63,6 +65,8 @@ export default function Forecasting() {
   const [generatedAt, setGeneratedAt] = useState(null)
   const [rows, setRows] = useState([])
   const [dailySales, setDailySales] = useState([])
+  const [granularity, setGranularity] = useState('day')
+  const isMonthly = granularity === 'month'
 
   const loadForecast = async () => {
     setLoading(true)
@@ -101,9 +105,19 @@ export default function Forecasting() {
   }, [])
 
   const best = getBestRow(rows)
-  const chartSeries = mergeActualsWithForecast(dailySales, best?.forecast_points ?? [])
+  const mergedSeries = mergeActualsWithForecast(dailySales, best?.forecast_points ?? [], {
+    historyDays: isMonthly ? 730 : 30,
+  })
+  // dailySales (and so mergedSeries) already covers the account's FULL
+  // real history — no re-fetch needed for Month view, just a wider
+  // historyDays slice above plus bucketing by calendar month here.
+  const chartSeries = isMonthly
+    ? aggregateToMonthly(mergedSeries, { sumKeys: ['actual', 'predicted'], avgKeys: ['low', 'band'] })
+    : mergedSeries
   const todayMarker =
-    dailySales.length > 0 ? [{ date: dailySales[dailySales.length - 1].date, label: 'Today' }] : []
+    !isMonthly && dailySales.length > 0
+      ? [{ date: dailySales[dailySales.length - 1].date, label: 'Today' }]
+      : []
   const isBaseline = best?.model_type === 'moving_average'
 
   return (
@@ -159,6 +173,7 @@ export default function Forecasting() {
             csvRows={chartSeries}
             csvFilename="revenue-forecast.csv"
             surface="glow"
+            headerActions={<GranularityToggle value={granularity} onChange={setGranularity} />}
           >
             {(seriesData) => (
               <ResponsiveContainer width="100%" height={CHART_HEIGHTS.lg}>
@@ -179,7 +194,7 @@ export default function Forecasting() {
                     vertical={false}
                   />
                   <XAxis
-                    dataKey="date"
+                    dataKey={isMonthly ? 'label' : 'date'}
                     tick={{ fontSize: 11 }}
                     axisLine={false}
                     tickLine={false}

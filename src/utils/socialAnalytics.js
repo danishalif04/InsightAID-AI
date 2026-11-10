@@ -74,34 +74,71 @@ function collapseAggregatesByDate(dailyAggregateRows) {
     .sort((a, b) => a.date.localeCompare(b.date))
 }
 
-/** Latest day's positive/neutral/negative % plus the change vs. ~7 days
- * earlier. Returns null when there's no ratio data at all to report. */
-export function computeSentimentScores(dailyAggregateRows = []) {
-  const collapsed = collapseAggregatesByDate(dailyAggregateRows)
-  if (collapsed.length === 0) return null
+function neutralRatioOf(positive, negative) {
+  return positive != null && negative != null ? Math.max(0, 1 - positive - negative) : null
+}
 
-  const latest = collapsed[collapsed.length - 1]
-  if (latest.positiveRatio === null && latest.negativeRatio === null) return null
-
-  const comparison = collapsed[Math.max(0, collapsed.length - 8)]
-  const neutralOf = (positive, negative) =>
-    positive != null && negative != null ? Math.max(0, 1 - positive - negative) : null
-
-  const latestNeutral = neutralOf(latest.positiveRatio, latest.negativeRatio)
-  const comparisonNeutral = neutralOf(comparison.positiveRatio, comparison.negativeRatio)
-
-  const toCard = (id, label, value, prevValue) => ({
+function toScoreCard(id, label, value, prevValue) {
+  return {
     id,
     label,
     value: value == null ? null : Math.round(value * 1000) / 10,
     delta: value != null && prevValue != null ? Math.round((value - prevValue) * 1000) / 10 : null,
-  })
+  }
+}
+
+/** Positive/neutral/negative % for `collapsed[index]`, plus the change vs.
+ * ~7 days earlier in the SAME collapsed series (not just the visible
+ * window, so the first few days of a trend window can still look back).
+ * Returns null when that day has no ratio data at all. */
+function computeScoreCardsAt(collapsed, index) {
+  const day = collapsed[index]
+  if (day.positiveRatio === null && day.negativeRatio === null) return null
+
+  const comparison = collapsed[Math.max(0, index - 7)]
+  const dayNeutral = neutralRatioOf(day.positiveRatio, day.negativeRatio)
+  const comparisonNeutral = neutralRatioOf(comparison.positiveRatio, comparison.negativeRatio)
 
   return [
-    toCard('positive', 'Positive', latest.positiveRatio, comparison.positiveRatio),
-    toCard('neutral', 'Neutral', latestNeutral, comparisonNeutral),
-    toCard('negative', 'Negative', latest.negativeRatio, comparison.negativeRatio),
+    toScoreCard('positive', 'Positive', day.positiveRatio, comparison.positiveRatio),
+    toScoreCard('neutral', 'Neutral', dayNeutral, comparisonNeutral),
+    toScoreCard('negative', 'Negative', day.negativeRatio, comparison.negativeRatio),
   ]
+}
+
+/** Latest day's positive/neutral/negative % plus the change vs. ~7 days
+ * earlier — or a specific day's, when `targetDate` (an ISO 'YYYY-MM-DD'
+ * matching a daily_aggregates.date value) is given. Returns null when
+ * there's no ratio data to report, or `targetDate` isn't in the data. */
+export function computeSentimentScores(dailyAggregateRows = [], targetDate = null) {
+  const collapsed = collapseAggregatesByDate(dailyAggregateRows)
+  if (collapsed.length === 0) return null
+
+  const index = targetDate == null ? collapsed.length - 1 : collapsed.findIndex((day) => day.date === targetDate)
+  if (index === -1) return null
+
+  return computeScoreCardsAt(collapsed, index)
+}
+
+/** One computeSentimentScores()-shaped entry PER DAY in the last `days`
+ * days — lets a UI offer a "pick a day" control backed by the exact same
+ * days as computeSentimentTrend's chart, without a second data fetch.
+ * Each entry's `cards` is null for a day with no ratio data that day
+ * (never guessed), same honesty rule as computeSentimentScores. */
+export function computeSentimentScoresSeries(dailyAggregateRows = [], days = 7) {
+  const collapsed = collapseAggregatesByDate(dailyAggregateRows)
+  if (collapsed.length === 0) return []
+
+  const startIndex = Math.max(0, collapsed.length - days)
+  const series = []
+  for (let index = startIndex; index < collapsed.length; index += 1) {
+    series.push({
+      date: collapsed[index].date,
+      label: formatShortDate(collapsed[index].date),
+      cards: computeScoreCardsAt(collapsed, index),
+    })
+  }
+  return series
 }
 
 /** Trend series for the last `days` days: [{date, positive, neutral, negative}].
@@ -118,7 +155,12 @@ export function computeSentimentTrend(dailyAggregateRows = [], days = 14) {
       positive != null && negative != null
         ? Math.round((100 - positive - negative) * 10) / 10
         : null
-    return { date: formatShortDate(point.date), positive, neutral, negative }
+    // `date` is the raw ISO value (was pre-formatted here before) so
+    // callers can bucket it by calendar month (src/utils/chartGranularity.js)
+    // for a Day/Month view toggle; `label` carries the same pretty string
+    // this always displayed, for charts that still want it as their XAxis
+    // dataKey in day mode.
+    return { date: point.date, label: formatShortDate(point.date), positive, neutral, negative }
   })
 }
 
@@ -220,21 +262,55 @@ export function computeMentionVolumeSeries(dailyAggregateRows = [], days = 7) {
   })
 }
 
+function countHashtags(rows) {
+  const counts = new Map()
+  for (const row of rows) {
+    const tags = row.features?.hashtags
+    if (!Array.isArray(tags)) continue
+    for (const tag of tags) counts.set(tag, (counts.get(tag) ?? 0) + 1)
+  }
+  return counts
+}
+
+function rankHashtagCounts(counts, limit) {
+  return [...counts.entries()]
+    .map(([hashtag, mentions]) => ({ hashtag, mentions }))
+    .sort((a, b) => b.mentions - a.mentions)
+    .slice(0, limit)
+}
+
 /** Aggregates the real hashtag strings captured during ingestion
  * (processed_data.features.hashtags — see featureEngineering.js) by
  * frequency. Rows without a features.hashtags array (e.g. non-text
  * templates) are silently skipped, not treated as zero hashtags. */
 export function computeTrendingHashtags(processedRows = [], limit = 8) {
-  const counts = new Map()
+  return rankHashtagCounts(countHashtags(processedRows), limit)
+}
+
+/** Same ranking, but bucketed per calendar day — keyed by the exact same
+ * date string daily_aggregates/collapseAggregatesByDate use
+ * (`collected_at.slice(0, 10)`, matching featureEngineering.js's
+ * aggregateDaily exactly, not a re-parsed Date that could drift a day on
+ * a timezone edge). Lets a "pick a day" control (see
+ * computeSentimentScoresSeries) show that day's real trending hashtags —
+ * a day with no hashtag-bearing posts simply has no key, so callers
+ * should fall back to [] rather than treating a missing key as an error. */
+export function computeTrendingHashtagsByDate(processedRows = [], limit = 8) {
+  const byDate = new Map()
   for (const row of processedRows) {
     const tags = row.features?.hashtags
-    if (!Array.isArray(tags)) continue
-    for (const tag of tags) counts.set(tag, (counts.get(tag) ?? 0) + 1)
+    if (!Array.isArray(tags) || tags.length === 0) continue
+    const date = (row.collected_at ?? row.published_at ?? '').slice(0, 10)
+    if (!date) continue
+    if (!byDate.has(date)) byDate.set(date, [])
+    byDate.get(date).push(row)
   }
-  return [...counts.entries()]
-    .map(([hashtag, mentions]) => ({ hashtag, mentions }))
-    .sort((a, b) => b.mentions - a.mentions)
-    .slice(0, limit)
+
+  const result = {}
+  for (const [date, rows] of byDate) {
+    result[date] = rankHashtagCounts(countHashtags(rows), limit)
+  }
+  return result
 }
 
 const LANGUAGE_LABELS = {

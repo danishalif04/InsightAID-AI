@@ -38,10 +38,20 @@ const TOP_BOTTOM_COUNT = 5
  * isolated per FYP2.md §66: one piece failing degrades that widget to
  * "not available," never the whole dashboard.
  */
-export async function getDashboardData(mode) {
+/**
+ * `granularity`: 'day' (default) keeps this function's original windows
+ * (30-day aggregate fetch, 14/7-day trend/volume slices). 'month' widens
+ * the fetch and slice windows to a full year so the Dashboard's Day/Month
+ * toggle has enough real history to bucket into calendar months
+ * (src/utils/chartGranularity.js does the actual bucketing, in the page,
+ * not here — this function only decides how much raw daily data to hand
+ * back).
+ */
+export async function getDashboardData(mode, { granularity = 'day' } = {}) {
+  const isMonthly = granularity === 'month'
   const [processedRows, dailyAggregateRows, context, forecastRun, salesPayloads] = await Promise.all([
     fetchProcessedRows(),
-    fetchDailyAggregates({ days: 30 }),
+    fetchDailyAggregates({ days: isMonthly ? 365 : 30 }),
     buildContext(mode).catch(() => ({ mode, profile: { exists: false, values: {}, provenance: {} }, crisis: null, dataReadiness: null })),
     getLatestForecastRun().catch(() => ({ runId: null, rows: [] })),
     fetchRawSalesPayloads().catch(() => []),
@@ -63,9 +73,9 @@ export async function getDashboardData(mode) {
 
   return {
     sentimentScores,
-    sentimentTrend: computeSentimentTrend(dailyAggregateRows, 14),
+    sentimentTrend: computeSentimentTrend(dailyAggregateRows, isMonthly ? 365 : 14),
     platformComparison: computePlatformComparison(processedRows, dailyAggregateRows),
-    mentionVolumeSeries: computeMentionVolumeSeries(dailyAggregateRows, 7),
+    mentionVolumeSeries: computeMentionVolumeSeries(dailyAggregateRows, isMonthly ? 365 : 7),
     trendingHashtags: computeTrendingHashtags(processedRows, 6),
     topProducts,
     bottomProducts,

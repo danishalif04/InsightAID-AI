@@ -7,10 +7,12 @@ import ChartTooltip from '@/components/ui/ChartTooltip'
 import PageHero from '@/components/ui/PageHero'
 import EmptyState from '@/components/ui/EmptyState'
 import ChartCard from '@/components/charts/ChartCard'
+import GranularityToggle from '@/components/ui/GranularityToggle'
 import { CHART_HEIGHTS } from '@/components/charts/chartDefaults'
 import { useAsyncData } from '@/hooks/useAsyncData'
 import { CHART_COLORS } from '@/theme/chartTheme'
 import { capitalize } from '@/utils/formatters'
+import { aggregateToMonthly } from '@/utils/chartGranularity'
 import { getSocialIntelligenceData } from '@/services/socialIntelligenceService'
 import { selectDefaultPlatform } from '@/utils/socialAnalytics'
 
@@ -27,7 +29,12 @@ function GlowSection({ title, description, children, className = '' }) {
 }
 
 export default function SocialIntelligence() {
-  const { status, data, error, reload } = useAsyncData(getSocialIntelligenceData, [])
+  const [granularity, setGranularity] = useState('day')
+  const { status, data, error, reload } = useAsyncData(
+    () => getSocialIntelligenceData({ granularity }),
+    [granularity]
+  )
+  const isMonthly = granularity === 'month'
   const [selectedPlatform, setSelectedPlatform] = useState(null)
   const gradientId = useId()
 
@@ -122,20 +129,25 @@ export default function SocialIntelligence() {
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <ChartCard
               title={`${platformLabel} Mention Volume`}
-              subtitle="Last 7 days"
-              readingGuide="Day-to-day volume for just this platform; compare against the other platform tabs to see where conversation is concentrated."
+              subtitle={isMonthly ? 'By calendar month' : 'Last 7 days'}
+              readingGuide="Volume for just this platform; compare against the other platform tabs to see where conversation is concentrated. Switch Day/Month to zoom out to a longer trend."
               surface="glow"
-              ariaLabel={`${platformLabel} mention volume over the last 7 days`}
+              ariaLabel={`${platformLabel} mention volume, by ${granularity}`}
               status={status}
               data={data}
               error={error}
               reload={reload}
               emptyWhen={(d) => d.mentionVolumeSeries.length === 0 || !effectivePlatform}
               emptyMessage="No mention-volume history yet."
+              headerActions={<GranularityToggle value={granularity} onChange={setGranularity} />}
             >
-              {(d) => (
+              {(d) => {
+                const series = isMonthly
+                  ? aggregateToMonthly(d.mentionVolumeSeries, { sumKeys: [effectivePlatform] })
+                  : d.mentionVolumeSeries
+                return (
                 <ResponsiveContainer width="100%" height={CHART_HEIGHTS.md}>
-                  <BarChart data={d.mentionVolumeSeries} margin={{ left: -20 }}>
+                  <BarChart data={series} margin={{ left: -20 }}>
                     <defs>
                       <linearGradient id={`${gradientId}-bar`} x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor={platformColor} stopOpacity={0.95} />
@@ -143,13 +155,14 @@ export default function SocialIntelligence() {
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid} vertical={false} />
-                    <XAxis dataKey="date" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
+                    <XAxis dataKey={isMonthly ? 'label' : 'date'} tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
                     <YAxis tick={{ fontSize: 12 }} axisLine={false} tickLine={false} unit=" mentions" />
                     <Tooltip content={<ChartTooltip />} />
                     <Bar dataKey={effectivePlatform} name="Mentions" fill={`url(#${gradientId}-bar)`} radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
-              )}
+                )
+              }}
             </ChartCard>
 
             <GlowSection title="Trending Hashtags" description="From real captured posts, across all platforms">

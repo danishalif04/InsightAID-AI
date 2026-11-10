@@ -34,6 +34,8 @@ import StatTile from '@/components/ui/StatTile'
 import EmptyState from '@/components/ui/EmptyState'
 import PageHero from '@/components/ui/PageHero'
 import InfoPopover from '@/components/ui/InfoPopover'
+import GranularityToggle from '@/components/ui/GranularityToggle'
+import { aggregateToMonthly } from '@/utils/chartGranularity'
 import AsyncSection from '@/components/common/AsyncSection'
 import Skeleton from '@/components/ui/Skeleton'
 import { useAsyncData } from '@/hooks/useAsyncData'
@@ -168,7 +170,7 @@ function DashboardBodySkeleton() {
   )
 }
 
-function DashboardBody({ data }) {
+function DashboardBody({ data, granularity, onGranularityChange }) {
   const platforms = data.platformComparison.map((p) => p.platform)
   const { uiMode } = useUIMode()
   const positiveScore = data.sentimentScores?.find((score) => score.id === 'positive') ?? null
@@ -176,6 +178,17 @@ function DashboardBody({ data }) {
   const lastForecastPoint =
     data.bestForecastRow?.forecast_points?.[data.bestForecastRow.forecast_points.length - 1]
   const gradientId = useId()
+
+  // getDashboardData() already fetched a year of history once `granularity`
+  // is 'month' (see dashboardService.js) — bucketing into calendar months
+  // happens here, in the page, so the service stays a plain data fetch.
+  const isMonthly = granularity === 'month'
+  const sentimentTrendData = isMonthly
+    ? aggregateToMonthly(data.sentimentTrend, { avgKeys: ['positive', 'neutral', 'negative'] })
+    : data.sentimentTrend
+  const mentionVolumeData = isMonthly
+    ? aggregateToMonthly(data.mentionVolumeSeries, { sumKeys: platforms })
+    : data.mentionVolumeSeries
 
   const hasKpis = positiveScore?.value != null || !!crisis || lastForecastPoint?.predicted != null
 
@@ -246,15 +259,20 @@ function DashboardBody({ data }) {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <ChartCard
           title="Sentiment Trend"
-          subtitle="Last 14 days, by sentiment label — shows whether customer sentiment is improving or worsening over time; each day's three bands always add up to 100%."
-          readingGuide="Each day's bar is split into positive/neutral/negative shares that always add to 100%. A growing green band over time means sentiment is improving."
+          subtitle={
+            isMonthly
+              ? 'By calendar month, by sentiment label — shows whether customer sentiment is improving or worsening over time; each month\'s three bands always add up to 100%.'
+              : 'Last 14 days, by sentiment label — shows whether customer sentiment is improving or worsening over time; each day\'s three bands always add up to 100%.'
+          }
+          readingGuide="Each bar is split into positive/neutral/negative shares that always add to 100%. A growing green band over time means sentiment is improving. Switch Day/Month above to zoom out to a longer trend."
           surface="glow"
           className="lg:col-span-2"
-          ariaLabel="Sentiment trend area chart, last 14 days, split into positive, neutral, and negative shares"
+          ariaLabel={`Sentiment trend area chart, by ${granularity}, split into positive, neutral, and negative shares`}
           status="success"
-          data={data.sentimentTrend}
+          data={sentimentTrendData}
           emptyWhen={(rows) => rows.length === 0}
           emptyMessage="No sentiment history yet."
+          headerActions={<GranularityToggle value={granularity} onChange={onGranularityChange} />}
         >
           {(trend) => (
             <ResponsiveContainer width="100%" height={CHART_HEIGHTS.md}>
@@ -274,7 +292,7 @@ function DashboardBody({ data }) {
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid} vertical={false} />
-                <XAxis dataKey="date" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
+                <XAxis dataKey="label" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 12 }} axisLine={false} tickLine={false} unit="%" />
                 <Tooltip
                   content={
@@ -367,22 +385,27 @@ function DashboardBody({ data }) {
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <ChartCard
-          title="Daily Mention Volume"
-          subtitle="Mentions by platform, last 7 days — a sudden same-day spike across platforms is often the first visible sign of a developing issue."
-          readingGuide="Each bar is one day, split by platform. A sudden same-day spike across every platform at once is often the first visible sign of a developing issue."
+          title={isMonthly ? 'Monthly Mention Volume' : 'Daily Mention Volume'}
+          subtitle={
+            isMonthly
+              ? 'Mentions by platform, by calendar month.'
+              : 'Mentions by platform, last 7 days — a sudden same-day spike across platforms is often the first visible sign of a developing issue.'
+          }
+          readingGuide="Each bar is one period, split by platform. Switch Day/Month above to zoom out to a longer trend."
           surface="glow"
           className="lg:col-span-2"
-          ariaLabel="Daily mention volume bar chart, by platform, last 7 days"
+          ariaLabel={`Mention volume bar chart, by platform, by ${granularity}`}
           status="success"
-          data={data.mentionVolumeSeries}
+          data={mentionVolumeData}
           emptyWhen={(rows) => rows.length === 0}
           emptyMessage="No mention-volume history yet."
+          headerActions={<GranularityToggle value={granularity} onChange={onGranularityChange} />}
         >
           {(series) => (
             <ResponsiveContainer width="100%" height={CHART_HEIGHTS.md}>
               <BarChart data={series} margin={{ left: -20 }} barGap={4}>
                 <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid} vertical={false} />
-                <XAxis dataKey="date" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
+                <XAxis dataKey={isMonthly ? 'label' : 'date'} tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
                 <Tooltip content={<ChartTooltip />} />
                 <Legend iconType="circle" wrapperStyle={{ fontSize: 12 }} />
@@ -517,9 +540,13 @@ function DashboardBody({ data }) {
 export default function Dashboard() {
   const { mode, modeConfig } = useMode()
   const [dismissedBanner, setDismissedBanner] = useState(false)
+  const [granularity, setGranularity] = useState('day')
 
   const { data: businessProfile } = useAsyncData(getProfile, [])
-  const { status, data, error, reload } = useAsyncData(() => getDashboardData(mode), [mode])
+  const { status, data, error, reload } = useAsyncData(
+    () => getDashboardData(mode, { granularity }),
+    [mode, granularity]
+  )
 
   const showOnboardingBanner = businessProfile && !businessProfile.exists && !dismissedBanner
   const showPlanningPanel =
@@ -618,7 +645,9 @@ export default function Dashboard() {
             reload={reload}
             loadingSkeleton={<DashboardBodySkeleton />}
           >
-            {(dashboardData) => <DashboardBody data={dashboardData} />}
+            {(dashboardData) => (
+              <DashboardBody data={dashboardData} granularity={granularity} onGranularityChange={setGranularity} />
+            )}
           </AsyncSection>
         </>
       )}
