@@ -50,6 +50,7 @@ import { getProfile } from '@/services/businessProfileService'
 import { getDashboardData } from '@/services/dashboardService'
 import BusinessPlanningPanel from '@/components/common/BusinessPlanningPanel'
 import BusinessOverviewCard from '@/components/common/BusinessOverviewCard'
+import BusinessFinancialHealthSection from '@/components/common/BusinessFinancialHealthSection'
 
 const ALERT_TONES = { warning: 'warning', critical: 'danger' }
 const RISK_TONES = { normal: 'text-glow-brand', warning: 'text-amber-400', critical: 'text-rose-400' }
@@ -564,7 +565,12 @@ export default function Dashboard() {
 
       {showPlanningPanel ? (
         <div className="space-y-6">
-          {mode === 'startup' && <BusinessOverviewCard values={businessProfile.values} />}
+          {mode === 'startup' && (
+            <>
+              <BusinessOverviewCard values={businessProfile.values} />
+              <BusinessFinancialHealthSection values={businessProfile.values} />
+            </>
+          )}
           <p className="mb-3 text-sm font-semibold text-glow-text">Business Planning Mode</p>
           <BusinessPlanningPanel
             values={businessProfile.values}
