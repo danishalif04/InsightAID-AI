@@ -53,7 +53,7 @@ const FAQS = [
   {
     question: 'Is this using a real trained AI model, or just rules?',
     answer:
-      'Both, and the split is intentional. Sentiment classification is a real, trained XLM-RoBERTa model (84.1% overall accuracy on a held-out test set, meeting this project’s own pre-registered target). Crisis detection and recommendations are rule-based and fully explainable — every recommendation shows the exact evidence that triggered it. An optional LLM layer (Grok) only rewords an already-decided recommendation into plain language; it never decides what to recommend or supplies a number.',
+      'Both, and the split is intentional. Sentiment classification is a real, trained XLM-RoBERTa model (84.1% overall accuracy on a held-out test set, meeting this project’s own pre-registered target). Crisis detection and recommendations are rule-based and fully explainable — every recommendation shows the exact evidence that triggered it. An optional LLM layer (provider-agnostic — currently Groq) only rewords an already-decided recommendation into plain language; it never decides what to recommend or supplies a number.',
   },
   {
     question: 'Can I try it with demo data?',
