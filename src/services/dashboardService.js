@@ -29,9 +29,9 @@ const TOP_BOTTOM_COUNT = 5
  * the pure rule engine (generateRecommendations()) instead of
  * getRecommendations() — Dashboard's "Latest AI Recommendations" widget
  * only ever renders title/category/priority/evidence[0], never the
- * Grok-written rationale/context, so there was never a reason to pay
+ * AI-written rationale/context, so there was never a reason to pay
  * for that network round-trip here; AiRecommendations.jsx and Reports
- * still get the full Grok-explained version where it's actually shown.
+ * still get the full AI-explained version where it's actually shown.
  *
  * The foundational fetch (processed_data/daily_aggregates) is allowed to
  * throw — if that fails, the page shows a real error. Everything else is

@@ -108,18 +108,18 @@ function RecommendationCard({ recommendation }) {
       </button>
       {expanded && (
         <div className="mt-2 rounded-2xl bg-white/[0.03] p-3 text-xs leading-relaxed text-glow-text/70">
-          {recommendation.explainedBy === 'grok' ? (
+          {recommendation.explainedBy === 'ai' ? (
             <>
               <p>{recommendation.rationale}</p>
               {recommendation.context && <p className="mt-2">{recommendation.context}</p>}
               <p className="mt-2 text-[11px] text-glow-text/40">
-                Explained by Grok, from the evidence above only.
+                Explained by AI, from the evidence above only.
               </p>
             </>
           ) : (
             <p className="text-glow-text/50">
-              Grok explanation unavailable right now — this recommendation is shown from the rule
-              engine's evidence above, which is always real regardless of Grok's availability.
+              AI explanation unavailable right now — this recommendation is shown from the rule
+              engine's evidence above, which is always real regardless of the AI layer's availability.
             </p>
           )}
         </div>
@@ -215,7 +215,7 @@ export default function AiRecommendations() {
         </div>
         {!loading && !explainerAvailable && recommendations.length > 0 && (
           <p className="mt-3 text-xs text-glow-text/50">
-            Grok explanations are unavailable right now — recommendations below are still real,
+            AI explanations are unavailable right now — recommendations below are still real,
             rule-based results.
           </p>
         )}

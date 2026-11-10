@@ -8,10 +8,13 @@ import { buildBusinessContextFactors, generateRecommendations } from '@/utils/re
  * Assembles real context (business profile, crisis signals, data
  * readiness) and runs the Layer-1 rule engine (FYP2.md §54), then — best
  * effort only — asks the explain-recommendations Edge Function (Layer 2,
- * backed by Grok/xAI — see supabase/functions/explain-recommendations)
- * to phrase each one. If Grok is unavailable/unconfigured, the rule-based
- * recommendations are returned unchanged (§55): the caller never blocks on
- * Grok and never shows a blank page because it's down.
+ * backed by whichever OpenAI-compatible provider is configured via the
+ * AI_BASE_URL/AI_API_KEY/AI_MODEL secrets — see
+ * supabase/functions/_shared/aiClient.ts; swapping providers is a secrets
+ * change only, never a code change) to phrase each one. If the AI layer is
+ * unavailable/unconfigured, the rule-based recommendations are returned
+ * unchanged (§55): the caller never blocks on it and never shows a blank
+ * page because it's down.
  */
 
 async function countRows(templateId) {
@@ -88,7 +91,7 @@ async function fetchExplanations(recommendations, businessContext) {
 /**
  * Runs Layer 1 + Layer 2 against an ALREADY-BUILT context — for callers
  * (dashboardService, reportContextService) that need both a raw context
- * and Grok-explained recommendations, so buildContext()'s ~9 queries
+ * and AI-explained recommendations, so buildContext()'s ~9 queries
  * (profile, crisis detection, 3 record counts, historical-months lookup)
  * run once, not twice. This is what getRecommendations() below also uses.
  * @returns {Promise<{recommendations: Array, businessContext: Array, explainerAvailable: boolean}>}
@@ -103,7 +106,7 @@ export async function getRecommendationsFromContext(context) {
     ...rec,
     rationale: explanations[rec.id]?.rationale ?? null,
     context: explanations[rec.id]?.context ?? null,
-    explainedBy: explanations[rec.id] ? 'grok' : 'rule_only',
+    explainedBy: explanations[rec.id] ? 'ai' : 'rule_only',
   }))
 
   return { recommendations: enriched, businessContext, explainerAvailable: !unavailable }

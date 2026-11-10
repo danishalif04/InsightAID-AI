@@ -48,10 +48,15 @@ outside config," confirmed still true by grep as of this phase.
   Vercel env var, because nothing Vercel serves ever needs it. It's only
   ever used by *you*, manually, when running SQL migrations or the
   `ml/sentiment`/`ml/forecasting` upload steps — never by deployed code.
-- `GEMINI_API_KEY` — a **Supabase Edge Function secret** (`supabase secrets set GEMINI_API_KEY=...`),
-  not a Vercel variable. Set once in the Supabase dashboard, consumed only
-  by `extract-business-profile`/`explain-recommendations`/`explain-report`,
-  never bundled into any frontend build.
+- `AI_BASE_URL`/`AI_API_KEY`/`AI_MODEL` — **Supabase Edge Function secrets**
+  (`supabase secrets set AI_BASE_URL=... AI_API_KEY=... AI_MODEL=...`), not
+  Vercel variables. Set once in the Supabase dashboard, consumed only by
+  `extract-business-profile`/`explain-recommendations`/`explain-report` via
+  the shared `supabase/functions/_shared/aiClient.ts` client, never bundled
+  into any frontend build. Provider-agnostic by design — any OpenAI chat-
+  completions-compatible endpoint works (currently Groq); swapping
+  providers later is a secrets change, not a code change. (Superseded the
+  earlier `GEMINI_API_KEY`-only setup this doc originally described.)
 - `TIKTOK_CLIENT_KEY`/`TIKTOK_CLIENT_SECRET`, `X_API_KEY`/`X_API_SECRET`,
   `THREADS_CLIENT_ID`/`THREADS_CLIENT_SECRET` — same: Supabase Edge Function
   secrets only (`source-status`), see `docs/API_INTEGRATION.md`.
@@ -85,10 +90,11 @@ access exists in this development environment):
 2. **Edge Functions**, via `supabase functions deploy <name>`:
    `extract-business-profile`, `source-status`, `explain-recommendations`,
    `explain-report`.
-3. **Secrets**, via `supabase secrets set`: `GEMINI_API_KEY` (shared by all
-   three Gemini-calling functions), plus the TikTok/X/Threads pairs above
-   if/when those integrations are actually implemented (currently
-   `NOT_CONFIGURED` — see `docs/API_INTEGRATION.md`).
+3. **Secrets**, via `supabase secrets set`: `AI_BASE_URL`/`AI_API_KEY`/`AI_MODEL`
+   (shared by all three AI-calling functions — see the note above), plus
+   the TikTok/X/Threads pairs above if/when those integrations are
+   actually implemented (currently `NOT_CONFIGURED` — see
+   `docs/API_INTEGRATION.md`).
 4. **`supabase/seed.sql`** (optional, demo data) — rewritten this phase to
    match the current trimmed schema; run it after signing up through
    `/signup` if you want a demo account with some starter Settings/Reports

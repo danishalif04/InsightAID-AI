@@ -1,11 +1,15 @@
 // Supabase Edge Function — extracts a structured business profile from a
-// free-text description via Gemini (FYP2.md §23-25). Stateless: does not
-// touch the database. Requires the GEMINI_API_KEY secret, set via
-//   supabase secrets set GEMINI_API_KEY=...
-// (never set as a VITE_* var — that would bundle it into the browser).
+// free-text description via an LLM (FYP2.md §23-25). Stateless: does not
+// touch the database.
+//
+// Provider-agnostic — see ../_shared/aiClient.ts. Requires the AI_BASE_URL/
+// AI_API_KEY/AI_MODEL secrets (shared with explain-recommendations and
+// explain-report — one config, one provider, for the whole app).
 //
 // Field list here must be kept in sync by hand with
 // src/utils/businessProfileSchema.js's EXTRACTABLE_FIELD_IDS.
+
+import { AIMalformedResponseError, AIProviderNotConfiguredError, AIUpstreamError, callAIChat } from '../_shared/aiClient.ts'
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -13,30 +17,9 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
-// gemini-2.0-flash was retired by Google (confirmed via a real 404 from
-// the live API: "This model ... is no longer available ... use
-// models/gemini-3.8-flash"). Overridable via the GEMINI_MODEL secret so a
-// future retirement doesn't need a code change/redeploy, just a new secret.
-const GEMINI_MODEL = Deno.env.get('GEMINI_MODEL') || 'gemini-3.8-flash'
 const MAX_DESCRIPTION_LENGTH = 4000
 
-// Gemini's 503 ("high demand... try again later") is typically transient -
-// a short retry has a real chance of succeeding within seconds. Only 503
-// is retried: 404/400/401/403 are deterministic and a retry cannot fix them.
-const MAX_RETRIES = 2
-const RETRY_DELAY_MS = 1200
-
-async function fetchWithRetry(url: string, init: RequestInit): Promise<Response> {
-  let response: Response
-  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-    response = await fetch(url, init)
-    if (response.status !== 503) return response
-    if (attempt < MAX_RETRIES) await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS * (attempt + 1)))
-  }
-  return response!
-}
-
-// { fieldId: 'string' | 'number' | 'string[]' } — the shape Gemini is asked to return.
+// { fieldId: 'string' | 'number' | 'string[]' } — the shape the LLM is asked to return.
 const EXTRACTABLE_FIELDS = {
   business_name: 'string',
   business_type: 'string',
@@ -91,9 +74,6 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS_HEADERS })
   if (req.method !== 'POST') return jsonResponse({ error: 'Method not allowed.' }, 405)
 
-  const apiKey = Deno.env.get('GEMINI_API_KEY')
-  if (!apiKey) return jsonResponse({ error: 'NOT_CONFIGURED', message: 'GEMINI_API_KEY is not set.' }, 503)
-
   let body: { description?: unknown }
   try {
     body = await req.json()
@@ -109,42 +89,27 @@ Deno.serve(async (req) => {
 
   const prompt = `Extract structured business information from the description below. Return ONLY a JSON object with these exact keys (omit any key you cannot confidently infer from the text — do not guess or invent values): ${Object.keys(EXTRACTABLE_FIELDS).join(', ')}. marketing_channels must be an array of strings. Numeric fields must be plain numbers with no currency symbols.\n\nDescription:\n${description}`
 
-  let geminiResponse: Response
+  let text: string
   try {
-    geminiResponse = await fetchWithRetry(
-      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { responseMimeType: 'application/json', temperature: 0.2 },
-        }),
-      }
-    )
+    text = await callAIChat(prompt, { temperature: 0.2 })
   } catch (error) {
+    if (error instanceof AIProviderNotConfiguredError) {
+      return jsonResponse({ error: 'NOT_CONFIGURED', message: error.message }, 503)
+    }
+    if (error instanceof AIUpstreamError) {
+      return jsonResponse({ error: 'UPSTREAM_ERROR', message: error.message, detail: error.detail }, 502)
+    }
+    if (error instanceof AIMalformedResponseError) {
+      return jsonResponse({ error: 'UPSTREAM_MALFORMED', message: error.message }, 502)
+    }
     return jsonResponse({ error: 'UPSTREAM_UNREACHABLE', message: String(error) }, 502)
-  }
-
-  if (!geminiResponse.ok) {
-    const detail = await geminiResponse.text().catch(() => '')
-    return jsonResponse(
-      { error: 'UPSTREAM_ERROR', message: `Gemini returned ${geminiResponse.status}.`, detail },
-      502
-    )
-  }
-
-  const payload = await geminiResponse.json().catch(() => null)
-  const text = payload?.candidates?.[0]?.content?.parts?.[0]?.text
-  if (typeof text !== 'string') {
-    return jsonResponse({ error: 'UPSTREAM_MALFORMED', message: 'Gemini response had no text content.' }, 502)
   }
 
   let parsed: unknown
   try {
     parsed = JSON.parse(text)
   } catch {
-    return jsonResponse({ error: 'UPSTREAM_MALFORMED', message: 'Gemini response was not valid JSON.' }, 502)
+    return jsonResponse({ error: 'UPSTREAM_MALFORMED', message: 'AI response was not valid JSON.' }, 502)
   }
 
   const { profile, warnings } = validateExtracted(parsed)

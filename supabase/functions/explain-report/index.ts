@@ -1,19 +1,22 @@
-// Supabase Edge Function — report narrative generation (FYP2.md §69: "Gemini
-// may help generate narrative explanations but must not independently
-// invent numerical metrics"). Stateless: does not touch the database, does
+// Supabase Edge Function — report narrative generation (FYP2.md §69: an
+// LLM may help generate narrative explanations but must not independently
+// invent numerical metrics). Stateless: does not touch the database, does
 // not decide what data appears in a report — that's already fixed by
 // src/utils/reportBuilders.js before this function is ever called.
-// Requires the GEMINI_API_KEY secret, set via
-//   supabase secrets set GEMINI_API_KEY=...
-// (never set as a VITE_* var — that would bundle it into the browser).
+//
+// Provider-agnostic — see ../_shared/aiClient.ts. Requires the AI_BASE_URL/
+// AI_API_KEY/AI_MODEL secrets (shared with explain-recommendations and
+// extract-business-profile — one config, one provider, for the whole app).
 //
 // Same reliability contract as explain-recommendations: this function only
 // ever returns ONE string per section id (`narrative`), and
 // validateExplained() below drops every other key — there is no code path
-// by which a Gemini response can alter a report's actual/scenario data
+// by which the LLM's response can alter a report's actual/scenario data
 // points. If unreachable/unconfigured, the caller
 // (src/services/reportGenerationService.js) must render the report with
 // its real data and no narrative prose, never a blank report.
+
+import { AIMalformedResponseError, AIProviderNotConfiguredError, AIUpstreamError, callAIChat } from '../_shared/aiClient.ts'
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -21,11 +24,6 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
-// gemini-2.0-flash was retired by Google (confirmed via a real 404 from
-// the live API: "This model ... is no longer available ... use
-// models/gemini-3.8-flash"). Overridable via the GEMINI_MODEL secret so a
-// future retirement doesn't need a code change/redeploy, just a new secret.
-const GEMINI_MODEL = Deno.env.get('GEMINI_MODEL') || 'gemini-3.8-flash'
 const MAX_SECTIONS = 15
 const MAX_NARRATIVE_LENGTH = 1500
 
@@ -49,28 +47,12 @@ function jsonResponse(body: unknown, status = 200) {
   })
 }
 
-// Gemini's 503 ("high demand... try again later") is typically transient -
-// a short retry has a real chance of succeeding within seconds. Only 503
-// is retried: 404/400/401/403 are deterministic and a retry cannot fix them.
-const MAX_RETRIES = 2
-const RETRY_DELAY_MS = 1200
-
-async function fetchWithRetry(url: string, init: RequestInit): Promise<Response> {
-  let response: Response
-  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-    response = await fetch(url, init)
-    if (response.status !== 503) return response
-    if (attempt < MAX_RETRIES) await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS * (attempt + 1)))
-  }
-  return response!
-}
-
 function isValidSection(value: unknown): value is ReportSection {
   return !!value && typeof value === 'object' && typeof (value as ReportSection).id === 'string'
 }
 
 /** Drops unknown keys/ids and coerces to a plain string, capped in length.
- * Never throws — this is the enforcement point for §69/§55: Gemini cannot
+ * Never throws — this is the enforcement point for §69/§55: the LLM cannot
  * inject a numeric field or a section id this function doesn't already know about. */
 function validateExplained(raw: unknown, knownIds: Set<string>): { narratives: Record<string, string>; warnings: string[] } {
   const narratives: Record<string, string> = {}
@@ -100,9 +82,6 @@ function formatDataPoints(points: DataPoint[] | undefined): string {
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS_HEADERS })
   if (req.method !== 'POST') return jsonResponse({ error: 'Method not allowed.' }, 405)
-
-  const apiKey = Deno.env.get('GEMINI_API_KEY')
-  if (!apiKey) return jsonResponse({ error: 'NOT_CONFIGURED', message: 'GEMINI_API_KEY is not set.' }, 503)
 
   let body: { reportTitle?: unknown; sections?: unknown }
   try {
@@ -134,39 +113,27 @@ Return ONLY a JSON object shaped like { "<section id>": "narrative text" } for e
 Sections:
 ${sectionsBlock}`
 
-  let geminiResponse: Response
+  let text: string
   try {
-    geminiResponse = await fetchWithRetry(
-      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { responseMimeType: 'application/json', temperature: 0.3 },
-        }),
-      }
-    )
+    text = await callAIChat(prompt, { temperature: 0.3 })
   } catch (error) {
+    if (error instanceof AIProviderNotConfiguredError) {
+      return jsonResponse({ error: 'NOT_CONFIGURED', message: error.message }, 503)
+    }
+    if (error instanceof AIUpstreamError) {
+      return jsonResponse({ error: 'UPSTREAM_ERROR', message: error.message, detail: error.detail }, 502)
+    }
+    if (error instanceof AIMalformedResponseError) {
+      return jsonResponse({ error: 'UPSTREAM_MALFORMED', message: error.message }, 502)
+    }
     return jsonResponse({ error: 'UPSTREAM_UNREACHABLE', message: String(error) }, 502)
-  }
-
-  if (!geminiResponse.ok) {
-    const detail = await geminiResponse.text().catch(() => '')
-    return jsonResponse({ error: 'UPSTREAM_ERROR', message: `Gemini returned ${geminiResponse.status}.`, detail }, 502)
-  }
-
-  const payload = await geminiResponse.json().catch(() => null)
-  const text = payload?.candidates?.[0]?.content?.parts?.[0]?.text
-  if (typeof text !== 'string') {
-    return jsonResponse({ error: 'UPSTREAM_MALFORMED', message: 'Gemini response had no text content.' }, 502)
   }
 
   let parsed: unknown
   try {
     parsed = JSON.parse(text)
   } catch {
-    return jsonResponse({ error: 'UPSTREAM_MALFORMED', message: 'Gemini response was not valid JSON.' }, 502)
+    return jsonResponse({ error: 'UPSTREAM_MALFORMED', message: 'AI response was not valid JSON.' }, 502)
   }
 
   const { narratives, warnings } = validateExplained(parsed, knownIds)

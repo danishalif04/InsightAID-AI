@@ -256,7 +256,8 @@ function ApiKeysSection() {
   return (
     <GlowSection title="API Keys">
       <p className="text-sm italic text-glow-text/50">
-        Unavailable — external integration credentials (TikTok, X, Threads, Gemini, Grok) are stored as Supabase Edge
+        Unavailable — external integration credentials (TikTok, X, Threads, and the AI provider configured for
+        recommendations/reports) are stored as Supabase Edge
         Function secrets, never exposed to the frontend (same pattern as every Edge Function in this project). There
         is no safe way to display or regenerate them from this page.
       </p>
