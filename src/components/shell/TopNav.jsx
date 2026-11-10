@@ -38,6 +38,7 @@ const NAV_GROUPS = [
       { label: 'Forecasting', path: PATHS.forecasting },
       { label: 'AI Recommendations', path: PATHS.recommendations },
       { label: 'Model Performance', path: PATHS.modelPerformance },
+      { label: 'Agent Orchestrator', path: PATHS.agentOrchestrator },
     ],
   },
   {

@@ -14,4 +14,5 @@ export const PATHS = {
   settings: '/settings',
   onboarding: '/onboarding',
   modelPerformance: '/model-performance',
+  agentOrchestrator: '/agent-orchestrator',
 }
