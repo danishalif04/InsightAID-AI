@@ -80,7 +80,7 @@ export default function BusinessOverviewCard({ values = {} }) {
           <Sparkles className="mt-0.5 size-4 shrink-0 text-amber-400" aria-hidden="true" />
           <p className="text-xs leading-relaxed text-glow-text/70">
             <span className="font-semibold text-amber-400">Illustrative example</span> — the figures below use a
-            sample price, cost, and fixed costs (RM10 price, RM6 cost per unit, RM2,500 fixed costs) so you can see
+            sample price, cost, and fixed costs (RM20 price, RM13 cost per unit, RM2,500 fixed costs) so you can see
             what this dashboard looks like. Add your own via Onboarding or Settings to replace them with your real
             numbers.
           </p>
