@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Activity, Sparkles } from 'lucide-react'
+import { Sparkles } from 'lucide-react'
+import brandMark from '@/assets/insightaid-mark.png'
 import Button from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { useAuth } from '@/hooks/useAuth'
@@ -82,13 +83,26 @@ export default function Login() {
       <div className="relative mx-auto grid min-h-screen max-w-6xl grid-cols-1 lg:grid-cols-2">
         {/* Brand panel — hidden on small screens, the form is what matters there */}
         <div className="hidden flex-col justify-between p-12 lg:flex">
-          <div className="flex items-center gap-2">
-            <span className="flex size-9 items-center justify-center rounded-full bg-glow-brand/15">
-              <Activity className="size-4 text-glow-brand" aria-hidden="true" />
-            </span>
+          <div className="flex items-center gap-2.5">
+            <img
+              src={brandMark}
+              alt=""
+              aria-hidden="true"
+              width={40}
+              height={40}
+              className="size-10 rounded-xl shadow-[0_0_0_1px_rgba(34,197,94,0.25),0_8px_24px_-10px_rgba(34,197,94,0.55)]"
+            />
             <span className="text-sm font-semibold uppercase tracking-wide text-glow-text/70">InsightAid AI</span>
           </div>
           <div>
+            <img
+              src={brandMark}
+              alt=""
+              aria-hidden="true"
+              width={128}
+              height={128}
+              className="mb-6 size-32 rounded-[1.75rem] shadow-[0_0_0_1px_rgba(34,197,94,0.25),0_24px_64px_-24px_rgba(34,197,94,0.65)]"
+            />
             <h1 className="text-[2.75rem] font-semibold leading-[1.05] tracking-tight text-glow-text" style={{ fontFamily: 'var(--font-ui)' }}>
               Decisions, backed by{' '}
               <em className="not-italic text-glow-brand" style={{ fontFamily: 'var(--font-serif-accent)', fontStyle: 'italic' }}>
@@ -109,10 +123,14 @@ export default function Login() {
         {/* Form panel */}
         <div className="flex items-center justify-center p-4 sm:p-8">
           <div className="w-full max-w-sm rounded-3xl border border-glow-border bg-glow-surface-elevated p-8">
-            <div className="flex flex-col items-center gap-2 text-center lg:hidden">
-              <span className="flex size-10 items-center justify-center rounded-full bg-glow-brand/15">
-                <Activity className="size-5 text-glow-brand" aria-hidden="true" />
-              </span>
+            <div className="mb-4 flex flex-col items-center gap-2 text-center lg:hidden">
+              <img
+                src={brandMark}
+                alt="InsightAid AI"
+                width={64}
+                height={64}
+                className="size-16 rounded-2xl shadow-[0_0_0_1px_rgba(34,197,94,0.25),0_12px_32px_-14px_rgba(34,197,94,0.6)]"
+              />
             </div>
             <h2 className="text-center text-lg font-semibold text-glow-text lg:text-left">
               Sign in to InsightAid
