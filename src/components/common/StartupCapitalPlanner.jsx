@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
-import { Save } from 'lucide-react'
+import { Save, Sparkles } from 'lucide-react'
 import { Input } from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
 import { CHART_HEIGHTS } from '@/components/charts/chartDefaults'
 import ChartTooltip from '@/components/ui/ChartTooltip'
 import { useNotifications } from '@/hooks/useNotifications'
 import { getStartupCapital, saveStartupCapital } from '@/services/startupCapitalService'
+import { ILLUSTRATIVE_STARTUP_CAPITAL } from '@/utils/illustrativeExample'
 import { formatCurrencyMYR } from '@/utils/formatters'
 import { CHART_COLORS } from '@/theme/chartTheme'
 
@@ -65,14 +66,31 @@ export default function StartupCapitalPlanner() {
     setItems((current) => ({ ...current, [id]: Number.isFinite(numeric) ? numeric : undefined }))
   }
 
-  const rows = ITEMS.map((item) => ({ label: item.label, amount: items[item.id] }))
+  const enteredRows = ITEMS.map((item) => ({ label: item.label, amount: items[item.id] }))
     .filter((row) => typeof row.amount === 'number' && Number.isFinite(row.amount) && row.amount > 0)
     .sort((a, b) => b.amount - a.amount)
-  const totalCapital = rows.reduce((sum, row) => sum + row.amount, 0)
 
   const availableNumeric = availableCapital === '' ? null : Number.parseFloat(availableCapital)
+
+  // Preview-only fallback: with nothing entered yet, the allocation chart
+  // and totals show the illustrative example rather than rendering empty.
+  // `items`/`availableCapital` (what Save persists) are never touched by it.
+  const isIllustrative = enteredRows.length === 0
+  const rows = isIllustrative
+    ? ITEMS.map((item) => ({ label: item.label, amount: ILLUSTRATIVE_STARTUP_CAPITAL.items[item.id] }))
+        .filter((row) => typeof row.amount === 'number' && row.amount > 0)
+        .sort((a, b) => b.amount - a.amount)
+    : enteredRows
+  const totalCapital = rows.reduce((sum, row) => sum + row.amount, 0)
+
+  const effectiveAvailable =
+    isIllustrative && (availableNumeric === null || !Number.isFinite(availableNumeric))
+      ? ILLUSTRATIVE_STARTUP_CAPITAL.availableCapital
+      : availableNumeric
   const fundingGap =
-    typeof availableNumeric === 'number' && Number.isFinite(availableNumeric) ? Math.round((availableNumeric - totalCapital) * 100) / 100 : null
+    typeof effectiveAvailable === 'number' && Number.isFinite(effectiveAvailable)
+      ? Math.round((effectiveAvailable - totalCapital) * 100) / 100
+      : null
 
   const handleSave = async () => {
     setSaving(true)
@@ -93,6 +111,17 @@ export default function StartupCapitalPlanner() {
       title="Startup Capital Planner"
       description="How much money you need before opening or expanding — a sum of your own entered figures, nothing guessed."
     >
+      {isIllustrative && (
+        <div className="mb-4 flex items-start gap-2.5 rounded-2xl border border-amber-400/30 bg-amber-400/10 p-3">
+          <Sparkles className="mt-0.5 size-4 shrink-0 text-amber-400" aria-hidden="true" />
+          <p className="text-xs leading-relaxed text-glow-text/70">
+            <span className="font-semibold text-amber-400">Illustrative example</span> — the totals and chart below
+            show a sample setup budget. Type your own figures into the fields and they replace it immediately;
+            only what you type is ever saved.
+          </p>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {ITEMS.map((item) => (
           <Input
@@ -131,7 +160,9 @@ export default function StartupCapitalPlanner() {
 
       {rows.length > 0 && (
         <div className="mt-6">
-          <p className="mb-2 text-xs font-semibold text-glow-text/70">Startup capital allocation</p>
+          <p className="mb-2 text-xs font-semibold text-glow-text/70">
+            Startup capital allocation{isIllustrative ? ' (illustrative example)' : ''}
+          </p>
           <ResponsiveContainer width="100%" height={CHART_HEIGHTS.sm}>
             <BarChart data={rows} layout="vertical" margin={{ left: 8, right: 24 }}>
               <CartesianGrid strokeDasharray="3 3" horizontal={false} />

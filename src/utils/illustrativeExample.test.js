@@ -1,5 +1,36 @@
 import { describe, expect, it } from 'vitest'
-import { hasCoreAssumptions, ILLUSTRATIVE_ASSUMPTIONS, resolveDisplayAssumptions } from './illustrativeExample'
+import {
+  hasCoreAssumptions,
+  ILLUSTRATIVE_ASSUMPTIONS,
+  ILLUSTRATIVE_STARTUP_CAPITAL,
+  resolveDisplayAssumptions,
+} from './illustrativeExample'
+import { calculateBreakEven, calculateGrossMarginPercent } from './scenarioEngine'
+
+describe('illustrativeExample — matches the spec mock it mimics', () => {
+  it('keeps total operating costs at exactly RM2,500 while still splitting across categories', () => {
+    const operatingCosts = ['marketing_cost', 'platform_fees', 'shipping_cost', 'labour_cost', 'fixed_costs', 'other_expenses']
+    const total = operatingCosts.reduce((sum, field) => sum + ILLUSTRATIVE_ASSUMPTIONS[field], 0)
+    expect(total).toBe(2500)
+    // More than one non-zero category, so the expense chart shows a real ranked comparison.
+    expect(operatingCosts.filter((field) => ILLUSTRATIVE_ASSUMPTIONS[field] > 0).length).toBeGreaterThan(1)
+  })
+
+  it('produces the mock\'s 35% margin and ~RM7,143 break-even revenue', () => {
+    const { selling_price: price, cost_per_unit: cost, expected_monthly_units: units } = ILLUSTRATIVE_ASSUMPTIONS
+    expect(calculateGrossMarginPercent(price * units, (price - cost) * units)).toBe(35)
+
+    const breakEven = calculateBreakEven(ILLUSTRATIVE_ASSUMPTIONS)
+    expect(breakEven.insufficient).toBe(false)
+    expect(breakEven.revenue).toBeGreaterThan(7000)
+    expect(breakEven.revenue).toBeLessThan(7300)
+  })
+
+  it('has a startup capital example that totals more than the available capital, so a funding gap is visible', () => {
+    const total = Object.values(ILLUSTRATIVE_STARTUP_CAPITAL.items).reduce((sum, value) => sum + value, 0)
+    expect(total).toBeGreaterThan(ILLUSTRATIVE_STARTUP_CAPITAL.availableCapital)
+  })
+})
 
 describe('illustrativeExample', () => {
   it('reports no core assumptions for an empty profile', () => {

@@ -1,8 +1,13 @@
 import { useState } from 'react'
-import { Info } from 'lucide-react'
+import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { Info, Sparkles } from 'lucide-react'
 import { Select } from '@/components/ui/Input'
+import { CHART_HEIGHTS } from '@/components/charts/chartDefaults'
+import ChartTooltip from '@/components/ui/ChartTooltip'
 import { calculateGrossMarginPercent } from '@/utils/scenarioEngine'
 import { formatCurrencyMYR } from '@/utils/formatters'
+import { CHART_COLORS } from '@/theme/chartTheme'
+import { resolveDisplayAssumptions } from '@/utils/illustrativeExample'
 
 /**
  * Cost Pressure Analysis — a deliberately scoped-down version of
@@ -43,9 +48,10 @@ export default function CostPressureAnalysis({ values = {} }) {
   const [costId, setCostId] = useState('cost_per_unit')
   const [pressurePercent, setPressurePercent] = useState(10)
 
-  const sellingPrice = typeof values.selling_price === 'number' ? values.selling_price : null
-  const costPerUnit = typeof values.cost_per_unit === 'number' ? values.cost_per_unit : null
-  const currentValue = typeof values[costId] === 'number' ? values[costId] : null
+  const { values: displayValues, isIllustrative } = resolveDisplayAssumptions(values)
+  const sellingPrice = typeof displayValues.selling_price === 'number' ? displayValues.selling_price : null
+  const costPerUnit = typeof displayValues.cost_per_unit === 'number' ? displayValues.cost_per_unit : null
+  const currentValue = typeof displayValues[costId] === 'number' ? displayValues[costId] : null
 
   const canCompute = sellingPrice !== null && costPerUnit !== null && currentValue !== null
   const bumpedValue = canCompute ? Math.round(currentValue * (1 + pressurePercent / 100) * 100) / 100 : null
@@ -57,6 +63,13 @@ export default function CostPressureAnalysis({ values = {} }) {
     const bumpedCostPerUnit = costId === 'cost_per_unit' ? bumpedValue : costPerUnit
     projectedMarginPercent = calculateGrossMarginPercent(sellingPrice, sellingPrice - bumpedCostPerUnit)
   }
+
+  const comparisonRows = canCompute
+    ? [
+        { label: 'Now', amount: currentValue },
+        { label: `+${pressurePercent}%`, amount: bumpedValue },
+      ]
+    : []
 
   return (
     <GlowSection
@@ -71,6 +84,16 @@ export default function CostPressureAnalysis({ values = {} }) {
           national inflation caused a specific cost change.
         </p>
       </div>
+
+      {isIllustrative && (
+        <div className="mt-3 flex items-start gap-2.5 rounded-2xl border border-amber-400/30 bg-amber-400/10 p-3">
+          <Sparkles className="mt-0.5 size-4 shrink-0 text-amber-400" aria-hidden="true" />
+          <p className="text-xs leading-relaxed text-glow-text/70">
+            <span className="font-semibold text-amber-400">Illustrative example</span> — using sample costs until
+            you add your own price and costs via Onboarding or Settings.
+          </p>
+        </div>
+      )}
 
       {!canCompute ? (
         <p className="mt-4 text-xs text-glow-text/50">
@@ -126,6 +149,25 @@ export default function CostPressureAnalysis({ values = {} }) {
               </>
             )}
           </p>
+
+          <div className="mt-4">
+            <p className="mb-2 text-[11px] font-medium uppercase tracking-wide text-glow-text/40">
+              {COST_OPTIONS.find((o) => o.id === costId)?.label} — now vs. under cost pressure
+            </p>
+            <ResponsiveContainer width="100%" height={CHART_HEIGHTS.sm}>
+              <BarChart data={comparisonRows} margin={{ left: -10, right: 8 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="label" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 12 }} axisLine={false} tickLine={false} unit=" RM" />
+                <Tooltip content={<ChartTooltip formatter={(value) => formatCurrencyMYR(value)} />} />
+                <Bar dataKey="amount" name="Amount" radius={[4, 4, 0, 0]}>
+                  {comparisonRows.map((row) => (
+                    <Cell key={row.label} fill={row.label === 'Now' ? CHART_COLORS.neutral : '#f59e0b'} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </>
       )}
     </GlowSection>
