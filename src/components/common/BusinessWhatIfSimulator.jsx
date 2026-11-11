@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
-import { RotateCcw } from 'lucide-react'
+import { RotateCcw, Sparkles } from 'lucide-react'
 import { CHART_HEIGHTS } from '@/components/charts/chartDefaults'
 import ChartTooltip from '@/components/ui/ChartTooltip'
 import { Input } from '@/components/ui/Input'
@@ -8,6 +8,7 @@ import Button from '@/components/ui/Button'
 import { buildAllScenarios, calculateBreakEven, calculateGrossMarginPercent } from '@/utils/scenarioEngine'
 import { formatCurrencyMYR } from '@/utils/formatters'
 import { CHART_COLORS } from '@/theme/chartTheme'
+import { resolveDisplayAssumptions } from '@/utils/illustrativeExample'
 
 /**
  * What-If Business Simulator (knowledge_updated_nov2026.md item 2).
@@ -33,14 +34,15 @@ function GlowSection({ title, description, children, className = '' }) {
 const SCENARIO_LABELS = { conservative: 'Conservative', expected: 'Current Plan', growth: 'Growth' }
 
 export default function BusinessWhatIfSimulator({ values = {} }) {
+  const { values: displayValues, isIllustrative } = resolveDisplayAssumptions(values)
   const defaults = useMemo(
     () => ({
-      selling_price: num(values.selling_price) ?? 0,
-      cost_per_unit: num(values.cost_per_unit) ?? 0,
-      fixed_costs: num(values.fixed_costs) ?? 0,
-      expected_monthly_units: num(values.expected_monthly_units) ?? 0,
+      selling_price: num(displayValues.selling_price) ?? 0,
+      cost_per_unit: num(displayValues.cost_per_unit) ?? 0,
+      fixed_costs: num(displayValues.fixed_costs) ?? 0,
+      expected_monthly_units: num(displayValues.expected_monthly_units) ?? 0,
     }),
-    [values]
+    [displayValues]
   )
 
   const [sellingPrice, setSellingPrice] = useState(defaults.selling_price)
@@ -74,17 +76,27 @@ export default function BusinessWhatIfSimulator({ values = {} }) {
   const operatingResult = Math.round((grossProfit - fixedCosts) * 100) / 100
 
   const scenarioRows = useMemo(() => {
-    const scenarios = buildAllScenarios(values)
+    const scenarios = buildAllScenarios(displayValues)
     return Object.values(scenarios)
       .filter((s) => s.operatingResult !== null)
       .map((s) => ({ label: SCENARIO_LABELS[s.caseType], operatingResult: s.operatingResult }))
-  }, [values])
+  }, [displayValues])
 
   return (
     <GlowSection
       title="What-If Business Simulator"
       description="Change the assumptions below to see the calculated results — a simulation, not a forecast."
     >
+      {isIllustrative && (
+        <div className="mb-4 flex items-start gap-2.5 rounded-2xl border border-amber-400/30 bg-amber-400/10 p-3">
+          <Sparkles className="mt-0.5 size-4 shrink-0 text-amber-400" aria-hidden="true" />
+          <p className="text-xs leading-relaxed text-glow-text/70">
+            <span className="font-semibold text-amber-400">Illustrative example</span> — pre-filled with a sample
+            price, cost, fixed costs, and unit count so you can try the simulator right away. Edit any field below,
+            or add your real figures via Onboarding or Settings first.
+          </p>
+        </div>
+      )}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
         <Input label="Selling Price (RM)" type="number" value={sellingPrice} onChange={(e) => setSellingPrice(Number.parseFloat(e.target.value) || 0)} />
         <Input label="Unit Cost (RM)" type="number" value={costPerUnit} onChange={(e) => setCostPerUnit(Number.parseFloat(e.target.value) || 0)} />
@@ -126,7 +138,8 @@ export default function BusinessWhatIfSimulator({ values = {} }) {
       {scenarioRows.length > 0 && (
         <div className="mt-6">
           <p className="mb-2 text-xs font-semibold text-glow-text/70">
-            Your saved plan under three assumption sets (Conservative / Current Plan / Growth)
+            {isIllustrative ? 'Illustrative example' : 'Your saved plan'} under three assumption sets (Conservative
+            / Current Plan / Growth)
           </p>
           <ResponsiveContainer width="100%" height={CHART_HEIGHTS.sm}>
             <BarChart data={scenarioRows} layout="vertical" margin={{ left: 8, right: 24 }}>

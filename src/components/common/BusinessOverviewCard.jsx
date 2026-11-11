@@ -1,8 +1,9 @@
-import { Building2, Lightbulb, PackageSearch } from 'lucide-react'
+import { Building2, Lightbulb, Sparkles } from 'lucide-react'
 import StatTile from '@/components/ui/StatTile'
 import { calculateBreakEven, calculateGrossMarginPercent, buildScenario } from '@/utils/scenarioEngine'
 import { calculateReadiness } from '@/utils/dataReadiness'
 import { calculateCapabilities } from '@/utils/capabilityMapping'
+import { resolveDisplayAssumptions } from '@/utils/illustrativeExample'
 
 /**
  * "My Business at a Glance" — Malaysian Local Shop's first screen after
@@ -41,11 +42,13 @@ function money(value) {
 
 /** @param {{values: object}} props business_profiles + business_assumptions, flattened (same shape as getProfile()'s `values`) */
 export default function BusinessOverviewCard({ values = {} }) {
-  const expected = buildScenario(values, 'expected')
-  const breakEven = calculateBreakEven(values)
+  const { values: displayValues, isIllustrative } = resolveDisplayAssumptions(values)
+  const expected = buildScenario(displayValues, 'expected')
+  const breakEven = calculateBreakEven(displayValues)
   const grossMarginPercent = calculateGrossMarginPercent(expected.revenue, expected.grossProfit)
   const readiness = calculateReadiness({ values })
   const capabilities = calculateCapabilities(readiness)
+  const productsRegistered = values.number_of_products ?? (isIllustrative ? displayValues.number_of_products : undefined)
 
   const businessName = values.business_name || 'Your Business'
   const category = values.industry || values.product_category || null
@@ -72,10 +75,22 @@ export default function BusinessOverviewCard({ values = {} }) {
         </span>
       </div>
 
+      {isIllustrative && (
+        <div className="mt-4 flex items-start gap-2.5 rounded-2xl border border-amber-400/30 bg-amber-400/10 p-3">
+          <Sparkles className="mt-0.5 size-4 shrink-0 text-amber-400" aria-hidden="true" />
+          <p className="text-xs leading-relaxed text-glow-text/70">
+            <span className="font-semibold text-amber-400">Illustrative example</span> — the figures below use a
+            sample price, cost, and fixed costs (RM10 price, RM6 cost per unit, RM2,500 fixed costs) so you can see
+            what this dashboard looks like. Add your own via Onboarding or Settings to replace them with your real
+            numbers.
+          </p>
+        </div>
+      )}
+
       <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatTile
           label="Products Registered"
-          value={money(values.number_of_products)}
+          value={money(productsRegistered)}
           guide="Count of products/services you've registered in your business profile."
         />
         <StatTile
@@ -137,12 +152,6 @@ export default function BusinessOverviewCard({ values = {} }) {
         </div>
       </div>
 
-      {!values.number_of_products && !expected.operatingCosts && (
-        <div className="mt-4 flex items-center gap-2 text-[11px] text-glow-text/40">
-          <PackageSearch className="size-3.5" aria-hidden="true" />
-          Figures above will fill in as you complete your business profile and cost assumptions.
-        </div>
-      )}
     </div>
   )
 }

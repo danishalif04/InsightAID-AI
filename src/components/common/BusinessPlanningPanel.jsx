@@ -15,6 +15,7 @@ import {
   calculateMarketingCostRatioPercent,
 } from '@/utils/scenarioEngine'
 import { calculateReadiness } from '@/utils/dataReadiness'
+import { resolveDisplayAssumptions } from '@/utils/illustrativeExample'
 import { CSV_TEMPLATES, downloadCsvTemplate } from '@/utils/csvTemplates'
 import { DATA_COLLECTION_GUIDANCE } from '@/utils/dataCollectionGuidance'
 
@@ -99,15 +100,22 @@ export default function BusinessPlanningPanel({ values, provenance, dataAvailabi
   const [computedValues, setComputedValues] = useState(values ?? {})
   const [saving, setSaving] = useState(false)
 
-  const scenarios = useMemo(() => buildAllScenarios(computedValues), [computedValues])
-  const breakEven = useMemo(() => calculateBreakEven(computedValues), [computedValues])
+  // Preview-only fallback: when nothing real has been entered yet, scenario/
+  // break-even figures below are computed from an illustrative example so
+  // the panel shows something concrete instead of "Insufficient data"
+  // everywhere. This NEVER touches formValues/computedValues themselves —
+  // Save still persists exactly what the owner typed, never the
+  // illustrative numbers.
+  const { values: displayAssumptions, isIllustrative } = resolveDisplayAssumptions(computedValues)
+  const scenarios = useMemo(() => buildAllScenarios(displayAssumptions), [displayAssumptions])
+  const breakEven = useMemo(() => calculateBreakEven(displayAssumptions), [displayAssumptions])
   const grossMarginPercent = useMemo(
     () => calculateGrossMarginPercent(scenarios.expected.revenue, scenarios.expected.grossProfit),
     [scenarios]
   )
   const marketingCostRatioPercent = useMemo(
-    () => calculateMarketingCostRatioPercent(computedValues.marketing_cost, scenarios.expected.revenue),
-    [computedValues, scenarios]
+    () => calculateMarketingCostRatioPercent(displayAssumptions.marketing_cost, scenarios.expected.revenue),
+    [displayAssumptions, scenarios]
   )
   const readiness = useMemo(() => calculateReadiness({ values: formValues }), [formValues])
 
@@ -184,7 +192,16 @@ export default function BusinessPlanningPanel({ values, provenance, dataAvailabi
       </Card>
 
       <div>
-        <p className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">Scenario Comparison</p>
+        <div className="mb-3 flex items-center gap-2">
+          <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Scenario Comparison</p>
+          {isIllustrative && <Badge tone="warning">Illustrative example</Badge>}
+        </div>
+        {isIllustrative && (
+          <p className="mb-3 text-xs text-slate-500 dark:text-slate-400">
+            Showing a sample price, cost, and fixed costs so you can see how this works. Fill in and save your own
+            assumptions below to replace it with your real numbers.
+          </p>
+        )}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           {Object.values(scenarios).map((scenario) => (
             <ScenarioCard key={scenario.caseType} scenario={scenario} />
@@ -192,7 +209,11 @@ export default function BusinessPlanningPanel({ values, provenance, dataAvailabi
         </div>
       </div>
 
-      <Card title="Break-Even &amp; Margins" description="Calculated from the Expected scenario">
+      <Card
+        title="Break-Even &amp; Margins"
+        description="Calculated from the Expected scenario"
+        actions={isIllustrative ? <Badge tone="warning">Illustrative example</Badge> : undefined}
+      >
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div>
             <p className="text-xs text-slate-500 dark:text-slate-400">Break-Even Units</p>
