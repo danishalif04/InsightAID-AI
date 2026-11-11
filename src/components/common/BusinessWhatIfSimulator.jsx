@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
-import { RotateCcw, Sparkles } from 'lucide-react'
+import { RotateCcw } from 'lucide-react'
+import AssumedFiguresNotice from '@/components/common/AssumedFiguresNotice'
 import { CHART_HEIGHTS } from '@/components/charts/chartDefaults'
 import ChartTooltip from '@/components/ui/ChartTooltip'
 import { Input } from '@/components/ui/Input'
@@ -21,6 +22,8 @@ import { resolveDisplayAssumptions } from '@/utils/illustrativeExample'
 
 const num = (value) => (typeof value === 'number' && Number.isFinite(value) ? value : null)
 
+const OPERATING_COST_FIELDS = ['marketing_cost', 'platform_fees', 'shipping_cost', 'labour_cost', 'fixed_costs', 'other_expenses']
+
 function GlowSection({ title, description, children, className = '' }) {
   return (
     <div className={`rounded-3xl border border-glow-border bg-glow-surface-elevated p-5 sm:p-6 ${className}`}>
@@ -34,12 +37,17 @@ function GlowSection({ title, description, children, className = '' }) {
 const SCENARIO_LABELS = { conservative: 'Conservative', expected: 'Current Plan', growth: 'Growth' }
 
 export default function BusinessWhatIfSimulator({ values = {} }) {
-  const { values: displayValues, isIllustrative } = resolveDisplayAssumptions(values)
+  const { values: displayValues, isIllustrative, assumedFields } = resolveDisplayAssumptions(values)
   const defaults = useMemo(
     () => ({
       selling_price: num(displayValues.selling_price) ?? 0,
       cost_per_unit: num(displayValues.cost_per_unit) ?? 0,
-      fixed_costs: num(displayValues.fixed_costs) ?? 0,
+      // This one input stands for TOTAL monthly overhead, so it seeds from
+      // every recorded operating cost — not just the `fixed_costs` field.
+      // Seeding from `fixed_costs` alone made the simulator report a
+      // break-even of 0 for an owner who had recorded, say, marketing but
+      // no rent, contradicting the break-even shown elsewhere on the page.
+      fixed_costs: OPERATING_COST_FIELDS.reduce((sum, field) => sum + (num(displayValues[field]) ?? 0), 0),
       expected_monthly_units: num(displayValues.expected_monthly_units) ?? 0,
     }),
     [displayValues]
@@ -87,16 +95,9 @@ export default function BusinessWhatIfSimulator({ values = {} }) {
       title="What-If Business Simulator"
       description="Change the assumptions below to see the calculated results — a simulation, not a forecast."
     >
-      {isIllustrative && (
-        <div className="mb-4 flex items-start gap-2.5 rounded-2xl border border-amber-400/30 bg-amber-400/10 p-3">
-          <Sparkles className="mt-0.5 size-4 shrink-0 text-amber-400" aria-hidden="true" />
-          <p className="text-xs leading-relaxed text-glow-text/70">
-            <span className="font-semibold text-amber-400">Illustrative example</span> — pre-filled with a sample
-            price, cost, fixed costs, and unit count so you can try the simulator right away. Edit any field below,
-            or add your real figures via Onboarding or Settings first.
-          </p>
-        </div>
-      )}
+      <AssumedFiguresNotice assumedFields={assumedFields} className="mb-4">
+        Edit any field below to try your own numbers — nothing here is saved.
+      </AssumedFiguresNotice>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
         <Input label="Selling Price (RM)" type="number" value={sellingPrice} onChange={(e) => setSellingPrice(Number.parseFloat(e.target.value) || 0)} />
         <Input label="Unit Cost (RM)" type="number" value={costPerUnit} onChange={(e) => setCostPerUnit(Number.parseFloat(e.target.value) || 0)} />

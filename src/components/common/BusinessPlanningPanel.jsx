@@ -15,7 +15,7 @@ import {
   calculateMarketingCostRatioPercent,
 } from '@/utils/scenarioEngine'
 import { calculateReadiness } from '@/utils/dataReadiness'
-import { resolveDisplayAssumptions } from '@/utils/illustrativeExample'
+import { describeAssumedFields, resolveDisplayAssumptions } from '@/utils/illustrativeExample'
 import { CSV_TEMPLATES, downloadCsvTemplate } from '@/utils/csvTemplates'
 import { DATA_COLLECTION_GUIDANCE } from '@/utils/dataCollectionGuidance'
 
@@ -106,7 +106,7 @@ export default function BusinessPlanningPanel({ values, provenance, dataAvailabi
   // everywhere. This NEVER touches formValues/computedValues themselves —
   // Save still persists exactly what the owner typed, never the
   // illustrative numbers.
-  const { values: displayAssumptions, isIllustrative } = resolveDisplayAssumptions(computedValues)
+  const { values: displayAssumptions, isIllustrative, assumedFields } = resolveDisplayAssumptions(computedValues)
   const scenarios = useMemo(() => buildAllScenarios(displayAssumptions), [displayAssumptions])
   const breakEven = useMemo(() => calculateBreakEven(displayAssumptions), [displayAssumptions])
   const grossMarginPercent = useMemo(
@@ -194,12 +194,12 @@ export default function BusinessPlanningPanel({ values, provenance, dataAvailabi
       <div>
         <div className="mb-3 flex items-center gap-2">
           <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Scenario Comparison</p>
-          {isIllustrative && <Badge tone="warning">Illustrative example</Badge>}
+          {isIllustrative && <Badge tone="warning">Example figures</Badge>}
         </div>
         {isIllustrative && (
           <p className="mb-3 text-xs text-slate-500 dark:text-slate-400">
-            Showing a sample price, cost, and fixed costs so you can see how this works. Fill in and save your own
-            assumptions below to replace it with your real numbers.
+            Sample values are standing in for your {describeAssumedFields(assumedFields)} — everything else is your
+            own data. Fill those in below and save to replace them.
           </p>
         )}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -212,7 +212,7 @@ export default function BusinessPlanningPanel({ values, provenance, dataAvailabi
       <Card
         title="Break-Even &amp; Margins"
         description="Calculated from the Expected scenario"
-        actions={isIllustrative ? <Badge tone="warning">Illustrative example</Badge> : undefined}
+        actions={isIllustrative ? <Badge tone="warning">Example figures</Badge> : undefined}
       >
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div>

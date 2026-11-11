@@ -1,5 +1,6 @@
-import { Building2, Lightbulb, Sparkles } from 'lucide-react'
+import { Building2, Lightbulb } from 'lucide-react'
 import StatTile from '@/components/ui/StatTile'
+import AssumedFiguresNotice from '@/components/common/AssumedFiguresNotice'
 import { calculateBreakEven, calculateGrossMarginPercent, buildScenario } from '@/utils/scenarioEngine'
 import { calculateReadiness } from '@/utils/dataReadiness'
 import { calculateCapabilities } from '@/utils/capabilityMapping'
@@ -42,13 +43,13 @@ function money(value) {
 
 /** @param {{values: object}} props business_profiles + business_assumptions, flattened (same shape as getProfile()'s `values`) */
 export default function BusinessOverviewCard({ values = {} }) {
-  const { values: displayValues, isIllustrative } = resolveDisplayAssumptions(values)
+  const { values: displayValues, assumedFields } = resolveDisplayAssumptions(values)
   const expected = buildScenario(displayValues, 'expected')
   const breakEven = calculateBreakEven(displayValues)
   const grossMarginPercent = calculateGrossMarginPercent(expected.revenue, expected.grossProfit)
   const readiness = calculateReadiness({ values })
   const capabilities = calculateCapabilities(readiness)
-  const productsRegistered = values.number_of_products ?? (isIllustrative ? displayValues.number_of_products : undefined)
+  const productsRegistered = displayValues.number_of_products
 
   const businessName = values.business_name || 'Your Business'
   const category = values.industry || values.product_category || null
@@ -75,17 +76,9 @@ export default function BusinessOverviewCard({ values = {} }) {
         </span>
       </div>
 
-      {isIllustrative && (
-        <div className="mt-4 flex items-start gap-2.5 rounded-2xl border border-amber-400/30 bg-amber-400/10 p-3">
-          <Sparkles className="mt-0.5 size-4 shrink-0 text-amber-400" aria-hidden="true" />
-          <p className="text-xs leading-relaxed text-glow-text/70">
-            <span className="font-semibold text-amber-400">Illustrative example</span> — the figures below use a
-            sample price, cost, and fixed costs (RM20 price, RM13 cost per unit, RM2,500 fixed costs) so you can see
-            what this dashboard looks like. Add your own via Onboarding or Settings to replace them with your real
-            numbers.
-          </p>
-        </div>
-      )}
+      <AssumedFiguresNotice assumedFields={assumedFields} className="mt-4">
+        Add them via Onboarding or Settings to replace them.
+      </AssumedFiguresNotice>
 
       <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatTile

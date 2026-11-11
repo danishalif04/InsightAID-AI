@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ReferenceDot, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
-import { Lightbulb, Sparkles } from 'lucide-react'
+import { Lightbulb } from 'lucide-react'
+import AssumedFiguresNotice from '@/components/common/AssumedFiguresNotice'
 import ChartCard from '@/components/charts/ChartCard'
 import { CHART_HEIGHTS } from '@/components/charts/chartDefaults'
 import ChartTooltip from '@/components/ui/ChartTooltip'
@@ -43,7 +44,7 @@ function GlowSection({ title, description, children, className = '' }) {
 }
 
 export default function BusinessFinancialHealthSection({ values = {} }) {
-  const { values: displayValues, isIllustrative } = resolveDisplayAssumptions(values)
+  const { values: displayValues, isIllustrative, assumedFields } = resolveDisplayAssumptions(values)
   const expected = useMemo(() => buildScenario(displayValues, 'expected'), [displayValues])
   const breakEven = useMemo(() => calculateBreakEven(displayValues), [displayValues])
   const grossMarginPercent = calculateGrossMarginPercent(expected.revenue, expected.grossProfit)
@@ -107,16 +108,7 @@ export default function BusinessFinancialHealthSection({ values = {} }) {
         </p>
       </div>
 
-      {isIllustrative && (
-        <div className="flex items-start gap-2.5 rounded-2xl border border-amber-400/30 bg-amber-400/10 p-3">
-          <Sparkles className="mt-0.5 size-4 shrink-0 text-amber-400" aria-hidden="true" />
-          <p className="text-xs leading-relaxed text-glow-text/70">
-            <span className="font-semibold text-amber-400">Illustrative example</span> — the charts below use a
-            sample price, cost, and fixed costs so you can see what this section looks like. Add your own via
-            Onboarding or Settings to replace them with your real numbers.
-          </p>
-        </div>
-      )}
+      <AssumedFiguresNotice assumedFields={assumedFields} />
 
       <ChartCard
         title="Monthly Expense Breakdown"

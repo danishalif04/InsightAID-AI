@@ -16,7 +16,7 @@ describe('illustrativeExample — matches the spec mock it mimics', () => {
     expect(operatingCosts.filter((field) => ILLUSTRATIVE_ASSUMPTIONS[field] > 0).length).toBeGreaterThan(1)
   })
 
-  it('produces the mock\'s 35% margin and ~RM7,143 break-even revenue', () => {
+  it("produces the mock's 35% margin and ~RM7,143 break-even revenue", () => {
     const { selling_price: price, cost_per_unit: cost, expected_monthly_units: units } = ILLUSTRATIVE_ASSUMPTIONS
     expect(calculateGrossMarginPercent(price * units, (price - cost) * units)).toBe(35)
 
@@ -32,27 +32,65 @@ describe('illustrativeExample — matches the spec mock it mimics', () => {
   })
 })
 
-describe('illustrativeExample', () => {
-  it('reports no core assumptions for an empty profile', () => {
+describe('hasCoreAssumptions', () => {
+  it('needs both price and cost to be real numbers', () => {
     expect(hasCoreAssumptions({})).toBe(false)
     expect(hasCoreAssumptions({ selling_price: 10 })).toBe(false)
     expect(hasCoreAssumptions({ cost_per_unit: 6 })).toBe(false)
-  })
-
-  it('reports core assumptions once both price and cost are real numbers', () => {
     expect(hasCoreAssumptions({ selling_price: 10, cost_per_unit: 6 })).toBe(true)
   })
+})
 
-  it('falls back to the illustrative example when nothing real is saved', () => {
-    const result = resolveDisplayAssumptions({})
-    expect(result.isIllustrative).toBe(true)
-    expect(result.values).toBe(ILLUSTRATIVE_ASSUMPTIONS)
+describe('resolveDisplayAssumptions — a real saved value always wins', () => {
+  it('fills everything from the example when nothing is saved, and says so', () => {
+    const { values, isIllustrative, assumedFields } = resolveDisplayAssumptions({})
+    expect(isIllustrative).toBe(true)
+    expect(values.selling_price).toBe(ILLUSTRATIVE_ASSUMPTIONS.selling_price)
+    expect(values.cost_per_unit).toBe(ILLUSTRATIVE_ASSUMPTIONS.cost_per_unit)
+    expect(assumedFields).toContain('selling price')
+    expect(assumedFields).toContain('monthly operating costs')
   })
 
-  it('uses the real values unchanged once core assumptions exist, never blending in the illustrative numbers', () => {
-    const real = { selling_price: 25, cost_per_unit: 10 }
-    const result = resolveDisplayAssumptions(real)
-    expect(result.isIllustrative).toBe(false)
-    expect(result.values).toBe(real)
+  it('keeps a real selling price and derives only the missing cost per unit from it', () => {
+    // usertest2's real shape: a price and units entered, no cost per unit yet.
+    const { values, isIllustrative, assumedFields } = resolveDisplayAssumptions({
+      selling_price: 18,
+      expected_monthly_units: 150,
+      marketing_cost: 300,
+    })
+
+    expect(values.selling_price).toBe(18) // real value preserved, NOT replaced by the example's 20
+    expect(values.expected_monthly_units).toBe(150) // real value preserved
+    expect(values.cost_per_unit).toBe(11.7) // derived at the example's 35% margin: 18 x 0.65
+    expect(isIllustrative).toBe(true)
+    expect(assumedFields).toContain('cost per unit')
+    expect(assumedFields).not.toContain('selling price')
+    expect(assumedFields).not.toContain('monthly units sold')
+  })
+
+  it('derives a missing selling price from a real cost per unit', () => {
+    const { values, assumedFields } = resolveDisplayAssumptions({ cost_per_unit: 13 })
+    expect(values.cost_per_unit).toBe(13)
+    expect(values.selling_price).toBe(20) // 13 / 0.65
+    expect(assumedFields).toContain('selling price')
+  })
+
+  it('never invents extra cost categories once the owner has recorded any cost', () => {
+    const { values, assumedFields } = resolveDisplayAssumptions({
+      selling_price: 18,
+      cost_per_unit: 10,
+      marketing_cost: 300,
+    })
+    expect(values.marketing_cost).toBe(300)
+    expect(values.fixed_costs).toBeUndefined()
+    expect(values.labour_cost).toBeUndefined()
+    expect(assumedFields).not.toContain('monthly operating costs')
+  })
+
+  it('reports nothing assumed when every field is already real', () => {
+    const complete = { ...ILLUSTRATIVE_ASSUMPTIONS }
+    const { isIllustrative, assumedFields } = resolveDisplayAssumptions(complete)
+    expect(isIllustrative).toBe(false)
+    expect(assumedFields).toEqual([])
   })
 })

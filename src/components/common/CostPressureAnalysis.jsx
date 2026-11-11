@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
-import { Info, Sparkles } from 'lucide-react'
+import { Info } from 'lucide-react'
+import AssumedFiguresNotice from '@/components/common/AssumedFiguresNotice'
 import { Select } from '@/components/ui/Input'
 import { CHART_HEIGHTS } from '@/components/charts/chartDefaults'
 import ChartTooltip from '@/components/ui/ChartTooltip'
@@ -48,10 +49,16 @@ export default function CostPressureAnalysis({ values = {} }) {
   const [costId, setCostId] = useState('cost_per_unit')
   const [pressurePercent, setPressurePercent] = useState(10)
 
-  const { values: displayValues, isIllustrative } = resolveDisplayAssumptions(values)
+  const { values: displayValues, assumedFields } = resolveDisplayAssumptions(values)
+
+  // Only offer categories that actually have a figure behind them —
+  // selecting an unrecorded one would blank the whole panel out.
+  const availableOptions = COST_OPTIONS.filter((option) => typeof displayValues[option.id] === 'number')
+  const activeCostId = availableOptions.some((option) => option.id === costId) ? costId : availableOptions[0]?.id
+
   const sellingPrice = typeof displayValues.selling_price === 'number' ? displayValues.selling_price : null
   const costPerUnit = typeof displayValues.cost_per_unit === 'number' ? displayValues.cost_per_unit : null
-  const currentValue = typeof displayValues[costId] === 'number' ? displayValues[costId] : null
+  const currentValue = typeof displayValues[activeCostId] === 'number' ? displayValues[activeCostId] : null
 
   const canCompute = sellingPrice !== null && costPerUnit !== null && currentValue !== null
   const bumpedValue = canCompute ? Math.round(currentValue * (1 + pressurePercent / 100) * 100) / 100 : null
@@ -85,15 +92,7 @@ export default function CostPressureAnalysis({ values = {} }) {
         </p>
       </div>
 
-      {isIllustrative && (
-        <div className="mt-3 flex items-start gap-2.5 rounded-2xl border border-amber-400/30 bg-amber-400/10 p-3">
-          <Sparkles className="mt-0.5 size-4 shrink-0 text-amber-400" aria-hidden="true" />
-          <p className="text-xs leading-relaxed text-glow-text/70">
-            <span className="font-semibold text-amber-400">Illustrative example</span> — using sample costs until
-            you add your own price and costs via Onboarding or Settings.
-          </p>
-        </div>
-      )}
+      <AssumedFiguresNotice assumedFields={assumedFields} className="mt-3" />
 
       {!canCompute ? (
         <p className="mt-4 text-xs text-glow-text/50">
@@ -102,8 +101,8 @@ export default function CostPressureAnalysis({ values = {} }) {
       ) : (
         <>
           <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Select label="Which cost?" value={costId} onChange={(e) => setCostId(e.target.value)}>
-              {COST_OPTIONS.map((option) => (
+            <Select label="Which cost?" value={activeCostId} onChange={(e) => setCostId(e.target.value)}>
+              {availableOptions.map((option) => (
                 <option key={option.id} value={option.id}>
                   {option.label}
                 </option>
@@ -133,10 +132,10 @@ export default function CostPressureAnalysis({ values = {} }) {
           </div>
 
           <p className="mt-4 text-xs leading-relaxed text-glow-text/70">
-            If {COST_OPTIONS.find((o) => o.id === costId)?.label.toLowerCase()} increases from{' '}
+            If {COST_OPTIONS.find((o) => o.id === activeCostId)?.label.toLowerCase()} increases from{' '}
             {formatCurrencyMYR(currentValue)} to {formatCurrencyMYR(bumpedValue)} while your selling price stays at{' '}
             {formatCurrencyMYR(sellingPrice)}, your gross margin{' '}
-            {costId === 'cost_per_unit' ? (
+            {activeCostId === 'cost_per_unit' ? (
               <>
                 decreases from <span className="font-semibold text-glow-text">{currentMarginPercent}%</span> to{' '}
                 <span className="font-semibold text-glow-text">{projectedMarginPercent}%</span>.
@@ -152,7 +151,7 @@ export default function CostPressureAnalysis({ values = {} }) {
 
           <div className="mt-4">
             <p className="mb-2 text-[11px] font-medium uppercase tracking-wide text-glow-text/40">
-              {COST_OPTIONS.find((o) => o.id === costId)?.label} — now vs. under cost pressure
+              {COST_OPTIONS.find((o) => o.id === activeCostId)?.label} — now vs. under cost pressure
             </p>
             <ResponsiveContainer width="100%" height={CHART_HEIGHTS.sm}>
               <BarChart data={comparisonRows} margin={{ left: -10, right: 8 }}>
