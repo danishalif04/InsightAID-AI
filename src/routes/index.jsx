@@ -3,6 +3,7 @@ import AppShell from '@/components/shell/AppShell'
 import RequireAuth from './RequireAuth'
 import { PATHS } from './paths'
 import * as Pages from './pages'
+import { localShopRoute } from '@/features/localshop/routes'
 
 const child = (path) => path.replace(/^\//, '')
 
@@ -31,6 +32,7 @@ export const router = createBrowserRouter([
           { path: child(PATHS.agentOrchestrator), element: <Pages.AgentOrchestrator /> },
           { path: child(PATHS.financialPlanning), element: <Pages.FinancialPlanning /> },
           { path: child(PATHS.actionCentre), element: <Pages.ActionCentre /> },
+          localShopRoute,
           { path: '*', element: <Pages.NotFound /> },
         ],
       },

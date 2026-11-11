@@ -24,6 +24,7 @@ import CommandPalette from './CommandPalette'
 
 const NAV_GROUPS = [
   { label: 'Overview', path: PATHS.dashboard },
+  { label: 'Local Shop', path: '/local-shop' },
   {
     label: 'Insights',
     items: [
