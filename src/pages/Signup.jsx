@@ -8,7 +8,7 @@ import { PATHS } from '@/routes/paths'
 import { glowBackground } from '@/config/designTokens'
 
 export default function Signup() {
-  const { signUp } = useAuth()
+  const { signUp, resendConfirmation } = useAuth()
   const navigate = useNavigate()
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
@@ -17,6 +17,8 @@ export default function Signup() {
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
   const [confirmationSent, setConfirmationSent] = useState(false)
+  const [resendState, setResendState] = useState('idle') // idle | sending | sent | error
+  const [resendError, setResendError] = useState(null)
 
   const handleSubmit = async (event) => {
     event.preventDefault()
@@ -36,11 +38,36 @@ export default function Signup() {
       return
     }
 
-    if (data.session) {
-      navigate(PATHS.dashboard, { replace: true })
-    } else {
-      setConfirmationSent(true)
+    // With email confirmation enabled, Supabase deliberately returns a
+    // success-shaped response for an email that is ALREADY registered, with
+    // an empty `identities` array — no new account, no email sent. Without
+    // this check the page tells the user to go check an inbox that will
+    // never receive anything.
+    if (Array.isArray(data?.user?.identities) && data.user.identities.length === 0) {
+      setError('An account with this email already exists. Try signing in instead.')
+      return
     }
+
+    // `data` can be null on some failure shapes — reading data.session
+    // directly would throw and blank the page out.
+    if (data?.session) {
+      navigate(PATHS.dashboard, { replace: true })
+      return
+    }
+
+    setConfirmationSent(true)
+  }
+
+  const handleResend = async () => {
+    setResendState('sending')
+    setResendError(null)
+    const { error: resendErr } = await resendConfirmation(email)
+    if (resendErr) {
+      setResendState('error')
+      setResendError(resendErr.message)
+      return
+    }
+    setResendState('sent')
   }
 
   return (
@@ -89,13 +116,37 @@ export default function Signup() {
             </h2>
 
             {confirmationSent ? (
-              <p className="mt-6 text-center text-sm leading-relaxed text-glow-text/60 lg:text-left">
-                Check <span className="font-medium text-glow-text">{email}</span> for a confirmation link, then{' '}
-                <Link to={PATHS.login} className="font-medium text-glow-brand hover:underline">
-                  sign in
-                </Link>
-                .
-              </p>
+              <div className="mt-6 space-y-4">
+                <p className="text-sm leading-relaxed text-glow-text/60">
+                  Your account was created. Before you can sign in, confirm it using the link sent to{' '}
+                  <span className="font-medium text-glow-text">{email}</span>.
+                </p>
+                <p className="text-xs leading-relaxed text-glow-text/40">
+                  It can take a few minutes — check your spam folder too. If nothing arrives, send it again below.
+                </p>
+
+                {resendState === 'sent' ? (
+                  <p className="text-sm text-glow-brand">Confirmation email sent again.</p>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="glowSecondary"
+                    className="w-full"
+                    loading={resendState === 'sending'}
+                    onClick={handleResend}
+                  >
+                    Resend confirmation email
+                  </Button>
+                )}
+                {resendError && <p className="text-sm text-danger">{resendError}</p>}
+
+                <p className="text-sm text-glow-text/50">
+                  Already confirmed?{' '}
+                  <Link to={PATHS.login} className="font-medium text-glow-brand hover:underline">
+                    Sign in
+                  </Link>
+                </p>
+              </div>
             ) : (
               <>
                 <form className="mt-6 space-y-4" onSubmit={handleSubmit}>

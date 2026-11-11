@@ -43,6 +43,13 @@ export default function AuthProvider({ children }) {
         supabase
           ? supabase.auth.signUp({ email, password, options: { data: { full_name: fullName } } })
           : Promise.resolve({ data: {}, error: NOT_CONFIGURED_ERROR }),
+      /** Re-sends the signup confirmation email. Needed because this project
+       * has "Confirm email" enabled, and Supabase's built-in SMTP is
+       * rate-limited — a first attempt is easily never delivered. */
+      resendConfirmation: (email) =>
+        supabase
+          ? supabase.auth.resend({ type: 'signup', email })
+          : Promise.resolve({ data: {}, error: NOT_CONFIGURED_ERROR }),
       signOut: () => (supabase ? supabase.auth.signOut() : Promise.resolve({ error: NOT_CONFIGURED_ERROR })),
     }),
     [session, loading]
