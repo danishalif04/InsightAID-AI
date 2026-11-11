@@ -1,0 +1,33 @@
+{
+  "_README": "CPI context data. Values are TODO_FROM_DOSM until real figures are pasted in, because an FYP citation needs a verifiable source and reference period - transcribing numbers off a chart image would not be citable. Fill `value` for each row, set `source`, `period` and `retrievedOn`, then set `status` to \"loaded\". The UI renders an explicit awaiting-data state while status is \"awaiting_data\" and never shows a placeholder as if it were a figure.",
+  "status": "awaiting_data",
+  "source": "TODO_FROM_DOSM",
+  "sourceUrl": "https://open.dosm.gov.my/",
+  "period": "TODO_FROM_DOSM",
+  "retrievedOn": "TODO_FROM_DOSM",
+  "unit": "percent change, year-on-year",
+  "series": [
+    { "id": "overall", "label": "CPI: Overall" },
+    { "id": "food_beverages", "label": "CPI: Food & Non-Alcoholic Beverages" }
+  ],
+  "regions": [
+    { "id": "malaysia", "label": "Malaysia", "overall": "TODO_FROM_DOSM", "food_beverages": "TODO_FROM_DOSM" },
+    { "id": "johor", "label": "Johor", "overall": "TODO_FROM_DOSM", "food_beverages": "TODO_FROM_DOSM" },
+    { "id": "kedah_perlis", "label": "Kedah & Perlis", "overall": "TODO_FROM_DOSM", "food_beverages": "TODO_FROM_DOSM" },
+    { "id": "kelantan", "label": "Kelantan", "overall": "TODO_FROM_DOSM", "food_beverages": "TODO_FROM_DOSM" },
+    { "id": "melaka", "label": "Melaka", "overall": "TODO_FROM_DOSM", "food_beverages": "TODO_FROM_DOSM" },
+    { "id": "negeri_sembilan", "label": "Negeri Sembilan", "overall": "TODO_FROM_DOSM", "food_beverages": "TODO_FROM_DOSM" },
+    { "id": "pahang", "label": "Pahang", "overall": "TODO_FROM_DOSM", "food_beverages": "TODO_FROM_DOSM" },
+    { "id": "perak", "label": "Perak", "overall": "TODO_FROM_DOSM", "food_beverages": "TODO_FROM_DOSM" },
+    { "id": "pulau_pinang", "label": "Pulau Pinang", "overall": "TODO_FROM_DOSM", "food_beverages": "TODO_FROM_DOSM" },
+    { "id": "sabah_labuan", "label": "Sabah & WP Labuan", "overall": "TODO_FROM_DOSM", "food_beverages": "TODO_FROM_DOSM" },
+    { "id": "sarawak", "label": "Sarawak", "overall": "TODO_FROM_DOSM", "food_beverages": "TODO_FROM_DOSM" },
+    { "id": "selangor_putrajaya", "label": "Selangor & WP Putrajaya", "overall": "TODO_FROM_DOSM", "food_beverages": "TODO_FROM_DOSM" },
+    { "id": "terengganu", "label": "Terengganu", "overall": "TODO_FROM_DOSM", "food_beverages": "TODO_FROM_DOSM" },
+    { "id": "kuala_lumpur", "label": "WP Kuala Lumpur", "overall": "TODO_FROM_DOSM", "food_beverages": "TODO_FROM_DOSM" }
+  ],
+  "priceWatch": {
+    "status": "awaiting_data",
+    "note": "KPDN PriceCatcher coverage has not been verified for this project. No observed price movements are shown until a real, licensed source is confirmed."
+  }
+}

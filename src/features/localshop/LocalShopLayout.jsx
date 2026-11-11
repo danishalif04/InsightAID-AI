@@ -2,6 +2,7 @@ import { NavLink, Outlet } from 'react-router-dom'
 import { Store } from 'lucide-react'
 import LanguageProvider from './i18n/LanguageProvider'
 import ShopProvider from './store/ShopProvider'
+import ActionsProvider from './store/ActionsProvider'
 import { useLang } from './i18n/useLang'
 import { LANGUAGES } from './i18n/strings'
 import { LOCAL_SHOP_PATHS } from './paths'
@@ -87,7 +88,9 @@ export default function LocalShopLayout() {
   return (
     <LanguageProvider>
       <ShopProvider>
-        <Shell />
+        <ActionsProvider>
+          <Shell />
+        </ActionsProvider>
       </ShopProvider>
     </LanguageProvider>
   )
