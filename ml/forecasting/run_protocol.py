@@ -171,6 +171,15 @@ def main() -> int:
     ap.add_argument("--max-folds", type=int, default=None)
     ap.add_argument("--categories", default=None,
                     help="comma-separated product/category values; each becomes one series")
+    ap.add_argument("--total-product", default=None,
+                    help="product/series value to use for the whole-business protocols. "
+                         "REQUIRED when the sales CSV holds several series, otherwise "
+                         "build_daily_series sums them all and double-counts any total row.")
+    ap.add_argument("--aggregates-by-product", default=None,
+                    help="sentiment CSV WITH a 'product' column, so each category series is "
+                         "paired with its OWN review sentiment. Without this, a per-category "
+                         "run tests category sales against marketplace-wide sentiment, which "
+                         "is a weak specification of the O2 hypothesis and is reported as such.")
     ap.add_argument("--full-per-category", action="store_true",
                     help="run ALL six model families per category and tally per-series "
                          "winners - required to fill the 'Series where best' column of "
@@ -183,7 +192,19 @@ def main() -> int:
 
     sales = pd.read_csv(args.sales)
     aggregates = pd.read_csv(args.aggregates) if args.aggregates else None
-    daily = build_daily_series(sales, aggregates)
+    by_product = pd.read_csv(args.aggregates_by_product) if args.aggregates_by_product else None
+    if by_product is not None and "product" not in by_product.columns:
+        print("--aggregates-by-product has no 'product' column; ignoring it.")
+        by_product = None
+    if "product" in sales.columns:
+        n_series = sales["product"].nunique()
+        if n_series > 1 and not args.total_product:
+            raise SystemExit(
+                "The sales CSV holds {} series ({}...). Pass --total-product to say which "
+                "one is the whole-business series; summing them would double-count any "
+                "total row that is already the sum of the others.".format(
+                    n_series, ", ".join(sorted(sales['product'].unique())[:4])))
+    daily = build_daily_series(sales, aggregates, product=args.total_product)
     print("daily series: {} days, {} to {}".format(
         len(daily), daily["date"].min().date(), daily["date"].max().date()))
 
@@ -191,6 +212,7 @@ def main() -> int:
         "run_id": run_id,
         "dataset_version": args.dataset_version,
         "prophet_config": config.as_dict(),
+        "total_product": args.total_product,
         "protocols": [],
         "sentiment_comparisons": [],
     }
@@ -243,7 +265,16 @@ def main() -> int:
     if args.categories and aggregates is not None:
         for cat in [c.strip() for c in args.categories.split(",") if c.strip()]:
             try:
-                cdf = build_daily_series(sales, aggregates, product=cat)
+                if by_product is not None:
+                    cagg = by_product[by_product["product"] == cat].drop(columns=["product"])
+                    if cagg.empty:
+                        print("[skip category {}] no rows in --aggregates-by-product".format(cat))
+                        continue
+                    sentiment_scope = "matched"
+                else:
+                    cagg = aggregates
+                    sentiment_scope = "marketplace_wide"
+                cdf = build_daily_series(sales, cagg, product=cat)
                 if len(cdf) < 120:
                     print("[skip category {}] only {} days".format(cat, len(cdf)))
                     continue
@@ -258,11 +289,13 @@ def main() -> int:
                     per_series.append({
                         "series": cat,
                         "n_days": len(cdf),
+                        "sentiment_scope": sentiment_scope,
                         "rows": [asdict(r) for r in cres.rows],
                     })
                     print("  full comparison done: {} ({} days)".format(cat, len(cdf)))
                 summary["sentiment_comparisons"].append({
                     "protocol": "daily_h7_per_category",
+                    "sentiment_scope": sentiment_scope,
                     **run_sentiment_comparison(cdf, config, cat, initial, 7, 7,
                                                max_folds=args.max_folds),
                 })
@@ -271,6 +304,14 @@ def main() -> int:
                 print("[skip category {}] {}".format(cat, exc))
 
     if per_series:
+        unmatched = [e["series"] for e in per_series
+                     if e.get("sentiment_scope") == "marketplace_wide"]
+        if unmatched:
+            print(("\n[warning] {} series were tested against MARKETPLACE-WIDE sentiment, "
+                   "not their own: {}. Pass --aggregates-by-product to pair each series "
+                   "with its own reviews; until then the O2 result for these series is a "
+                   "weak test of the hypothesis and must be reported as one.")
+                  .format(len(unmatched), ", ".join(unmatched)))
         summary["per_series"] = per_series
         summary["series_winner_counts"] = tally_series_winners(per_series)
         summary["mean_metrics_across_series"] = aggregate_metrics_across_series(per_series)
