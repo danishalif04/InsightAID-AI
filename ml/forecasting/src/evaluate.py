@@ -137,6 +137,11 @@ def run_comparison(
         candidates["lstm"] = ("lstm", "sales_only", _lstm_fn)
 
     rows = []
+    # Recorded on every row so a reader can tell a 10-fold result from a
+    # 2-fold one without re-deriving it from the series length.
+    n_folds = len(rolling_origin_splits(len(daily_df), initial_train_size, horizon,
+                                        step=step, max_folds=max_folds))
+
     for _key, (model_type, variant, fn) in candidates.items():
         try:
             metrics = evaluate_candidate(daily_df, fn, initial_train_size, horizon, step=step, max_folds=max_folds)
@@ -218,6 +223,7 @@ def run_comparison(
             metrics=metrics,
             forecast_points=forecast_points,
             notes=notes,
+            n_folds=n_folds,
         )
         rows.append(row)
 

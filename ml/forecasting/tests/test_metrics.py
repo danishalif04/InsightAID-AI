@@ -1,6 +1,8 @@
 import json
 from pathlib import Path
 
+import pytest
+
 from src.metrics import (
     ForecastMetrics,
     average_metrics,
@@ -101,8 +103,9 @@ def test_average_metrics_handles_missing_mape():
     assert averaged.mape == 10  # only fold_b contributes
 
 
-def _row(model_type, variant, mae, rmse, mape):
-    metrics = ForecastMetrics(mae=mae, rmse=rmse, mape=mape, n_points=10, n_mape_points=10)
+def _row(model_type, variant, mae, rmse, mape, mase=None, n_folds=None):
+    metrics = ForecastMetrics(mae=mae, rmse=rmse, mape=mape, n_points=10,
+                              n_mape_points=10, mase=mase)
     return build_forecast_result_row(
         run_id="test-run",
         model_type=model_type,
@@ -113,6 +116,7 @@ def _row(model_type, variant, mae, rmse, mape):
         evaluation_period_end="2026-01-10",
         metrics=metrics,
         forecast_points=[],
+        n_folds=n_folds,
     )
 
 
@@ -122,7 +126,7 @@ def test_select_best_picks_lowest_mape():
         _row("prophet", "sentiment_enhanced", mae=10, rmse=12, mape=8),
         _row("xgboost", "sales_only", mae=15, rmse=18, mape=12),
     ]
-    best = select_best(rows)
+    best = select_best(rows, metric="mape")
     assert best.model_type == "prophet"
     assert best.is_best is True
     assert sum(r.is_best for r in rows) == 1
@@ -133,7 +137,7 @@ def test_select_best_breaks_ties_on_rmse():
         _row("arima", "sales_only", mae=10, rmse=20, mape=10),
         _row("xgboost", "sales_only", mae=10, rmse=15, mape=10),
     ]
-    best = select_best(rows)
+    best = select_best(rows, metric="mape")
     assert best.model_type == "xgboost"
 
 
@@ -142,7 +146,7 @@ def test_select_best_falls_back_when_no_mape_defined():
         _row("moving_average", "sales_only", mae=10, rmse=20, mape=None),
         _row("arima", "sales_only", mae=5, rmse=8, mape=None),
     ]
-    best = select_best(rows)
+    best = select_best(rows, metric="mape")
     assert best.model_type == "arima"  # lowest RMSE among the undefined-MAPE pool
 
 
@@ -158,3 +162,38 @@ def test_write_forecast_results_json_round_trips(tmp_path: Path):
     loaded = json.loads(path.read_text(encoding="utf-8"))
     assert loaded[0]["model_type"] == "prophet"
     assert loaded[0]["is_best"] is True
+
+
+def test_build_forecast_result_row_carries_mase_and_n_folds():
+    """These were computed but had no field on the row, so every saved result
+    reported mase=null. Regression guard for that exact bug."""
+    row = _row("prophet", "sales_only", mae=10, rmse=12, mape=8, mase=0.85, n_folds=10)
+    assert row.mase == 0.85
+    assert row.n_folds == 10
+
+
+def test_select_best_ranks_by_mase_by_default():
+    """The model with the lowest MAPE is NOT the winner when MASE disagrees.
+    MAPE divides by the actual, so a near-zero day can hand first place to a
+    worse forecaster; MASE is the default for that reason."""
+    rows = [
+        _row("xgboost", "sales_only", mae=50, rmse=60, mape=5, mase=2.4),
+        _row("prophet", "sales_only", mae=20, rmse=25, mape=40, mase=0.8),
+    ]
+    best = select_best(rows)
+    assert best.model_type == "prophet"
+    assert sum(r.is_best for r in rows) == 1
+
+
+def test_select_best_ignores_rows_with_no_mase_when_others_have_one():
+    rows = [
+        _row("arima", "sales_only", mae=1, rmse=1, mape=1, mase=None),
+        _row("prophet", "sales_only", mae=30, rmse=40, mape=30, mase=1.2),
+    ]
+    assert select_best(rows).model_type == "prophet"
+
+
+def test_select_best_rejects_an_unknown_metric():
+    rows = [_row("prophet", "sales_only", mae=10, rmse=12, mape=8, mase=0.9)]
+    with pytest.raises(ValueError):
+        select_best(rows, metric="rmse")

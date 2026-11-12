@@ -36,7 +36,12 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from src.data_loader import build_daily_series, resample_series  # noqa: E402
+from src.data_loader import (  # noqa: E402
+    build_daily_series,
+    find_mature_start,
+    resample_series,
+    trim_to_mature,
+)
 from src.dm_test import diebold_mariano_test  # noqa: E402
 from src.evaluate import run_comparison  # noqa: E402
 from src.metrics import compute_forecast_metrics, write_forecast_results_json  # noqa: E402
@@ -150,8 +155,8 @@ def aggregate_metrics_across_series(per_series: list[dict]) -> dict:
     for entry in per_series:
         for r in entry["rows"]:
             key = "{}:{}".format(r["model_type"], r["variant"])
-            acc.setdefault(key, {"mae": [], "rmse": [], "mape": []})
-            for m in ("mae", "rmse", "mape"):
+            acc.setdefault(key, {"mae": [], "rmse": [], "mape": [], "mase": []})
+            for m in ("mae", "rmse", "mape", "mase"):
                 if r.get(m) is not None:
                     acc[key][m].append(r[m])
     out = {}
@@ -171,6 +176,11 @@ def main() -> int:
     ap.add_argument("--max-folds", type=int, default=None)
     ap.add_argument("--categories", default=None,
                     help="comma-separated product/category values; each becomes one series")
+    ap.add_argument("--trim-ramp-up", action="store_true",
+                    help="drop the launch ramp before evaluating, using the fixed rule in "
+                         "data_loader.find_mature_start (28-day trailing median reaching 50%% "
+                         "of the last 365 days' median). The derived date is printed and saved; "
+                         "it is never hand-picked.")
     ap.add_argument("--total-product", default=None,
                     help="product/series value to use for the whole-business protocols. "
                          "REQUIRED when the sales CSV holds several series, otherwise "
@@ -208,11 +218,24 @@ def main() -> int:
     print("daily series: {} days, {} to {}".format(
         len(daily), daily["date"].min().date(), daily["date"].max().date()))
 
+    mature_start = None
+    if args.trim_ramp_up:
+        mature_start = find_mature_start(daily)
+        if mature_start is None:
+            print("[trim] series never reaches the maturity threshold - evaluating it whole.")
+        else:
+            before = len(daily)
+            daily = trim_to_mature(daily, mature_start)
+            print("[trim] mature from {} - dropped {} ramp-up days, {} remain".format(
+                mature_start.date(), before - len(daily), len(daily)))
+
     summary = {
         "run_id": run_id,
         "dataset_version": args.dataset_version,
         "prophet_config": config.as_dict(),
         "total_product": args.total_product,
+        "trim_ramp_up": args.trim_ramp_up,
+        "mature_start": str(mature_start.date()) if mature_start is not None else None,
         "protocols": [],
         "sentiment_comparisons": [],
     }
@@ -236,8 +259,9 @@ def main() -> int:
         print("saved " + str(path))
         for r in result.rows:
             mape = "n/a" if r.mape is None else round(r.mape, 2)
-            print("  {:<16} {:<20} MAE={:>12.2f}  RMSE={:>12.2f}  MAPE={:>8}  best={}".format(
-                r.model_type, r.variant, r.mae, r.rmse, mape, r.is_best))
+            mase = "n/a" if r.mase is None else round(r.mase, 3)
+            print("  {:<16} {:<20} MAE={:>12.2f}  RMSE={:>12.2f}  MAPE={:>8}  MASE={:>7}  best={}".format(
+                r.model_type, r.variant, r.mae, r.rmse, mape, mase, r.is_best))
 
         summary["protocols"].append({
             "protocol": asdict(proto),
@@ -275,6 +299,13 @@ def main() -> int:
                     cagg = aggregates
                     sentiment_scope = "marketplace_wide"
                 cdf = build_daily_series(sales, cagg, product=cat)
+                cat_start = None
+                if args.trim_ramp_up:
+                    # Each series gets its own derived date: categories launch
+                    # and mature at different times, so reusing the total's
+                    # date would trim some series wrongly in both directions.
+                    cat_start = find_mature_start(cdf)
+                    cdf = trim_to_mature(cdf, cat_start)
                 if len(cdf) < 120:
                     print("[skip category {}] only {} days".format(cat, len(cdf)))
                     continue
@@ -289,6 +320,7 @@ def main() -> int:
                     per_series.append({
                         "series": cat,
                         "n_days": len(cdf),
+                        "mature_start": str(cat_start.date()) if cat_start is not None else None,
                         "sentiment_scope": sentiment_scope,
                         "rows": [asdict(r) for r in cres.rows],
                     })
@@ -317,9 +349,11 @@ def main() -> int:
         summary["mean_metrics_across_series"] = aggregate_metrics_across_series(per_series)
         print("\n=== Table 4.4 inputs: mean across {} series ===".format(len(per_series)))
         for key, m in summary["mean_metrics_across_series"].items():
-            print("  {:<42} MAE={:<12} RMSE={:<12} MAPE={:<9} best_on={} of {} series".format(
-                key, m["mae"], m["rmse"], m["mape"],
+            print("  {:<42} MAE={:<11} RMSE={:<11} MAPE={:<8} MASE={:<7} best_on={} of {} series".format(
+                key, m["mae"], m["rmse"], m["mape"], m["mase"],
                 summary["series_winner_counts"].get(key, 0), len(per_series)))
+        print("  Winners are ranked by MASE. MAPE is reported but is unreliable on "
+              "low-volume series: it divides by the actual, so near-zero days dominate it.")
     else:
         print("\n[Table 4.4] single series only - leave the 'Series where best' "
               "column blank or drop it; it is not measurable from one series.")

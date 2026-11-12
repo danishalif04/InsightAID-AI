@@ -121,6 +121,14 @@ class ForecastResultRow:
     forecast_points: list  # [{date, predicted, lower, upper}]
     is_best: bool = False
     notes: Optional[str] = None
+    # MASE was computed and averaged correctly but had nowhere to go, so every
+    # saved result reported mase=null. It is the metric that matters most on
+    # low-volume series: MAPE divides by the actual, so a handful of near-zero
+    # days sends it toward 100% and makes it useless for ranking models.
+    # MASE divides by the seasonal-naive error instead, so >1 means "worse
+    # than repeating last week".
+    mase: Optional[float] = None
+    n_folds: Optional[int] = None
 
 
 def build_forecast_result_row(
@@ -135,6 +143,7 @@ def build_forecast_result_row(
     metrics: ForecastMetrics,
     forecast_points: list,
     notes: Optional[str] = None,
+    n_folds: Optional[int] = None,
 ) -> ForecastResultRow:
     return ForecastResultRow(
         run_id=run_id,
@@ -151,26 +160,48 @@ def build_forecast_result_row(
         forecast_points=forecast_points,
         is_best=False,
         notes=notes,
+        mase=metrics.mase,
+        n_folds=n_folds,
     )
 
 
-def select_best(rows: list[ForecastResultRow]) -> Optional[ForecastResultRow]:
-    """Picks the row with the lowest MAPE (the user's target metric - "target
-    MAPE < 15%"), breaking ties on RMSE. Rows with no defined MAPE (every
-    actual in their evaluation window was 0) are only chosen if NOTHING
-    else has a defined MAPE, since MAPE is undefined rather than good or
-    bad for them. Mutates `is_best` on the winning row in place and returns
-    it; returns None for an empty list."""
+def select_best(rows: list[ForecastResultRow], metric: str = "mase") -> Optional[ForecastResultRow]:
+    """Picks the best row by `metric` ("mase" by default, or "mape"), breaking
+    ties on RMSE. Mutates `is_best` on the winner and returns it; None for an
+    empty list.
+
+    Why MASE and not MAPE, even though the project's acceptance target is
+    stated in MAPE: MAPE divides by each actual value, so on a series with
+    near-zero days a model can be ranked first on a number that is dominated
+    by a few tiny denominators rather than by forecast quality. Measured on
+    this project's olist category series, mean MAPE ran 87-103% while the
+    models were not that bad - the metric was. MASE divides by the
+    seasonal-naive error on the TRAINING set instead, so it is scale-free,
+    defined when actuals are zero, and interpretable: >1 means the model did
+    worse than repeating the previous season.
+
+    The MAPE target is still reported against the winner, unchanged. This
+    function decides which model is best; it does not decide whether the
+    target was met.
+
+    Rows with no value for the chosen metric are only selected if NO row has
+    one, since an undefined metric is neither good nor bad.
+    """
     if not rows:
         return None
+    if metric not in ("mase", "mape"):
+        raise ValueError("metric must be 'mase' or 'mape', got " + repr(metric))
 
     for row in rows:
         row.is_best = False
 
-    ranked = [r for r in rows if r.mape is not None]
+    def _value(row: "ForecastResultRow") -> Optional[float]:
+        return row.mase if metric == "mase" else row.mape
+
+    ranked = [r for r in rows if _value(r) is not None]
     pool = ranked if ranked else rows
 
-    best = min(pool, key=lambda r: (r.mape if r.mape is not None else float("inf"), r.rmse))
+    best = min(pool, key=lambda r: (_value(r) if _value(r) is not None else float("inf"), r.rmse))
     best.is_best = True
     return best
 

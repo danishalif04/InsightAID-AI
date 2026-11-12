@@ -185,3 +185,57 @@ def resample_series(daily_df: pd.DataFrame, freq: str = "W-MON") -> pd.DataFrame
         out = out.merge(pd.DataFrame(rows), on="date", how="left")
 
     return out.sort_values("date").reset_index(drop=True)
+
+
+def find_mature_start(
+    daily_df: pd.DataFrame,
+    window: int = 28,
+    fraction: float = 0.5,
+    reference_days: int = 365,
+) -> pd.Timestamp | None:
+    """First date from which the series is at a comparable scale to its own
+    recent level - the start of the "mature" period.
+
+    Why this exists
+    ---------------
+    A business that launched inside the observation window spends its first
+    months at a fraction of its eventual size. A rolling-origin split then
+    trains on the launch ramp and scores against the mature business, so every
+    model under-forecasts for a reason that has nothing to do with the model.
+    Measured on this project's olist series, monthly median revenue ran 3,308
+    in January 2017 against 33,306 in August 2018 - a tenfold change inside
+    one series - and daily MAPE sat at 36-48% for every model family.
+
+    The rule, not a chosen date
+    ---------------------------
+    Returns the first date whose trailing `window`-day median reaches
+    `fraction` of the median of the last `reference_days`. Both the rule and
+    its parameters are fixed here, in code, so the start date is DERIVED from
+    the data rather than selected after seeing which date produces the best
+    error. Trying dates until the error drops would be threshold-hacking; the
+    derived date must be reported alongside the result either way.
+
+    Returns None when the series never reaches the threshold, or is shorter
+    than `window`. Callers must treat None as "do not trim", not as an error.
+    """
+    if daily_df.empty or len(daily_df) < window:
+        return None
+
+    df = daily_df.sort_values("date")
+    revenue = df["revenue"].astype(float)
+    reference = revenue.tail(min(reference_days, len(revenue))).median()
+    if not reference > 0:
+        return None
+
+    rolling = revenue.rolling(window, min_periods=max(2, window // 2)).median()
+    mature = df.loc[rolling >= fraction * reference, "date"]
+    return pd.to_datetime(mature.iloc[0]) if len(mature) else None
+
+
+def trim_to_mature(daily_df: pd.DataFrame, start: pd.Timestamp | None) -> pd.DataFrame:
+    """Drops rows before `start`. A no-op when `start` is None, so a series
+    that never matured is evaluated whole rather than silently emptied."""
+    if start is None or daily_df.empty:
+        return daily_df
+    out = daily_df[pd.to_datetime(daily_df["date"]) >= start].reset_index(drop=True)
+    return out if len(out) else daily_df
