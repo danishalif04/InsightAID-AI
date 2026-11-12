@@ -118,6 +118,50 @@ def run_sentiment_comparison(df, config, label, initial_train_size, horizon,
     }
 
 
+def tally_series_winners(per_series: list[dict]) -> dict:
+    """How many series each model family won.
+
+    Table 4.4 in the dissertation has a "Series where best" column. A
+    single-series run CANNOT fill it - with one series every count is 0 or 1
+    and the column is meaningless. It is filled only from a multi-series run,
+    and left blank otherwise rather than guessed.
+    """
+    families: dict[str, int] = {}
+    wins: dict[str, int] = {}
+    for entry in per_series:
+        for r in entry["rows"]:
+            key = "{}:{}".format(r["model_type"], r["variant"])
+            families[key] = 0
+            if r.get("is_best"):
+                wins[key] = wins.get(key, 0) + 1
+    return {k: wins.get(k, 0) for k in families}
+
+
+def aggregate_metrics_across_series(per_series: list[dict]) -> dict:
+    """Unweighted mean of each family's fold-averaged metrics across series.
+
+    Unweighted because MAPE is already scale-free; averaging MAE across series
+    of different revenue scale is reported but is the weaker of the two columns.
+    Series where a family produced no metric are excluded from its mean and the
+    surviving count is reported as n_series, so a family that failed on most
+    series cannot look strong on the one it survived.
+    """
+    acc: dict[str, dict[str, list]] = {}
+    for entry in per_series:
+        for r in entry["rows"]:
+            key = "{}:{}".format(r["model_type"], r["variant"])
+            acc.setdefault(key, {"mae": [], "rmse": [], "mape": []})
+            for m in ("mae", "rmse", "mape"):
+                if r.get(m) is not None:
+                    acc[key][m].append(r[m])
+    out = {}
+    for key, v in acc.items():
+        out[key] = {m: (round(sum(x) / len(x), 4) if x else None)
+                    for m, x in v.items()}
+        out[key]["n_series"] = len(v["mae"])
+    return out
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--sales", required=True, help="processed_data / forecast sales CSV")
@@ -126,7 +170,11 @@ def main() -> int:
     ap.add_argument("--dataset-version", default=None)
     ap.add_argument("--max-folds", type=int, default=None)
     ap.add_argument("--categories", default=None,
-                    help="comma-separated product/category values for the per-category O2 test")
+                    help="comma-separated product/category values; each becomes one series")
+    ap.add_argument("--full-per-category", action="store_true",
+                    help="run ALL six model families per category and tally per-series "
+                         "winners - required to fill the 'Series where best' column of "
+                         "Table 4.4, which a single-series run cannot fill")
     args = ap.parse_args()
 
     run_id = uuid.uuid4().hex[:12]
@@ -191,6 +239,7 @@ def main() -> int:
 
     # Per-category O2 test: review sentiment is product-specific, so testing it
     # against a marketplace-wide total is a weak specification of the hypothesis.
+    per_series: list[dict] = []
     if args.categories and aggregates is not None:
         for cat in [c.strip() for c in args.categories.split(",") if c.strip()]:
             try:
@@ -199,6 +248,19 @@ def main() -> int:
                     print("[skip category {}] only {} days".format(cat, len(cdf)))
                     continue
                 initial = max(30, len(cdf) // 2)
+                if args.full_per_category:
+                    cres = run_comparison(
+                        cdf, horizon=7, initial_train_size=initial,
+                        dataset_version="{}:cat_{}".format(args.dataset_version, cat),
+                        run_id="{}_cat_{}".format(run_id, cat),
+                        max_folds=args.max_folds,
+                    )
+                    per_series.append({
+                        "series": cat,
+                        "n_days": len(cdf),
+                        "rows": [asdict(r) for r in cres.rows],
+                    })
+                    print("  full comparison done: {} ({} days)".format(cat, len(cdf)))
                 summary["sentiment_comparisons"].append({
                     "protocol": "daily_h7_per_category",
                     **run_sentiment_comparison(cdf, config, cat, initial, 7, 7,
@@ -207,6 +269,19 @@ def main() -> int:
                 print("  per-category O2 test done: " + cat)
             except (KeyError, ValueError) as exc:
                 print("[skip category {}] {}".format(cat, exc))
+
+    if per_series:
+        summary["per_series"] = per_series
+        summary["series_winner_counts"] = tally_series_winners(per_series)
+        summary["mean_metrics_across_series"] = aggregate_metrics_across_series(per_series)
+        print("\n=== Table 4.4 inputs: mean across {} series ===".format(len(per_series)))
+        for key, m in summary["mean_metrics_across_series"].items():
+            print("  {:<42} MAE={:<12} RMSE={:<12} MAPE={:<9} best_on={} of {} series".format(
+                key, m["mae"], m["rmse"], m["mape"],
+                summary["series_winner_counts"].get(key, 0), len(per_series)))
+    else:
+        print("\n[Table 4.4] single series only - leave the 'Series where best' "
+              "column blank or drop it; it is not measurable from one series.")
 
     out = RESULTS_DIR / "protocol_summary_{}.json".format(run_id)
     out.parent.mkdir(parents=True, exist_ok=True)
