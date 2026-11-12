@@ -133,3 +133,55 @@ def build_daily_series(
         # (Prophet regressors need no NaNs), not silently zeroed here.
 
     return daily
+
+
+def resample_series(daily_df: pd.DataFrame, freq: str = "W-MON") -> pd.DataFrame:
+    """Aggregates the daily series produced by `build_daily_series` to a
+    coarser frequency (e.g. 'W-MON' for weeks starting Monday).
+
+    Daily small-business revenue is dominated by day-of-week noise, which
+    inflates MAPE without reflecting any real failure to predict demand.
+    Evaluating at weekly granularity is a legitimate protocol choice, but it
+    is a DIFFERENT protocol - any result produced from this function must be
+    reported with its frequency stated, never compared like-for-like against
+    a daily run.
+
+    Revenue, sales and the two volume columns are summed over the period.
+    Ratio/score columns are averaged weighted by `comment_volume`, matching
+    how `build_daily_sentiment_regressors` collapses across platforms, so a
+    week's sentiment reflects the days that actually had comments. A period
+    with no comments at all keeps a null ratio rather than a fabricated 0.
+    """
+    if daily_df.empty:
+        return daily_df
+
+    df = daily_df.copy()
+    df["date"] = pd.to_datetime(df["date"])
+    grouper = pd.Grouper(key="date", freq=freq)
+
+    sum_columns = [c for c in ("sales", "revenue", "mention_volume", "comment_volume") if c in df.columns]
+    ratio_columns = [
+        c for c in ("avg_rating_sentiment", "positive_ratio", "negative_ratio") if c in df.columns
+    ]
+
+    out = df.groupby(grouper)[sum_columns].sum(min_count=1).reset_index()
+
+    if ratio_columns:
+        weights = df["comment_volume"] if "comment_volume" in df.columns else None
+        rows = []
+        for period, group in df.groupby(grouper):
+            row = {"date": period}
+            for col in ratio_columns:
+                values = group[col].dropna()
+                if values.empty:
+                    row[col] = None
+                    continue
+                w = group.loc[values.index, "comment_volume"] if weights is not None else None
+                if w is not None and w.sum() > 0:
+                    row[col] = float((values * w).sum() / w.sum())
+                else:
+                    row[col] = float(values.mean())
+            rows.append(row)
+        out = out.merge(pd.DataFrame(rows), on="date", how="left")
+
+    return out.sort_values("date").reset_index(drop=True)

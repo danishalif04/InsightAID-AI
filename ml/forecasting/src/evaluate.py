@@ -75,11 +75,11 @@ def _arima_fn(train_df: pd.DataFrame, _test_df: pd.DataFrame, horizon: int) -> l
     return predictions
 
 
-def _prophet_fn(variant: str) -> ForecastFn:
+def _prophet_fn(variant: str, freq: str = "D") -> ForecastFn:
     def _predict(train_df: pd.DataFrame, test_df: pd.DataFrame, horizon: int) -> list[float]:
         fitted = fit_prophet(train_df, variant=variant)
         future_regressors = test_df[["date", *SENTIMENT_REGRESSOR_COLUMNS]] if variant == "sentiment_enhanced" else None
-        result = prophet_forecast(fitted, train_df, horizon, future_regressors=future_regressors)
+        result = prophet_forecast(fitted, train_df, horizon, future_regressors=future_regressors, freq=freq)
         return result["predicted"].tolist()
 
     return _predict
@@ -95,13 +95,20 @@ def _lstm_fn(train_df: pd.DataFrame, _test_df: pd.DataFrame, horizon: int) -> li
     return lstm_forecast(model, normalization, train_df["revenue"].tolist(), horizon)
 
 
-CANDIDATES: dict[str, tuple[str, str, ForecastFn]] = {
-    "moving_average": ("moving_average", "sales_only", _moving_average_fn),
-    "arima": ("arima", "sales_only", _arima_fn),
-    "prophet_sales_only": ("prophet", "sales_only", _prophet_fn("sales_only")),
-    "prophet_sentiment_enhanced": ("prophet", "sentiment_enhanced", _prophet_fn("sentiment_enhanced")),
-    "xgboost": ("xgboost", "sales_only", _xgboost_fn),
-}
+def build_candidates(freq: str = "D") -> dict[str, tuple[str, str, ForecastFn]]:
+    """`freq` is the series' own spacing ('D' daily, 'W-MON' weekly). Only
+    Prophet needs it, because it is the one model that forecasts by DATE
+    rather than by position."""
+    return {
+        "moving_average": ("moving_average", "sales_only", _moving_average_fn),
+        "arima": ("arima", "sales_only", _arima_fn),
+        "prophet_sales_only": ("prophet", "sales_only", _prophet_fn("sales_only", freq)),
+        "prophet_sentiment_enhanced": ("prophet", "sentiment_enhanced", _prophet_fn("sentiment_enhanced", freq)),
+        "xgboost": ("xgboost", "sales_only", _xgboost_fn),
+    }
+
+
+CANDIDATES: dict[str, tuple[str, str, ForecastFn]] = build_candidates()
 
 
 @dataclass
@@ -118,12 +125,13 @@ def run_comparison(
     run_id: Optional[str] = None,
     step: Optional[int] = None,
     max_folds: Optional[int] = None,
+    freq: str = "D",
 ) -> ComparisonResult:
     if initial_train_size is None:
         initial_train_size = max(30, len(daily_df) // 2)
     run_id = run_id or uuid.uuid4().hex[:12]
 
-    candidates = dict(CANDIDATES)
+    candidates = build_candidates(freq)
     lstm_ok, lstm_reason = should_train_lstm(len(daily_df))
     if lstm_ok:
         candidates["lstm"] = ("lstm", "sales_only", _lstm_fn)
@@ -147,8 +155,9 @@ def run_comparison(
 
         # Forward-looking points for the UI chart, trained on the full series.
         full_train = daily_df
+        offset = pd.tseries.frequencies.to_offset(freq)
         future_index = pd.date_range(
-            pd.to_datetime(daily_df["date"]).max() + pd.Timedelta(days=1), periods=horizon
+            pd.to_datetime(daily_df["date"]).max() + offset, periods=horizon, freq=freq
         )
         forecast_points = [
             {"date": str(d.date()), "predicted": None, "lower": None, "upper": None} for d in future_index
@@ -160,7 +169,7 @@ def run_comparison(
                 if variant == "sentiment_enhanced":
                     last_row = full_train[["date", *SENTIMENT_REGRESSOR_COLUMNS]].tail(1)
                     future_regressors = pd.concat([last_row.assign(date=d) for d in future_index], ignore_index=True)
-                result = prophet_forecast(fitted, full_train, horizon, future_regressors=future_regressors)
+                result = prophet_forecast(fitted, full_train, horizon, future_regressors=future_regressors, freq=freq)
                 forecast_points = [
                     {"date": str(r.date.date()), "predicted": round(r.predicted, 2), "lower": round(r.lower, 2), "upper": round(r.upper, 2)}
                     for r in result.itertuples()
