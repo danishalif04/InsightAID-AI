@@ -5,20 +5,7 @@ import ShopProvider from './store/ShopProvider'
 import ActionsProvider from './store/ActionsProvider'
 import { useLang } from './i18n/useLang'
 import { LANGUAGES } from './i18n/strings'
-import { LOCAL_SHOP_PATHS } from './paths'
-
-/** The plan's 8-item Local Shop navigation (PDF §8). */
-const NAV = [
-  { key: 'nav.overview', to: LOCAL_SHOP_PATHS.overview, end: true },
-  { key: 'nav.business', to: LOCAL_SHOP_PATHS.business },
-  { key: 'nav.products', to: LOCAL_SHOP_PATHS.products },
-  { key: 'nav.financial', to: LOCAL_SHOP_PATHS.financial },
-  { key: 'nav.whatif', to: LOCAL_SHOP_PATHS.whatif },
-  { key: 'nav.capital', to: LOCAL_SHOP_PATHS.capital },
-  { key: 'nav.economic', to: LOCAL_SHOP_PATHS.economic },
-  { key: 'nav.assistant', to: LOCAL_SHOP_PATHS.assistant },
-  { key: 'nav.actions', to: LOCAL_SHOP_PATHS.actions },
-]
+import { LOCAL_SHOP_NAV } from './nav'
 
 function LanguageSwitch() {
   const { lang, setLang } = useLang()
@@ -46,7 +33,7 @@ function Nav() {
   const { t } = useLang()
   return (
     <nav aria-label={t('nav.section')} className="flex gap-1 overflow-x-auto pb-1">
-      {NAV.map((item) => (
+      {LOCAL_SHOP_NAV.map((item) => (
         <NavLink
           key={item.to}
           to={item.to}

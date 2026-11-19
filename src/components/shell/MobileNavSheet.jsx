@@ -1,14 +1,20 @@
+import { useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import { Link, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { X } from 'lucide-react'
 import { PATHS } from '@/routes/paths'
 import { useMotionAllowed } from '@/hooks/useMotionAllowed'
+import { LOCAL_SHOP_NAV_ITEMS } from '@/features/localshop/nav'
 import ModeSwitcher from '@/components/common/ModeSwitcher'
 import UIModeSwitcher from '@/components/common/UIModeSwitcher'
 
+// `modes` restricts a section to specific business pathways, exactly as in
+// TopNav — a section without it shows in every pathway. Local Shop is the
+// same nine-item list the top bar and the in-page bar render.
 const SECTIONS = [
   { label: 'Overview', items: [{ label: 'Dashboard', path: PATHS.dashboard }] },
+  { label: 'Local Shop', modes: ['startup'], items: LOCAL_SHOP_NAV_ITEMS },
   {
     label: 'Insights',
     items: [
@@ -44,6 +50,10 @@ const SECTIONS = [
 export default function MobileNavSheet({ open, onClose, mode, onModeChange }) {
   const location = useLocation()
   const motionAllowed = useMotionAllowed()
+  const sections = useMemo(
+    () => SECTIONS.filter((section) => !section.modes || section.modes.includes(mode)),
+    [mode],
+  )
 
   if (!open) return null
 
@@ -77,7 +87,7 @@ export default function MobileNavSheet({ open, onClose, mode, onModeChange }) {
         </div>
 
         <nav className="mt-8 space-y-7">
-          {SECTIONS.map((section) => (
+          {sections.map((section) => (
             <div key={section.label}>
               <p className="text-xs font-semibold uppercase tracking-wide text-glow-text/40">{section.label}</p>
               <ul className="mt-2 space-y-1">

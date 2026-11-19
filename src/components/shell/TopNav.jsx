@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
@@ -20,11 +20,25 @@ import { getMyProfile } from '@/services/profileService'
 import { initialsFromName } from '@/utils/formatters'
 import ModeSwitcher from '@/components/common/ModeSwitcher'
 import UIModeSwitcher from '@/components/common/UIModeSwitcher'
+import { LOCAL_SHOP_NAV_ITEMS } from '@/features/localshop/nav'
 import CommandPalette from './CommandPalette'
 
+// `modes` restricts a group to specific business pathways; a group without
+// it shows in every pathway. The Local Shop workspace only exists for the
+// `startup` pathway (MODES.startup is labelled "Malaysian Local Shop"), so
+// showing it under Business Startup would advertise a workspace that
+// pathway never uses. Order here is the rendered order:
+//   Local Shop      -> Overview, Local Shop, Insights, Intelligence, Data
+//   Business Startup -> Overview, Insights, Intelligence, Data
 const NAV_GROUPS = [
   { label: 'Overview', path: PATHS.dashboard },
-  { label: 'Local Shop', path: '/local-shop' },
+  // The Local Shop pathway's own nine-item bar, lifted to chrome level so
+  // What-If Simulator, Startup Capital and the rest are one click from
+  // anywhere in the app instead of only from inside the pathway. The
+  // in-page bar in LocalShopLayout stays — both read LOCAL_SHOP_NAV, so
+  // they cannot drift. Labels here are English-only (TopNav sits outside
+  // the Local Shop LanguageProvider); the in-page bar stays translated.
+  { label: 'Local Shop', modes: ['startup'], items: LOCAL_SHOP_NAV_ITEMS },
   {
     label: 'Insights',
     items: [
@@ -56,6 +70,12 @@ const NAV_GROUPS = [
 function NavDropdown({ group, isActive, motionAllowed }) {
   const [open, setOpen] = useState(false)
   const closeTimer = useRef(null)
+  const location = useLocation()
+
+  // `end` items (a pathway root like /local-shop) match exactly; everything
+  // else matches by prefix, so a nested route still lights its menu entry.
+  const isItemActive = (item) =>
+    item.end ? location.pathname === item.path : location.pathname.startsWith(item.path)
 
   const handleEnter = () => {
     if (closeTimer.current) clearTimeout(closeTimer.current)
@@ -95,7 +115,9 @@ function NavDropdown({ group, isActive, motionAllowed }) {
                 to={item.path}
                 role="menuitem"
                 onClick={() => setOpen(false)}
-                className="block rounded-lg px-3 py-2 text-sm text-glow-text/80 transition-colors hover:bg-white/5 hover:text-glow-text"
+                className={`block rounded-lg px-3 py-2 text-sm transition-colors hover:bg-white/5 hover:text-glow-text ${
+                  isItemActive(item) ? 'bg-glow-brand/15 text-glow-brand' : 'text-glow-text/80'
+                }`}
               >
                 {item.label}
               </Link>
@@ -127,6 +149,12 @@ export default function TopNav({
   const motionAllowed = useMotionAllowed()
   const { data: profile } = useAsyncData(getMyProfile, [])
   const displayName = profile?.full_name?.trim() || user?.email || 'Signed in'
+
+  // Groups with no `modes` list are pathway-independent and always shown.
+  const navGroups = useMemo(
+    () => NAV_GROUPS.filter((group) => !group.modes || group.modes.includes(mode)),
+    [mode],
+  )
 
   const [scrolled, setScrolled] = useState(false)
   const [avatarOpen, setAvatarOpen] = useState(false)
@@ -164,7 +192,7 @@ export default function TopNav({
             paddingBottom: scrolled ? 6 : 10,
           }}
           transition={{ duration: motionAllowed ? 0.2 : 0 }}
-          className="flex w-full max-w-5xl items-center justify-between gap-3 rounded-full border border-glow-border bg-glow-surface-elevated/80 px-4 shadow-2xl backdrop-blur-xl"
+          className="flex w-full max-w-7xl items-center justify-between gap-3 rounded-full border border-glow-border bg-glow-surface-elevated/80 px-4 shadow-2xl backdrop-blur-xl"
         >
           <div className="flex shrink-0 items-center gap-3">
             <button
@@ -184,7 +212,7 @@ export default function TopNav({
           </div>
 
           <nav aria-label="Primary" className="hidden items-center gap-0.5 lg:flex">
-            {NAV_GROUPS.map((group) =>
+            {navGroups.map((group) =>
               group.path ? (
                 <Link
                   key={group.label}
