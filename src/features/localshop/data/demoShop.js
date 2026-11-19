@@ -64,6 +64,28 @@ export const DEMO_SHOP = {
   currency: 'MYR',
   language: 'ms',
 
+  // Profile fields mirroring the onboarding step's three questions, so the
+  // demo shop carries the same profile a hand-entered shop would. All three
+  // are DISPLAY-ONLY: no engine function reads them, so none of this shop's
+  // computed figures (35.06% average margin, RM2,500 fixed, RM7,131
+  // break-even) can move because of them.
+  //
+  // The revenue target is the owner's own goal, not a forecast: RM2,750 of
+  // total recorded expenses divided by the 35.06% average margin is
+  // RM7,844, so RM9,000 covers every recorded cost with headroom and sits
+  // above the RM7,131 break-even.
+  sector: 'Retail / E-commerce',
+  revenueTarget: 9000,
+  description:
+    'I run a small grocery shop in Malaysia, open to walk-in customers and ' +
+    'taking cash or e-wallet. I stock about 28 everyday items — rice, ' +
+    'cooking oil, sugar, flour, eggs, milk, instant noodles, drinks, ' +
+    'biscuits and household goods like detergent and soap — plus bread, ' +
+    'coffee and mineral water that sell every day. My customers are ' +
+    'households and workers from the surrounding neighbourhood. I do not ' +
+    'keep daily sales records yet, so I want to know what I need to sell ' +
+    'each month to cover my rent, wages and utilities.',
+
   products: [...NAMED_PRODUCTS, ...STAPLES],
 
   // The FIXED rows sum to exactly RM2,500 — the spec's "Monthly fixed
