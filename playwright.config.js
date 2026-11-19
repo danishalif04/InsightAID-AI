@@ -14,7 +14,12 @@ export default defineConfig({
     screenshot: 'only-on-failure',
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
-  webServer: {
+  // When E2E_BASE_URL is set, the caller is already serving the app — the
+  // timing protocol serves a PRODUCTION build (`npm run build` +
+  // `npm run preview`, port 4173). Booting the dev server anyway would
+  // both ignore that build and burn CPU alongside the measurement, so the
+  // managed server is skipped entirely in that case.
+  webServer: process.env.E2E_BASE_URL ? undefined : {
     command: 'npm run dev',
     url: 'http://localhost:5173',
     reuseExistingServer: true,
