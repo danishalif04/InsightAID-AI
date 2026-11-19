@@ -21,6 +21,7 @@ import { initialsFromName } from '@/utils/formatters'
 import ModeSwitcher from '@/components/common/ModeSwitcher'
 import UIModeSwitcher from '@/components/common/UIModeSwitcher'
 import { LOCAL_SHOP_NAV_ITEMS } from '@/features/localshop/nav'
+import { visibleGroupsForMode } from '@/utils/navVisibility'
 import CommandPalette from './CommandPalette'
 
 // `modes` restricts a group to specific business pathways; a group without
@@ -152,7 +153,7 @@ export default function TopNav({
 
   // Groups with no `modes` list are pathway-independent and always shown.
   const navGroups = useMemo(
-    () => NAV_GROUPS.filter((group) => !group.modes || group.modes.includes(mode)),
+    () => visibleGroupsForMode(NAV_GROUPS, mode),
     [mode],
   )
 

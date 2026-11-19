@@ -11,15 +11,14 @@ import { glowBackground } from '@/config/designTokens'
 
 // Demo-only credentials for a presentation/supervisor walkthrough. Set to
 // [] to hide this panel entirely, e.g. before deploying anywhere actually
-// public. "Main (demo identity)" is the developer's own account, deliberately
-// renamed to a throwaway demo email/password (never the real one) specifically
-// so it could be shown here safely.
+// public. Every account listed here is a disposable demo account created for
+// that purpose — none is a personal account, and no real password appears.
 const DEMO_ACCOUNTS = [
   { label: 'Business Startup demo (Embun Botanica, real uploaded data)', email: 'usertest1@insightai.com', password: 'usertest1' },
   { label: 'Malaysian Local Shop demo (no-data/planning path)', email: 'usertest2@insightai.com', password: 'usertest2' },
   { label: 'Malaysian Local Shop demo (Kedai Makan Pak Long, synthetic data)', email: 'usertest3@insightai.com', password: 'usertest3' },
   { label: 'Business Startup demo (Kasual Thread Co., synthetic data)', email: 'usertest4@insightai.com', password: 'usertest4' },
-  { label: 'Main (demo identity)', email: 'demotest1@gmail.com', password: 'demotest1' },
+  { label: 'Malaysian Local Shop demo (usertest5)', email: 'usertest5@insightai.com', password: 'usertest5' },
 ]
 
 export default function Login() {

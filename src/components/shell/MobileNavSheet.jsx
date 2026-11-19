@@ -6,6 +6,7 @@ import { X } from 'lucide-react'
 import { PATHS } from '@/routes/paths'
 import { useMotionAllowed } from '@/hooks/useMotionAllowed'
 import { LOCAL_SHOP_NAV_ITEMS } from '@/features/localshop/nav'
+import { visibleGroupsForMode } from '@/utils/navVisibility'
 import ModeSwitcher from '@/components/common/ModeSwitcher'
 import UIModeSwitcher from '@/components/common/UIModeSwitcher'
 
@@ -51,7 +52,7 @@ export default function MobileNavSheet({ open, onClose, mode, onModeChange }) {
   const location = useLocation()
   const motionAllowed = useMotionAllowed()
   const sections = useMemo(
-    () => SECTIONS.filter((section) => !section.modes || section.modes.includes(mode)),
+    () => visibleGroupsForMode(SECTIONS, mode),
     [mode],
   )
 
