@@ -1,11 +1,11 @@
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Lightbulb, Sparkles, Store } from 'lucide-react'
+import { Lightbulb, Sparkles } from 'lucide-react'
 import Button from '@/components/ui/Button'
-import EmptyState from '@/components/ui/EmptyState'
 import KpiTile from '../components/KpiTile'
 import ToolCard from '../components/ToolCard'
 import ProvenanceBadge from '../components/ProvenanceBadge'
+import GenerateShopPanel from '../components/GenerateShopPanel'
 import { useLang } from '../i18n/useLang'
 import { useShop } from '../store/useShop'
 import { LOCAL_SHOP_PATHS } from '../paths'
@@ -17,7 +17,13 @@ const money = (value) => `RM${Number(value).toLocaleString('en-MY', { maximumFra
 export default function Overview() {
   const { t } = useLang()
   const navigate = useNavigate()
-  const { shop, hasShop, isDemo, loadDemo } = useShop()
+  const { shop, hasShop, isDemo } = useShop()
+
+  // A generated shop is illustrative too, so `isDemo` stays true for it.
+  // This distinguishes the two so the ribbon can say which one it is.
+  const isGenerated = shop?.provenance === 'ai-generated'
+  const provenanceKind = isGenerated ? 'AI-generated' : 'Illustrative'
+  const provenanceNote = isGenerated ? t('common.aiGenerated') : t('common.illustrative')
 
   const model = useMemo(() => {
     if (!shop) return null
@@ -34,14 +40,13 @@ export default function Overview() {
   }, [shop])
 
   if (!hasShop) {
+    // The generator panel replaces the bare "load demo" empty state: an owner
+    // arriving with no data can now describe their own business instead of
+    // being shown someone else's shop. Loading the demo is still offered
+    // inside the panel, so nothing is taken away.
     return (
-      <div className="rounded-3xl border border-glow-border bg-glow-surface-elevated p-6">
-        <EmptyState
-          icon={Store}
-          message={t('overview.empty')}
-          actionLabel={t('overview.loadDemo')}
-          onAction={loadDemo}
-        />
+      <div className="rounded-3xl border border-glow-border bg-glow-surface-elevated p-5 sm:p-6">
+        <GenerateShopPanel />
       </div>
     )
   }
@@ -63,7 +68,7 @@ export default function Overview() {
             </p>
             {shop.model && <p className="text-[11px] text-glow-text/40">{shop.model}</p>}
           </div>
-          {isDemo && <ProvenanceBadge kind="Illustrative" title={t('common.illustrative')} />}
+          {isDemo && <ProvenanceBadge kind={provenanceKind} title={provenanceNote} />}
         </div>
         <p className="mt-3 text-xs text-glow-text/50">{t('overview.subtitle')}</p>
       </div>
@@ -73,7 +78,7 @@ export default function Overview() {
         <KpiTile
           label={t('overview.products')}
           value={shop.products?.length ?? 0}
-          provenance={isDemo ? 'Illustrative' : 'Your input'}
+          provenance={isDemo ? provenanceKind : 'Your input'}
         />
         <KpiTile
           label={t('overview.fixedCosts')}

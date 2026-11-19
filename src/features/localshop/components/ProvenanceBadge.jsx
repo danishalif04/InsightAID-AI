@@ -1,4 +1,4 @@
-import { Calculator, FlaskConical, Pencil, Sparkles, UserPen } from 'lucide-react'
+import { Calculator, FlaskConical, Pencil, Sparkles, UserPen, Wand2 } from 'lucide-react'
 import { useLang } from '../i18n/useLang'
 
 /**
@@ -12,6 +12,11 @@ const VARIANTS = {
   'Your input': { icon: UserPen, className: 'bg-sky-500/15 text-sky-400 border-sky-500/30' },
   Assumption: { icon: FlaskConical, className: 'bg-amber-400/15 text-amber-400 border-amber-400/30' },
   'AI-explained': { icon: Sparkles, className: 'bg-violet-500/15 text-violet-400 border-violet-500/30' },
+  // Distinct from 'AI-explained': that one means a computed figure the model
+  // put into words, this one means the INPUTS themselves were generated. It
+  // shares the rose styling with Illustrative because both say the same
+  // thing to an owner — these are not your own records.
+  'AI-generated': { icon: Wand2, className: 'bg-rose-500/15 text-rose-400 border-rose-500/30' },
   Illustrative: { icon: Pencil, className: 'bg-rose-500/15 text-rose-400 border-rose-500/30' },
 }
 
