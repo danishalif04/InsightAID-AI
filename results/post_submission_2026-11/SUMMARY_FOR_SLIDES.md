@@ -9,8 +9,8 @@ Run date **2026-11-19** · protocol pre-registered `c87a7a9` · change committed
 |---|---|---|---|---|
 | **Chart contrast ≥ 3:1** | Chart green **2.28:1**; **4 of 15** below 3:1 (light theme only) | **15 of 15 pass in both themes.** Re-audit first found **6** failures, not 4 — the submitted audit checked light only | ✅ **NOW MET** | RESULTS.md §Task 1 |
 | **End-to-end page time < 3 s** | Not measured ("2.70 ms computation; end-to-end not measured") | **Still not measured** — no credentials, backend unreachable | ⛔ **UNCHANGED — blocked** | RESULTS.md §Task 2 |
-| **Trained sentiment model deployed** | Not deployed — dashboard uses `rating_heuristic_v1` | **Still not deployed** — no trained checkpoint exists in the repository | ⛔ **UNCHANGED — blocked** | RESULTS.md §Task 3 |
-| **Code-mixed accuracy** | Not evaluated | **Still not evaluated** — same missing checkpoint | ⛔ **UNCHANGED — blocked** | RESULTS.md §Task 4 |
+| **Trained sentiment model deployed** | Not deployed — dashboard uses `rating_heuristic_v1` | **Still not deployed.** Recovery attempted 2026-11-19 and failed: the checkpoint was written to Colab's ephemeral disk, not Drive, and was destroyed with the runtime | ⛔ **UNCHANGED — permanently blocked** | RESULTS.md §Task 3 |
+| **Code-mixed accuracy** | Not evaluated | **Still not evaluated** — same lost checkpoint | ⛔ **UNCHANGED — permanently blocked** | RESULTS.md §Task 4 |
 | **Sentiment variant beats sales-only** | Worse in 6 of 8 DM tests; none significant | **Not re-tested** — awaiting confirmation, and blocked by the same checkpoint | ⏸ **NOT STARTED** | RESULTS.md §Task 5 |
 
 **One of five targets moved. Four did not, and the reason in every case is a missing prerequisite, not a failed attempt.**
@@ -55,6 +55,25 @@ Keeping the "at submission" value visible in that row is the point — it shows 
 | Need | Unblocks |
 |---|---|
 | `E2E_TEST_EMAIL` / `E2E_TEST_PASSWORD` + an unpaused backend | Task 2 |
-| The trained XLM-R checkpoint (Drive / Hugging Face / weights file) | Tasks 3, 4, 5 |
+| ~~The trained XLM-R checkpoint~~ — **confirmed lost 2026-11-19; cannot be unblocked without training a new model** | Tasks 3, 4, 5 |
 | SentiBahasaRojak licence check | Task 4 |
 | Your explicit confirmation | Task 5 |
+
+---
+
+## If asked at the viva: "why was code-mixed never evaluated?"
+
+The honest answer, in full:
+
+> It was out of scope at submission, and the dissertation says so. I attempted it
+> after submission. The evaluation requires the trained XLM-R checkpoint, and that
+> checkpoint no longer exists — the training run saved it to the Colab runtime's
+> local disk rather than to Drive, so it was destroyed when the runtime was
+> recycled. Only the config and tokenizer survived. I could train a replacement,
+> but it would be a different model from the one my results tables describe, so
+> evaluating it would not answer the question honestly. I recorded the loss, and
+> the cause, in the post-submission results rather than working around it.
+
+**None of the submitted sentiment metrics depend on the weights file.** The accuracy
+figures are evidenced by `O1_SCORECARD.md` and `model_versions_v20261020-171546.json`,
+both intact and unmodified.

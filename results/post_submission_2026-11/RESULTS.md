@@ -135,7 +135,37 @@ npx eslint . && npx vitest@5.1.1 run && npm run build
 
 # TASK 3 — Deploy the trained sentiment model ⛔ NOT RUN
 
-**Blocker:** **there is no trained checkpoint in this repository.** A search for `*.bin`, `*.safetensors`, `*.pt` and `*checkpoint*` under `ml/` returns nothing; `ml/sentiment/results/` contains only metrics JSON and Markdown. Training ran on Google Colab (Dissertation Table 3.10) and the weights were never committed.
+**Blocker:** **there is no trained checkpoint, and on 2026-11-19 it was confirmed lost.** A search for `*.bin`, `*.safetensors`, `*.pt` and `*checkpoint*` under `ml/` returns nothing; `ml/sentiment/results/` contains only metrics JSON and Markdown. Training ran on Google Colab (Dissertation Table 3.10) and the weights were never committed.
+
+### Recovery attempt — 2026-11-19, failed
+
+The Drive folder named by `03_train_sentiment_models.ipynb`
+(`MyDrive/INSIGHTAID_AI/ml_data/sentiment_checkpoints/xlmr_model`) was retrieved and
+unpacked. It contains `config.json`, `tokenizer.json`, `tokenizer_config.json`,
+`training_args.bin` and three `checkpoint-*` folders holding `scheduler.pt`,
+`scaler.pt` and `rng_state.pth` — **but no `model.safetensors`, `pytorch_model.bin`
+or `optimizer.pt` in any folder.** No file anywhere under `ml/` exceeds 50 MB; the
+XLM-R weights would be roughly 1.1 GB.
+
+**Cause.** `checkpoint-8031/trainer_state.json` records
+`best_model_checkpoint = /content/xlmr_model/checkpoint-5354` — Colab's **ephemeral
+local disk**, not `/content/drive/`. Only the small files were ever copied to Drive.
+The weights were destroyed when the Colab runtime was recycled.
+
+**Consequence.** Tasks 3, 4 and 5 are **permanently blocked** for the submitted
+checkpoint. They cannot be unblocked by locating a file, only by training a new
+model — which would answer a different question, since it would not be the model the
+dissertation's metrics describe.
+
+**What this does NOT affect.** The submitted sentiment metrics are unchanged and
+remain evidenced by `ml/sentiment/results/O1_SCORECARD.md` and
+`model_versions_v20261020-171546.json`. No reported accuracy figure is retracted.
+
+**Reproducibility lesson, recorded deliberately:** the training run wrote checkpoints
+to the runtime's local disk and copied only selectively to persistent storage. Fixing
+seeds and pinning versions (Working Rule 5) did not protect the artefact itself.
+`train_xlmr.py` retains `seed=42`, 3 epochs, lr 2e-5, so the *procedure* is
+reproducible; the *model* is not recoverable.
 
 Deployment cannot be begun, let alone claimed. Per the protocol, **no document or slide may state that the model is deployed** — and none does.
 
@@ -147,7 +177,7 @@ Deployment cannot be begun, let alone claimed. Per the protocol, **no document o
 
 **Original value at submission:** not evaluated (Dissertation Table 4.9, Table 4.3: *"Code-mixed — Not evaluated"*). **New value: still not evaluated.**
 
-**Blocker:** the same missing checkpoint. Task 4 requires evaluating *the existing trained checkpoint with zero changes*. Training a fresh model would answer a **different question** — it would measure a new model, not the one the dissertation reports — so it was **not** substituted. The SentiBahasaRojak licence has also not been verified.
+**Blocker:** the same missing checkpoint — **confirmed lost on 2026-11-19**, see the recovery attempt recorded under Task 3. Task 4 requires evaluating *the existing trained checkpoint with zero changes*. Training a fresh model would answer a **different question** — it would measure a new model, not the one the dissertation reports — so it was **not** substituted. The SentiBahasaRojak licence has also not been verified.
 
 **To unblock:** the checkpoint, and a licence check on the corpus. The label mapping must be pre-registered as an amendment before that run, not after.
 
