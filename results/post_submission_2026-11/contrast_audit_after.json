@@ -1,0 +1,166 @@
+{
+  "backgrounds": {
+    "LIGHT_BG": {
+      "canvas": "#f6f8f7",
+      "surface": "#ffffff"
+    },
+    "DARK_BG": {
+      "surface": "#0a100d",
+      "elevated": "#0f1713"
+    }
+  },
+  "rule": "min ratio vs that theme backgrounds >= 3.0",
+  "cvdFloor": 30,
+  "changes": {
+    "brand.brand": "#22a45f",
+    "platform.shopee": "#db7509",
+    "platform.tiktok": "#0e96e9",
+    "platform.x": "#c3103b",
+    "crisis.warning": "#cf7b0f",
+    "forecast.actual": "#217044"
+  },
+  "rows": [
+    {
+      "category": "brand",
+      "role": "brand",
+      "hex": "#22a45f",
+      "light": 3.01,
+      "dark": 5.68,
+      "pass": true
+    },
+    {
+      "category": "sentiment",
+      "role": "positive",
+      "hex": "#0072b2",
+      "light": 4.86,
+      "dark": 3.51,
+      "pass": true
+    },
+    {
+      "category": "sentiment",
+      "role": "neutral",
+      "hex": "#78716c",
+      "light": 4.5,
+      "dark": 3.8,
+      "pass": true
+    },
+    {
+      "category": "sentiment",
+      "role": "negative",
+      "hex": "#d55e00",
+      "light": 3.63,
+      "dark": 4.71,
+      "pass": true
+    },
+    {
+      "category": "platform",
+      "role": "shopee",
+      "hex": "#db7509",
+      "light": 3,
+      "dark": 5.69,
+      "pass": true
+    },
+    {
+      "category": "platform",
+      "role": "tiktok",
+      "hex": "#0e96e9",
+      "light": 3,
+      "dark": 5.69,
+      "pass": true
+    },
+    {
+      "category": "platform",
+      "role": "x",
+      "hex": "#c3103b",
+      "light": 5.69,
+      "dark": 3,
+      "pass": true
+    },
+    {
+      "category": "platform",
+      "role": "threads",
+      "hex": "#a855f7",
+      "light": 3.71,
+      "dark": 4.61,
+      "pass": true
+    },
+    {
+      "category": "crisis",
+      "role": "normal",
+      "hex": "#64748b",
+      "light": 4.46,
+      "dark": 3.83,
+      "pass": true
+    },
+    {
+      "category": "crisis",
+      "role": "warning",
+      "hex": "#cf7b0f",
+      "light": 3.03,
+      "dark": 5.64,
+      "pass": true
+    },
+    {
+      "category": "crisis",
+      "role": "critical",
+      "hex": "#dc2626",
+      "light": 4.53,
+      "dark": 3.77,
+      "pass": true
+    },
+    {
+      "category": "forecast",
+      "role": "actual",
+      "hex": "#217044",
+      "light": 5.68,
+      "dark": 3.01,
+      "pass": true
+    },
+    {
+      "category": "forecast",
+      "role": "forecast",
+      "hex": "#7c3aed",
+      "light": 5.34,
+      "dark": 3.2,
+      "pass": true
+    },
+    {
+      "category": "forecast",
+      "role": "baseline",
+      "hex": "#0d9488",
+      "light": 3.51,
+      "dark": 4.87,
+      "pass": true
+    },
+    {
+      "category": "forecast",
+      "role": "scenario",
+      "hex": "#db2777",
+      "light": 4.31,
+      "dark": 3.96,
+      "pass": true
+    }
+  ],
+  "cvd": {
+    "sentiment": {
+      "protanopia": 106.53,
+      "deuteranopia": 112.87,
+      "tritanopia": 126.41
+    },
+    "platform": {
+      "protanopia": 82.46,
+      "deuteranopia": 70.97,
+      "tritanopia": 38.53
+    },
+    "crisis": {
+      "protanopia": 42.37,
+      "deuteranopia": 30.35,
+      "tritanopia": 37.83
+    },
+    "forecast": {
+      "protanopia": 60.59,
+      "deuteranopia": 58.5,
+      "tritanopia": 77.56
+    }
+  }
+}
