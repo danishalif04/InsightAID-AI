@@ -1,5 +1,6 @@
 import { Store } from 'lucide-react'
-import { Input, Select } from '@/components/ui/Input'
+import { Input, Select, Textarea } from '@/components/ui/Input'
+import { FIELDS_BY_ID } from '@/utils/businessProfileSchema'
 import EmptyState from '@/components/ui/EmptyState'
 import Section from '../components/Section'
 import { useLang } from '../i18n/useLang'
@@ -49,11 +50,41 @@ export default function MyBusiness() {
             </option>
           ))}
         </Select>
+        {/* Same option list as the onboarding "Business Sector" dropdown
+            (businessProfileSchema.js), so a shop entered here and one
+            entered there are describable in the same terms. */}
+        <Select label="Business sector" value={shop.sector ?? ''} onChange={(event) => update('sector', event.target.value)}>
+          <option value="">Not stated</option>
+          {FIELDS_BY_ID.industry.options.map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
+          ))}
+        </Select>
         <Input
           label="Available capital (RM, optional)"
           type="number"
           value={shop.availableCapital ?? ''}
           onChange={(event) => update('availableCapital', event.target.value === '' ? null : Number(event.target.value))}
+        />
+        {/* Your own goal, not a forecast — nothing in the engine derives a
+            prediction from it, and leaving it blank changes no calculation. */}
+        <Input
+          label="Revenue target (RM / month, optional)"
+          type="number"
+          min="0"
+          value={shop.revenueTarget ?? ''}
+          onChange={(event) => update('revenueTarget', event.target.value === '' ? null : Number(event.target.value))}
+        />
+      </div>
+
+      <div className="mt-4">
+        <Textarea
+          label="Business description (optional)"
+          rows={5}
+          placeholder="In your own words: what you sell, where, to whom, and what you want to find out."
+          value={shop.description ?? ''}
+          onChange={(event) => update('description', event.target.value)}
         />
       </div>
     </Section>
