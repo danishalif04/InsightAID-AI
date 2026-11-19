@@ -69,3 +69,6 @@ playwright/.cache/
 # Supabase CLI local project-link cache (npx supabase link)
 supabase/.temp/
 supabase/.branches/
+
+# Word/Excel lock files created while a document is open
+~$*
