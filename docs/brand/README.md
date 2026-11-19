@@ -32,3 +32,34 @@ source's own light-on-dark order and do not have that problem.
 
 The script expects the original artwork path in `SRC`; it is not in this
 repository, so keep a copy of the source file if these need regenerating.
+
+---
+
+## The 2026-11-20 mark, and why its background was NOT removed
+
+`src/assets/insightaid-mark.jpg` is now a square crop of
+`Gemini_Generated_Image_c7012lc7012lc701.jpg`, background included.
+
+Removing that background was attempted five ways and abandoned. The reason is
+measurable, not a matter of tuning. With the background modelled as a smooth
+surface and each pixel scored by how far it sits above that surface:
+
+| Region | Score |
+|---|---|
+| outer background | 2.4 |
+| **sphere's shaded side** | **1.5** |
+| ring's inner glow | 11.2 |
+| **gem's dark base** | **16.0** |
+
+The sphere's shaded half scores *below* the background it sits on, and the
+gem's dark base is 5 points from the ring's inner glow. There is no colour
+signal separating them - a human eye uses knowledge of the shape, which no
+threshold has. Every attempt either punched holes through the sphere and the
+gem, or kept ragged blobs of background beside them.
+`cutout-attempt-failed.png` is the best of the five, shown over white and over
+the dark theme; `cutout_attempt.py` is the script.
+
+**To get a transparent version**, regenerate the artwork with a background
+that is not green - plain white, magenta, or an actual transparent PNG. Any of
+those keys out in one line. Recolouring the subject is not required; only the
+background needs to differ from the darkest part of the mark.
