@@ -4,8 +4,10 @@ import {
   computeMentionVolumeSeries,
   computePlatformComparison,
   computeSentimentScores,
+  computeSentimentScoresSeries,
   computeSentimentTrend,
   computeTrendingHashtags,
+  computeTrendingHashtagsByDate,
   selectDefaultPlatform,
   selectTopPosts,
 } from './socialAnalytics'
@@ -76,6 +78,59 @@ describe('computeSentimentScores', () => {
     const scores = computeSentimentScores(rows)
     // weighted: (0.8*8 + 0.2*2) / 10 = 0.68
     expect(scores.find((s) => s.id === 'positive').value).toBe(68)
+  })
+
+  it('computes a specific past day via targetDate instead of the latest', () => {
+    const rows = [
+      aggRow('2026-01-01', { positive_ratio: 0.9, negative_ratio: 0.0 }),
+      aggRow('2026-01-02', { positive_ratio: 0.1, negative_ratio: 0.8 }),
+    ]
+    const scores = computeSentimentScores(rows, '2026-01-01')
+    expect(scores.find((s) => s.id === 'positive').value).toBe(90)
+  })
+
+  it('returns null for a targetDate not present in the data, never guessing', () => {
+    const rows = [aggRow('2026-01-01', { positive_ratio: 0.5, negative_ratio: 0.1 })]
+    expect(computeSentimentScores(rows, '2099-12-31')).toBeNull()
+  })
+})
+
+describe('computeSentimentScoresSeries', () => {
+  it('returns one entry per day, each matching what computeSentimentScores would give for that day', () => {
+    const rows = [
+      aggRow('2026-01-01', { positive_ratio: 0.9, negative_ratio: 0.0 }),
+      aggRow('2026-01-02', { positive_ratio: 0.1, negative_ratio: 0.8 }),
+    ]
+    const series = computeSentimentScoresSeries(rows, 7)
+    expect(series).toHaveLength(2)
+    expect(series[0].date).toBe('2026-01-01')
+    expect(series[0].cards.find((s) => s.id === 'positive').value).toBe(90)
+    expect(series[1].date).toBe('2026-01-02')
+    expect(series[1].cards.find((s) => s.id === 'positive').value).toBe(10)
+  })
+
+  it('caps at `days` most recent days and returns [] when there is no data', () => {
+    expect(computeSentimentScoresSeries([], 7)).toEqual([])
+    const rows = Array.from({ length: 10 }, (_, i) => aggRow(`2026-01-${String(i + 1).padStart(2, '0')}`))
+    expect(computeSentimentScoresSeries(rows, 7)).toHaveLength(7)
+  })
+
+  it('a day with no ratio data gets a null cards entry rather than being dropped', () => {
+    const rows = [aggRow('2026-01-01', { positive_ratio: null, negative_ratio: null })]
+    const series = computeSentimentScoresSeries(rows, 7)
+    expect(series).toEqual([{ date: '2026-01-01', label: 'Jan 1', cards: null }])
+  })
+
+  it('still looks back 7 real days for delta even on the first day of the visible window', () => {
+    const rows = [
+      aggRow('2026-01-01', { positive_ratio: 0.4, negative_ratio: 0.1 }),
+      ...Array.from({ length: 6 }, (_, i) => aggRow(`2026-01-0${i + 2}`, { positive_ratio: 0.4, negative_ratio: 0.1 })),
+      aggRow('2026-01-08', { positive_ratio: 0.6, negative_ratio: 0.1 }),
+    ]
+    // Window of 1 day only shows 2026-01-08, but its delta must still compare against 2026-01-01.
+    const series = computeSentimentScoresSeries(rows, 1)
+    expect(series).toHaveLength(1)
+    expect(series[0].cards.find((s) => s.id === 'positive').delta).toBe(20)
   })
 })
 
@@ -192,6 +247,39 @@ describe('computeTrendingHashtags', () => {
   it('respects the limit', () => {
     const rows = Array.from({ length: 10 }, (_, i) => ({ features: { hashtags: [`tag${i}`] } }))
     expect(computeTrendingHashtags(rows, 3)).toHaveLength(3)
+  })
+})
+
+describe('computeTrendingHashtagsByDate', () => {
+  it('buckets by the exact collected_at date string, not a re-parsed Date', () => {
+    const rows = [
+      { collected_at: '2026-10-15T23:59:00+00:00', features: { hashtags: ['glowup'] } },
+      { collected_at: '2026-10-15T01:00:00+00:00', features: { hashtags: ['glowup'] } },
+      { collected_at: '2026-10-16T00:00:00+00:00', features: { hashtags: ['refund'] } },
+    ]
+    const byDate = computeTrendingHashtagsByDate(rows, 5)
+    expect(byDate['2026-10-15']).toEqual([{ hashtag: 'glowup', mentions: 2 }])
+    expect(byDate['2026-10-16']).toEqual([{ hashtag: 'refund', mentions: 1 }])
+  })
+
+  it('a day with no hashtag-bearing posts has no key at all, not an empty-array placeholder', () => {
+    const rows = [{ collected_at: '2026-10-15T00:00:00+00:00', features: {} }]
+    expect(computeTrendingHashtagsByDate(rows, 5)).toEqual({})
+  })
+
+  it('falls back to published_at when collected_at is missing', () => {
+    const rows = [{ published_at: '2026-10-15T00:00:00+00:00', features: { hashtags: ['glowup'] } }]
+    expect(computeTrendingHashtagsByDate(rows, 5)['2026-10-15']).toEqual([{ hashtag: 'glowup', mentions: 1 }])
+  })
+
+  it('ranks and limits independently per day', () => {
+    const rows = [
+      { collected_at: '2026-10-15T00:00:00+00:00', features: { hashtags: ['a', 'a', 'b'] } },
+      { collected_at: '2026-10-16T00:00:00+00:00', features: { hashtags: ['c'] } },
+    ]
+    const byDate = computeTrendingHashtagsByDate(rows, 1)
+    expect(byDate['2026-10-15']).toEqual([{ hashtag: 'a', mentions: 2 }])
+    expect(byDate['2026-10-16']).toEqual([{ hashtag: 'c', mentions: 1 }])
   })
 })
 
