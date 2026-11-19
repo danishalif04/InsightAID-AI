@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Sparkles } from 'lucide-react'
-import brandMark from '@/assets/insightaid-mark.jpg'
+import brandMark from '@/assets/insightaid-mark.png'
 import Button from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { useAuth } from '@/hooks/useAuth'
@@ -89,7 +89,7 @@ export default function Login() {
               aria-hidden="true"
               width={40}
               height={40}
-              className="size-10 rounded-xl object-cover ring-1 ring-glow-brand/25 shadow-[0_8px_24px_-10px_rgba(34,164,95,0.55)]"
+              className="size-10 object-contain [filter:drop-shadow(0_4px_10px_rgba(34,164,95,0.35))]"
             />
             <span className="text-sm font-semibold uppercase tracking-wide text-glow-text/70">InsightAid AI</span>
           </div>
@@ -100,7 +100,7 @@ export default function Login() {
               aria-hidden="true"
               width={128}
               height={128}
-              className="mb-6 size-32 rounded-[1.75rem] object-cover ring-1 ring-glow-brand/25 shadow-[0_24px_64px_-24px_rgba(34,164,95,0.65)]"
+              className="mb-6 size-36 object-contain [filter:drop-shadow(0_18px_40px_rgba(34,164,95,0.4))]"
             />
             <h1 className="text-[2.75rem] font-semibold leading-[1.05] tracking-tight text-glow-text" style={{ fontFamily: 'var(--font-ui)' }}>
               Decisions, backed by{' '}

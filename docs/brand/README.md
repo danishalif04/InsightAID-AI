@@ -35,14 +35,18 @@ repository, so keep a copy of the source file if these need regenerating.
 
 ---
 
-## The 2026-11-20 mark, and why its background was NOT removed
+## The current mark (transparent)
 
-`src/assets/insightaid-mark.jpg` is now a square crop of
-`Gemini_Generated_Image_c7012lc7012lc701.jpg`, background included.
+`src/assets/insightaid-mark.png` is keyed from
+`Gemini_Generated_Image_o6qs34o6qs34o6qs.jpg` by `keyout_mark.py`, and has
+real transparency, so it sits on the page itself rather than on a tile.
 
-Removing that background was attempted five ways and abandoned. The reason is
-measurable, not a matter of tuning. With the background modelled as a smooth
-surface and each pixel scored by how far it sits above that surface:
+### Why this source keys and the earlier ones did not
+
+Two earlier renders were supplied on a flat green ground
+(`..._c7012lc7012lc701.jpg`, `..._w75q8lw75q8lw75q.jpg`). Neither could be cut
+out, and the reason was measurable rather than a matter of tuning: scoring
+each pixel by how far it sat above a fitted background surface gave
 
 | Region | Score |
 |---|---|
@@ -51,15 +55,33 @@ surface and each pixel scored by how far it sits above that surface:
 | ring's inner glow | 11.2 |
 | **gem's dark base** | **16.0** |
 
-The sphere's shaded half scores *below* the background it sits on, and the
-gem's dark base is 5 points from the ring's inner glow. There is no colour
-signal separating them - a human eye uses knowledge of the shape, which no
-threshold has. Every attempt either punched holes through the sphere and the
-gem, or kept ragged blobs of background beside them.
-`cutout-attempt-failed.png` is the best of the five, shown over white and over
-the dark theme; `cutout_attempt.py` is the script.
+The sphere's shaded half scored *below* the background it sat on. No threshold
+separates those, because there is no signal to separate - the eye uses
+knowledge of the shape instead. Five approaches were tried and all either
+punched holes through the sphere and gem or kept ragged blobs beside them.
 
-**To get a transparent version**, regenerate the artwork with a background
-that is not green - plain white, magenta, or an actual transparent PNG. Any of
-those keys out in one line. Recolouring the subject is not required; only the
-background needs to differ from the darkest part of the mark.
+The current source is supplied on a painted checkerboard, which keys cleanly
+because it is pure greyscale at exactly two levels:
+
+| Region | Luminance | Channel spread |
+|---|---|---|
+| checker dark | ~5 | 0.6 |
+| checker light | ~155 | 0.9 |
+| ring (lit) | - | 29 |
+| sphere shaded | - | 43 |
+| gem dark base | - | 58 |
+
+The one trap is the ring's shaded lower-left, rgb(92,91,89), whose spread is
+only 3.5 - a saturation cut alone removes it and breaks the ring. Its
+luminance of 91 sits squarely BETWEEN the checker's two levels, so requiring a
+background pixel to be both unsaturated **and** at one of those levels keeps
+it. That pair of conditions is the whole key.
+
+The script also un-premultiplies the silhouette. Edge pixels are JPEG-blended
+with the checker behind them, so without that step the mark carries a grey rim
+on a light page and a bright rim on a dark one.
+
+**The takeaway for future artwork:** ask for a checkerboard or any background
+that differs from the darkest part of the mark. A green ground cannot be
+removed, however the subject is coloured.
+
