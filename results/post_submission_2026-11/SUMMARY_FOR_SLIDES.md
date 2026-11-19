@@ -108,3 +108,27 @@ The answer to give, in full, without hedging:
 pre-registered the method before running, reported the number that hurt, and can
 name the next diagnostic step. The alternative — leaving "not measured" on the
 slide — invites exactly the same question with no answer attached.
+
+---
+
+## Optional slide — affordability has an engineering cost (gap G4)
+
+Not a pre-registered target. Use it only if you want to show G4 evidenced rather than asserted.
+
+> The same deployed function, the same question, two free-tier providers,
+> changed by three configuration values with no code change and no redeploy:
+
+| Free-tier provider | Success | Median latency |
+|---|---|---|
+| `gemini-3.8-flash` | **2 / 7 (29%)** | **~80 s** |
+| `openai/gpt-oss-120b` (Groq) | **7 / 7 (100%)** | **0.71 s** |
+
+> One free-tier provider could not support an interactive dashboard at all — 80 seconds
+> against a 3-second target, and in one case the Supabase function exhausted its own
+> free-tier compute while waiting. Another met it comfortably. Affordability is
+> achievable, but it is not free of engineering consequence, and the provider-agnostic
+> client is what made the substitution a configuration change.
+
+**Say this limit out loud if you use the slide:** 14 calls, two days, one machine, one
+network. It is evidence about this deployment, **not** a benchmark of either provider.
+Free-tier capacity is best-effort and varies by hour and region.

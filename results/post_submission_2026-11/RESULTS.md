@@ -254,6 +254,28 @@ Awaiting explicit confirmation, as instructed — and blocked by the same missin
 
 ---
 
+---
+
+# OUT-OF-SCOPE OBSERVATION — free-tier LLM provider latency and reliability
+
+**Not part of the pre-registered protocol.** No target in PROTOCOL.md covers this, and it was measured on 2026-11-19/20 while configuring the AI provider, not as a planned experiment. It is recorded here because it bears directly on **gap G4 (affordability)**, which CLAUDE.md states as a research claim, and because discarding a measurement because it was unplanned would be its own form of selection.
+
+**Method.** The same deployed Edge Function (`agent-orchestrator`), the same question, the same two grounding facts, called over HTTPS from the author's machine. Success = HTTP 200 with a non-empty answer. Latency = full round trip including the Supabase function's own overhead. Provider changed by configuration only — `AI_BASE_URL`, `AI_API_KEY`, `AI_MODEL` — with **no code change and no redeploy**.
+
+| Provider / model | Calls | Succeeded | Median latency |
+|---|---|---|---|
+| `gemini-3.8-flash` (Google free tier) | 7 | **2 (29%)** | **~80 s** |
+| `openai/gpt-oss-120b` (Groq free tier) | 7 | **7 (100%)** | **0.71 s** |
+
+Gemini failures were three 503 "high demand" (after the client's own two automatic retries), one client timeout at 150 s, and one **`WORKER_RESOURCE_LIMIT` from the Supabase Edge Function itself** — the function exhausted its free-tier compute while waiting on the provider. Groq's successful calls ranged 0.49–1.74 s.
+
+**What this supports.** Affordability is not free of engineering consequence. On one free-tier provider the system was unusable for an interactive dashboard — 80 s against an application target of 3 s, with a 71% failure rate — while a different free-tier provider met it comfortably. The provider-agnostic client (`supabase/functions/_shared/aiClient.ts`) is what made that substitution a three-value configuration change.
+
+**What this does NOT support.** This is 14 calls on two days from one machine on one network. It is **not** a benchmark of either provider, it does not characterise either service's steady-state behaviour, and it must not be presented as one. Free-tier capacity is explicitly best-effort and varies by hour, region and account.
+
+**Second observation, recorded for completeness.** In one `agent-orchestrator` response the model returned *"about RM 600 short of the goal"* from facts that stated only RM 8,400 and RM 9,000. The arithmetic is correct, but RM 600 was **not** in the supplied facts, and the function's prompt instructs the model never to produce a number that is not. The Local Shop path has `guardAnswer()` (`src/features/localshop/ai/guard.js`) checking wording against tool output; `agent-orchestrator` has **no equivalent guard** and relies on the prompt alone. No wrong figure was observed. The point is that nothing would have caught one.
+
+
 ## Amendment record
 
 One deviation from the pre-registered method occurred. It is recorded as a dated amendment at the foot of `PROTOCOL.md` and summarised here: the fix used **one value per role satisfying both themes**, rather than the pre-registered **theme-specific light/dark variants**. The target, the pass/fail rule and all four constraints are unchanged. Reason and consequences are in the amendment.
