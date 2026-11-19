@@ -148,3 +148,17 @@ Committed before the first run. **This file is not edited after results are seen
 **Disclosed consequence.** A single value per role is more constrained than two, so the colours are pushed closer together: simulated colour-blind separation falls in 9 of 12 category×deficiency cells (all still above the floor; tightest is crisis/deuteranopia at 30.35, down from 32.10). Reported in RESULTS.md rather than omitted.
 
 **Also recorded:** the protocol did not specify how to choose among feasible candidates. The rule applied, fixed before the final run and applied uniformly to all six colours, was **"closest to the original in sRGB"**. An earlier candidate set using a different objective (balance the two theme ratios) is reported in RESULTS.md as a rejected run, not discarded.
+
+### Amendment 2 — 2026-11-19, Task 2 measurement harness
+
+**Changed:** `e2e/journey-existing-data.spec.js` now asserts the per-page target with `expect.soft` instead of a hard `expect`, and the Dashboard step's content check became a real assertion.
+
+**Unchanged:** the target (< 3000 ms), the pass/fail rule (**maximum** across every page and every measured run must be < 3000 ms), the metric (navigation start → network idle), the warm-up policy (one discarded) and the five measured runs.
+
+**Reason.** The first run exposed a defect in the instrument, not in the system. A hard assertion aborts the test at the first slow page, so the other four pages are never measured — and a run that reports one page **cannot produce the per-page median and maximum this protocol requires**. Soft assertions still fail the test; they just let every page be measured first. This change makes the pre-registered output obtainable; it does not make the target easier to meet.
+
+Separately, `expect(page.getByText('Executive Summary').first()).toBeTruthy()` was a no-op — a Playwright `Locator` is always truthy, so it asserted nothing and never waited. It is now `await expect(...).toBeVisible()`. The timing is captured before this assertion, so the measurement is unaffected.
+
+**Not changed, deliberately:** `waitForLoadState('networkidle')` is discouraged in Playwright's own documentation, but it is the conservative proxy this protocol pre-registered and it stays. Replacing it after seeing a failing number would be changing the metric to fit the result.
+
+**Status of the 4412 ms Dashboard reading.** It is a real measurement and is reported as such. It is **not** a verdict: it was run #1, which this protocol pre-designated as the warm-up to be discarded, it measured only one page, and it has not been confirmed to have run against the production preview build rather than the dev server (see RESULTS.md, Task 2).
