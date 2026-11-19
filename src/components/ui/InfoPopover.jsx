@@ -18,8 +18,13 @@ export default function InfoPopover({ guide, label = 'More information', classNa
 
   if (!guide) return null
 
+  // <span>, not <div>: this popover is used inside <p> labels (StatTile,
+  // GlowSection headers, chart captions). A <div> there is invalid HTML and
+  // React reports it as a console error on every page that renders one.
+  // Spans are phrasing content, so they are legal inside <p>; the display
+  // is set by the utility classes below, so nothing changes visually.
   return (
-    <div className={`relative inline-flex ${className}`}>
+    <span className={`relative inline-flex ${className}`}>
       <button
         type="button"
         aria-label={label}
@@ -30,7 +35,7 @@ export default function InfoPopover({ guide, label = 'More information', classNa
       >
         <HelpCircle className="size-3.5" aria-hidden="true" />
       </button>
-      <div
+      <span
         id={id}
         role="tooltip"
         className={`absolute left-0 top-full z-20 mt-2 w-64 rounded-lg border border-glow-border bg-glow-surface p-3 text-xs text-glow-text/70 shadow-xl ${
@@ -38,7 +43,7 @@ export default function InfoPopover({ guide, label = 'More information', classNa
         }`}
       >
         {guide}
-      </div>
-    </div>
+      </span>
+    </span>
   )
 }
