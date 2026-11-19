@@ -22,6 +22,12 @@ test.describe('Journey 1 — existing-data walkthrough', () => {
   // per-page median and maximum the measurement protocol requires
   // (results/post_submission_2026-11/PROTOCOL.md, Task 2). Soft assertions
   // still fail the test; they just let every page be measured first.
+  // Five timed page loads plus a real Supabase login do not fit inside
+  // Playwright's 30s default, and a timeout truncates the run to whichever
+  // pages happened to load first — which cannot produce the per-page median
+  // and maximum the protocol requires.
+  test.setTimeout(120000)
+
   const timings = []
   async function openTimed(page, path, label) {
     const start = Date.now()
@@ -37,7 +43,9 @@ test.describe('Journey 1 — existing-data walkthrough', () => {
     const rows = timings.map((t) => `  ${t.label.padEnd(28)} ${String(t.elapsedMs).padStart(6)} ms`)
     const slowest = timings.reduce((a, b) => (b.elapsedMs > a.elapsedMs ? b : a))
     console.log(
-      ['', 'End-to-end response time (navigation start to network idle)', ...rows,
+      ['', 'End-to-end response time (navigation start to network idle)',
+       `  Measured against: ${process.env.E2E_BASE_URL ?? 'http://localhost:5173 (DEV SERVER — not a production build)'}`,
+       ...rows,
        `  ${'SLOWEST'.padEnd(28)} ${String(slowest.elapsedMs).padStart(6)} ms (${slowest.label})`,
        `  Target < 3000 ms: ${slowest.elapsedMs < 3000 ? 'met' : 'NOT met'}`, ''].join('\n'),
     )
@@ -61,10 +69,16 @@ test.describe('Journey 1 — existing-data walkthrough', () => {
       expect.soft(elapsedMs, `Dashboard took ${elapsedMs}ms, target is <3000ms`).toBeLessThan(3000)
     })
 
-    await test.step('Switch Business Startup -> E-Commerce', async () => {
-      const ecommerceTab = page.getByRole('tab', { name: /E-Commerce/i })
-      await ecommerceTab.click()
-      await expect(ecommerceTab).toHaveAttribute('aria-selected', 'true')
+    // The journey in FYP2.md §75 was written when the pathway was a clickable
+    // segmented control. It no longer is: ModeSwitcher.jsx now renders a
+    // read-only badge (role="status"), because the pathway is chosen once at
+    // onboarding and flipping it mid-session would change which data, rules
+    // and content the whole app shows. So this step asserts the pathway the
+    // account is actually in, rather than clicking a tab that no longer
+    // exists. This is a harness correction, not a change to the measurement
+    // protocol — no page timing is added, removed or altered by it.
+    await test.step('Confirm the account pathway badge is shown', async () => {
+      await expect(page.getByRole('status', { name: /Business mode/i })).toBeVisible()
     })
 
     await test.step('View Sentiment', async () => {
