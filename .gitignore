@@ -5,6 +5,21 @@ node_modules
 dist
 dist-ssr
 
+# Generated test output
+playwright-report
+test-results
+coverage
+
+# Python bytecode
+__pycache__/
+*.pyc
+
+# Trained model weights - hundreds of MB, kept out of git on purpose.
+# Restore to this path from Drive/HF; provenance recorded in
+# results/post_submission_2026-11/RESULTS.md
+ml/sentiment/results/xlmr_model/
+ml/sentiment/results/mbert_model/
+
 # Environment
 .env
 .env.local

@@ -4,7 +4,10 @@ import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 
 export default [
-  { ignores: ['dist', 'node_modules'] },
+  // playwright-report/ and test-results/ are generated: they contain
+// vendored, minified bundles (CodeMirror, the trace viewer) that are
+// not this project's source and produce hundreds of false errors.
+  { ignores: ['dist', 'node_modules', 'playwright-report', 'test-results', 'coverage'] },
   {
     files: ['**/*.{js,jsx}'],
     languageOptions: {
