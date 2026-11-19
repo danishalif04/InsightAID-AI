@@ -1,11 +1,13 @@
 import { useState } from 'react'
-import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { Store } from 'lucide-react'
 import { Input, Select } from '@/components/ui/Input'
 import EmptyState from '@/components/ui/EmptyState'
 import ChartTooltip from '@/components/ui/ChartTooltip'
 import { CHART_HEIGHTS } from '@/components/charts/chartDefaults'
 import { CHART_COLORS } from '@/theme/chartTheme'
+import { magnitudeStep } from '@/config/colorTokens'
+import { useTheme } from '@/hooks/useTheme'
 import Section from '../components/Section'
 import { useLang } from '../i18n/useLang'
 import { useShop } from '../store/useShop'
@@ -15,6 +17,7 @@ const money = (value) => `RM${Number(value).toFixed(2)}`
 
 export default function ProductsPricing() {
   const { t } = useLang()
+  const { isDark } = useTheme()
   const { shop, setShop, hasShop, loadDemo } = useShop()
   const [selectedId, setSelectedId] = useState(null)
   const [costIncrease, setCostIncrease] = useState(0.5)
@@ -47,6 +50,12 @@ export default function ProductsPricing() {
 
   // Top 12 keeps the ranked bar readable; the table below carries the rest.
   const chartRows = table.rows.slice(0, 12).map((row) => ({ name: row.name, marginPct: row.marginPct }))
+  // Ramp spans this chart's own range, so the shading spreads across
+  // whatever margins the shop's products actually occupy.
+  const marginValues = chartRows.map((row) => Number(row.marginPct) || 0)
+  const marginRange = marginValues.length
+    ? { min: Math.min(...marginValues), max: Math.max(...marginValues) }
+    : { min: 0, max: 0 }
 
   return (
     <div className="space-y-5">
@@ -65,7 +74,15 @@ export default function ProductsPricing() {
               <XAxis type="number" unit="%" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
               <YAxis type="category" dataKey="name" width={130} tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
               <Tooltip content={<ChartTooltip formatter={(value) => `${value}%`} />} />
-              <Bar dataKey="marginPct" name="Gross margin" radius={[0, 4, 4, 0]} fill={CHART_COLORS.positive} />
+              {/* Sequential ramp, not one flat colour and not a hue per
+                  product: these bars are the same measure at different
+                  sizes, so the shade carries the same information the
+                  length does. A hue per product would colour by rank. */}
+              <Bar dataKey="marginPct" name="Gross margin" radius={[0, 4, 4, 0]}>
+                {chartRows.map((row) => (
+                  <Cell key={row.name} fill={magnitudeStep(row.marginPct, { ...marginRange, isDark, hue: 'green' })} />
+                ))}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         )}

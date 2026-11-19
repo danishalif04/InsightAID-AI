@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest'
-import { ALL_COLOR_CATEGORIES } from './colorTokens'
+import { ALL_COLOR_CATEGORIES, MAGNITUDE_RAMPS, magnitudeStep } from './colorTokens'
 import { CVD_TYPES, minPairwiseDistanceUnderCvd } from './colorblindSimulation'
+
+/** Relative luminance (WCAG 2.x) — used to assert the sequential ramps are
+ * actually monotonic, rather than trusting that they look ordered. */
+function relativeLuminance(hex) {
+  const channels = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255)
+  const [r, g, b] = channels.map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4))
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b
+}
 
 describe('colorTokens', () => {
   it('never assigns the same hex value to two different categories', () => {
@@ -51,5 +59,74 @@ describe('colorTokens', () => {
         expect(minDistance, `${category} has a pair too close under simulated ${type}`).toBeGreaterThan(30)
       }
     }
+  })
+})
+
+describe('magnitudeStep', () => {
+  const RAMPS = [
+    ['green light', MAGNITUDE_RAMPS.green.light],
+    ['green dark', MAGNITUDE_RAMPS.green.dark],
+    ['blue light', MAGNITUDE_RAMPS.blue.light],
+    ['blue dark', MAGNITUDE_RAMPS.blue.dark],
+  ]
+
+  it('uses ramps that are monotonic in luminance, so shade tracks size', () => {
+    for (const [name, ramp] of RAMPS) {
+      const lums = ramp.map(relativeLuminance)
+      for (let i = 1; i < lums.length; i++) {
+        expect(lums[i], `${name}: ${ramp[i]} is not lighter than ${ramp[i - 1]}`).toBeGreaterThan(lums[i - 1])
+      }
+    }
+  })
+
+  it('maps the largest value to the lightest step and the smallest to the dimmest', () => {
+    expect(magnitudeStep(100, { max: 100, isDark: true, hue: 'green' })).toBe(MAGNITUDE_RAMPS.green.dark.at(-1))
+    expect(magnitudeStep(0, { max: 100, isDark: true, hue: 'green' })).toBe(MAGNITUDE_RAMPS.green.dark[0])
+    expect(magnitudeStep(100, { max: 100, isDark: false, hue: 'blue' })).toBe(MAGNITUDE_RAMPS.blue.light.at(-1))
+    expect(magnitudeStep(0, { max: 100, isDark: false, hue: 'blue' })).toBe(MAGNITUDE_RAMPS.blue.light[0])
+  })
+
+  it('picks the ramp that suits the active surface and the requested hue', () => {
+    expect(MAGNITUDE_RAMPS.green.dark).toContain(magnitudeStep(50, { max: 100, isDark: true, hue: 'green' }))
+    expect(MAGNITUDE_RAMPS.green.light).toContain(magnitudeStep(50, { max: 100, isDark: false, hue: 'green' }))
+    expect(MAGNITUDE_RAMPS.blue.dark).toContain(magnitudeStep(50, { max: 100, isDark: true, hue: 'blue' }))
+    expect(MAGNITUDE_RAMPS.blue.light).toContain(magnitudeStep(50, { max: 100, isDark: false, hue: 'blue' }))
+  })
+
+  it('keeps the two hues visibly apart, so the charts do not read alike', () => {
+    for (const mode of ['light', 'dark']) {
+      for (let i = 0; i < MAGNITUDE_RAMPS.green[mode].length; i++) {
+        expect(MAGNITUDE_RAMPS.green[mode][i]).not.toBe(MAGNITUDE_RAMPS.blue[mode][i])
+      }
+    }
+  })
+
+  it('spreads the ramp across a clustered range instead of pinning to the top', () => {
+    // Real case: product margins between 33% and 37.5%. Scaled from zero
+    // every bar lands on the top step; scaled across the range they differ.
+    const clustered = [33, 34, 35.5, 37, 37.5]
+    const range = { min: Math.min(...clustered), max: Math.max(...clustered), isDark: true, hue: 'green' }
+    const shades = clustered.map((v) => magnitudeStep(v, range))
+    expect(new Set(shades).size).toBeGreaterThan(1)
+    expect(shades[0]).toBe(MAGNITUDE_RAMPS.green.dark[0])
+    expect(shades.at(-1)).toBe(MAGNITUDE_RAMPS.green.dark.at(-1))
+  })
+
+  it('gives every bar the mid step when all values are identical', () => {
+    const flat = [10, 10, 10].map((v) => magnitudeStep(v, { min: 10, max: 10, isDark: true }))
+    expect(new Set(flat).size).toBe(1)
+    expect(MAGNITUDE_RAMPS.green.dark).toContain(flat[0])
+  })
+
+  it('falls back to the green ramp for an unknown hue rather than returning undefined', () => {
+    expect(MAGNITUDE_RAMPS.green.dark).toContain(magnitudeStep(50, { max: 100, isDark: true, hue: 'chartreuse' }))
+  })
+
+  it('never divides by zero or returns undefined for degenerate input', () => {
+    for (const [value, max] of [[0, 0], [5, 0], [NaN, 100], [10, NaN], [-5, 100]]) {
+      expect(MAGNITUDE_RAMPS.green.dark).toContain(magnitudeStep(value, { max, isDark: true, hue: 'green' }))
+    }
+    expect(MAGNITUDE_RAMPS.green.dark).toContain(magnitudeStep(5, {}))
+    expect(MAGNITUDE_RAMPS.green.dark).toContain(magnitudeStep(5))
   })
 })

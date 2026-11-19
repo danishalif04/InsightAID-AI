@@ -3,6 +3,7 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
+  Cell,
   ComposedChart,
   Legend,
   Line,
@@ -19,6 +20,8 @@ import EmptyState from '@/components/ui/EmptyState'
 import ChartTooltip from '@/components/ui/ChartTooltip'
 import { CHART_HEIGHTS } from '@/components/charts/chartDefaults'
 import { CHART_COLORS } from '@/theme/chartTheme'
+import { magnitudeStep } from '@/config/colorTokens'
+import { useTheme } from '@/hooks/useTheme'
 import KpiTile from '../components/KpiTile'
 import Section from '../components/Section'
 import { useLang } from '../i18n/useLang'
@@ -37,6 +40,7 @@ const money0 = (value) => `RM${Number(value).toLocaleString('en-MY', { maximumFr
 
 export default function FinancialPlanningScreen() {
   const { t } = useLang()
+  const { isDark } = useTheme()
   const { shop, hasShop, loadDemo } = useShop()
   const [assumedUnits, setAssumedUnits] = useState(null)
 
@@ -90,6 +94,12 @@ export default function FinancialPlanningScreen() {
   const { expenses, fixed, reference, unitsBep, revenueBep } = model
   const maxUnits = series.length ? series[series.length - 1].units : 0
   const daily = unitsBep.ok ? dailyTarget(bepUnits) : { ok: false }
+  // Ramp spans this shop's own expense range, biggest line to smallest.
+  const expenseValues = expenses.ok ? expenses.byCategory.map((row) => Number(row.amount) || 0) : []
+  const expenseRange = expenseValues.length
+    ? { min: Math.min(...expenseValues), max: Math.max(...expenseValues) }
+    : { min: 0, max: 0 }
+
   const runway = cashRunway(shop.cash, shop.monthlyOutflow)
   const capital = startupCapital(shop.startupItems, { monthlyFixed: fixed, availableCapital: shop.availableCapital })
 
@@ -148,7 +158,14 @@ export default function FinancialPlanningScreen() {
                   />
                 }
               />
-              <Bar dataKey="amount" name="Amount" radius={[0, 4, 4, 0]} fill={CHART_COLORS.positive} />
+              {/* Ranked spend, so the shade tracks the amount. Blue ramp
+                  rather than the margin chart's green, so the two Local
+                  Shop charts don't read as the same chart. */}
+              <Bar dataKey="amount" name="Amount" radius={[0, 4, 4, 0]}>
+                {expenses.byCategory.map((row) => (
+                  <Cell key={row.category} fill={magnitudeStep(row.amount, { ...expenseRange, isDark, hue: 'blue' })} />
+                ))}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         )}
