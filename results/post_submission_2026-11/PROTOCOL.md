@@ -136,3 +136,15 @@ Committed before the first run. **This file is not edited after results are seen
 ## Amendments
 
 *(None. Any amendment must be dated, state the reason, and be added below — never by editing the text above.)*
+
+### Amendment 1 — 2026-11-19, Task 1 adjustment strategy
+
+**Changed:** the fix uses **one value per role that satisfies both themes**, instead of the pre-registered **theme-specific light/dark variants**.
+
+**Unchanged:** the target (≥ 3:1), the pass/fail rule (worst case across each theme's backgrounds, both themes), and all four constraints (hue ±12°, per-theme contrast, CVD ≥ 30 within category, no cross-category hex reuse).
+
+**Reason.** The two rules together require a relative luminance between roughly 0.11 and 0.28 — a real band, and every one of the six failing colours has a value inside it at its own hue. Where a single value satisfies both themes, the pre-registered "light value and dark value" collapse to the same value, so this is the degenerate case of the registered rule rather than a weaker one. It also avoids introducing a theme-aware resolver into `colorTokens.js`, which would have required changing every chart consumer and the legacy `CHART_COLORS` map — a behaviour change across 10 files, and a regression risk carried into a viva demo for no gain in contrast.
+
+**Disclosed consequence.** A single value per role is more constrained than two, so the colours are pushed closer together: simulated colour-blind separation falls in 9 of 12 category×deficiency cells (all still above the floor; tightest is crisis/deuteranopia at 30.35, down from 32.10). Reported in RESULTS.md rather than omitted.
+
+**Also recorded:** the protocol did not specify how to choose among feasible candidates. The rule applied, fixed before the final run and applied uniformly to all six colours, was **"closest to the original in sRGB"**. An earlier candidate set using a different objective (balance the two theme ratios) is reported in RESULTS.md as a rejected run, not discarded.
