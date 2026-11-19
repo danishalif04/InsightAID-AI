@@ -18,8 +18,19 @@ import { formatDelta } from '@/utils/formatters'
 import { downloadCsv } from '@/utils/csvExport'
 import { aggregateToMonthly } from '@/utils/chartGranularity'
 import { getSentimentAnalysisData } from '@/services/sentimentAnalysisService'
+import { computeConfidenceDistribution, computeLanguageSentiment } from '@/utils/postBreakdowns'
+import { SENTIMENT_COLORS } from '@/config/colorTokens'
 
 const LANGUAGE_LABELS = { en: 'EN', ms: 'MY', zh: 'ZH', 'ms-en': 'MY/EN', unknown: '—' }
+// Spelled out for the Language Breakdown panel, where a two-letter code
+// beside a percentage bar is not self-explanatory.
+const LANGUAGE_FULL_LABELS = {
+  en: 'English',
+  ms: 'Bahasa Melayu',
+  zh: 'Mandarin',
+  'ms-en': 'Code-mixed (BM/EN)',
+  unknown: 'Undetected',
+}
 const SENTIMENT_TONE = { positive: 'success', neutral: 'neutral', negative: 'danger' }
 const SCORE_TONE = {
   positive: 'text-glow-brand',
@@ -70,6 +81,12 @@ export default function SentimentAnalysis() {
       return matchesKeyword && matchesLanguage && matchesPlatform
     })
   }, [data, keyword, language, platform])
+
+  // Both follow the filters, so narrowing to one language or platform
+  // re-scopes them rather than leaving a figure that describes a different
+  // set of posts than the list beneath it.
+  const confidence = useMemo(() => computeConfidenceDistribution(filteredPosts), [filteredPosts])
+  const languageRows = useMemo(() => computeLanguageSentiment(filteredPosts, LANGUAGE_FULL_LABELS), [filteredPosts])
 
   const handleExport = () => {
     if (filteredPosts.length === 0) {
@@ -219,10 +236,62 @@ export default function SentimentAnalysis() {
               }}
             </ChartCard>
 
-            <GlowSection title="Emotion Analysis" description="Breakdown of detected emotions">
-              <p className="text-sm italic text-glow-text/50">
-                Unavailable — this project only has 3-class sentiment (positive/neutral/negative); no emotion classifier is implemented.
-              </p>
+            {/* Replaces the old "Emotion Analysis" panel, which could never
+                show anything: this project classifies 3-class sentiment only
+                and no emotion classifier exists. Confidence is something the
+                system genuinely records, and it answers a more useful
+                question for Objective O1 — where is the model unsure? */}
+            <GlowSection
+              title="Classifier Confidence"
+              description="How sure the model was about these posts. Low confidence is where a human should look first."
+            >
+              {confidence.scored === 0 ? (
+                <EmptyState
+                  icon={MessageSquare}
+                  message="No confidence scores on the posts matching these filters. Posts rated by the star-rating fallback carry no confidence value."
+                />
+              ) : (
+                <div className="space-y-3">
+                  <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1">
+                    <div>
+                      <p className="text-2xl font-semibold text-glow-text">
+                        {Math.round(confidence.meanConfidence * 100)}%
+                      </p>
+                      <p className="text-xs text-glow-text/50">mean confidence</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-semibold text-glow-text">{confidence.lowShare}%</p>
+                      <p className="text-xs text-glow-text/50">below 60%</p>
+                    </div>
+                  </div>
+                  <ul className="space-y-2">
+                    {confidence.bands.map((band) => (
+                      <li key={band.id}>
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-glow-text/70">{band.label}</span>
+                          <span className="text-glow-text/50">
+                            {band.count} · {band.sharePct}%
+                          </span>
+                        </div>
+                        <div className="mt-1 h-2 overflow-hidden rounded-full bg-glow-border">
+                          <div
+                            className="h-full rounded-full"
+                            style={{
+                              width: `${band.sharePct}%`,
+                              backgroundColor: band.id === 'low' ? SENTIMENT_COLORS.negative : SENTIMENT_COLORS.positive,
+                            }}
+                          />
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                  {confidence.missing > 0 && (
+                    <p className="text-xs text-glow-text/40">
+                      {confidence.missing} post{confidence.missing === 1 ? '' : 's'} carry no confidence score and are excluded — a missing score is not a low one.
+                    </p>
+                  )}
+                </div>
+              )}
             </GlowSection>
           </div>
 
@@ -269,10 +338,53 @@ export default function SentimentAnalysis() {
               )}
             </GlowSection>
 
-            <GlowSection title="Region Breakdown" description="Sentiment score and mention volume by state">
-              <p className="text-sm italic text-glow-text/50">
-                Unavailable — no location field is captured during data ingestion, so posts can't be attributed to a state.
-              </p>
+            {/* Replaces the old "Region Breakdown", which could never show
+                anything: no location field is captured at ingestion, so a
+                post cannot be attributed to a state. Language is captured,
+                and the per-language split is what Objective O1 is actually
+                graded on (>= 75% accuracy for EACH language), so this is the
+                more load-bearing view of the same dataset. */}
+            <GlowSection
+              title="Language Breakdown"
+              description="Sentiment split per detected language — the per-language view Objective O1 is graded on"
+            >
+              {languageRows.length === 0 ? (
+                <EmptyState icon={MessageSquare} message="No posts match the current filters." />
+              ) : (
+                <ul className="space-y-3">
+                  {languageRows.map((row) => (
+                    <li key={row.language}>
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-medium text-glow-text/80">{row.label}</span>
+                        <span className="text-glow-text/50">
+                          {row.total} post{row.total === 1 ? '' : 's'}
+                          {row.unrated > 0 ? ` · ${row.unrated} unrated` : ''}
+                        </span>
+                      </div>
+                      {row.rated === 0 ? (
+                        <p className="mt-1 text-xs italic text-glow-text/40">No rated posts in this language.</p>
+                      ) : (
+                        <>
+                          <div className="mt-1 flex h-2.5 overflow-hidden rounded-full bg-glow-border">
+                            {['positive', 'neutral', 'negative'].map((key) =>
+                              row[`${key}Pct`] > 0 ? (
+                                <div
+                                  key={key}
+                                  style={{ width: `${row[`${key}Pct`]}%`, backgroundColor: SENTIMENT_COLORS[key] }}
+                                  title={`${key}: ${row[`${key}Pct`]}%`}
+                                />
+                              ) : null
+                            )}
+                          </div>
+                          <p className="mt-1 text-[11px] text-glow-text/40">
+                            {row.positivePct}% positive · {row.neutralPct}% neutral · {row.negativePct}% negative
+                          </p>
+                        </>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </GlowSection>
           </div>
         </>

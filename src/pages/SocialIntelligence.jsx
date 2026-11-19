@@ -15,6 +15,8 @@ import { capitalize } from '@/utils/formatters'
 import { aggregateToMonthly } from '@/utils/chartGranularity'
 import { getSocialIntelligenceData } from '@/services/socialIntelligenceService'
 import { selectDefaultPlatform } from '@/utils/socialAnalytics'
+import { computeEngagementBySentiment } from '@/utils/postBreakdowns'
+import { SENTIMENT_COLORS } from '@/config/colorTokens'
 
 const PLATFORM_COLORS = [CHART_COLORS.tiktok, CHART_COLORS.x, CHART_COLORS.positive, CHART_COLORS.neutral]
 
@@ -51,6 +53,7 @@ export default function SocialIntelligence() {
     [data, effectivePlatform]
   )
   const maxHashtag = Math.max(...filteredHashtags.map((item) => item.mentions), 1)
+  const reach = useMemo(() => computeEngagementBySentiment(filteredPosts), [filteredPosts])
 
   return (
     <div className="space-y-6">
@@ -186,10 +189,66 @@ export default function SocialIntelligence() {
             </GlowSection>
           </div>
 
-          <GlowSection title="Top Influencers" description={`Highest-follower accounts mentioning the brand on ${platformLabel}`}>
-            <p className="text-sm italic text-glow-text/50">
-              Unavailable — author identity is deliberately anonymized during ingestion, and no follower-count field is captured.
-            </p>
+          {/* Replaces the old "Top Influencers" panel. That one could never
+              show anything, and deliberately so: author identity is
+              anonymised at ingestion and no follower count is captured,
+              because PDPA 2010 forbids storing personal identifiers from
+              scraped comments (CLAUDE.md rule 7). Ranking people is the one
+              thing this system must not do.
+
+              Ranking SENTIMENT by reach needs no identity at all, and asks a
+              more useful question: do negative posts travel further than
+              positive ones? That ratio is the mechanism crisis detection
+              exists to catch. */}
+          <GlowSection
+            title="Reach by Sentiment"
+            description={`Engagement carried by each sentiment on ${platformLabel} — no author identity is stored, so accounts are never ranked`}
+          >
+            {reach.rated === 0 ? (
+              <EmptyState
+                icon={Users}
+                message="No rated posts with engagement figures on this platform yet."
+              />
+            ) : (
+              <div className="space-y-4">
+                {reach.negativeToPositiveRatio !== null && (
+                  <div className="rounded-2xl border border-glow-border bg-glow-surface p-3">
+                    <p className="text-2xl font-semibold text-glow-text">
+                      {reach.negativeToPositiveRatio}×
+                    </p>
+                    <p className="text-xs text-glow-text/60">
+                      {reach.negativeToPositiveRatio > 1
+                        ? 'Negative posts carry more engagement than positive ones here — complaints are travelling further than praise.'
+                        : 'Negative posts carry less engagement than positive ones here.'}
+                    </p>
+                  </div>
+                )}
+                <ul className="space-y-2">
+                  {reach.groups.map((group) => (
+                    <li key={group.sentiment} className="flex items-center gap-3">
+                      <span
+                        className="size-2.5 shrink-0 rounded-full"
+                        style={{ backgroundColor: SENTIMENT_COLORS[group.sentiment] }}
+                        aria-hidden="true"
+                      />
+                      <span className="w-20 shrink-0 text-xs capitalize text-glow-text/70">{group.sentiment}</span>
+                      <span className="text-xs text-glow-text/50">
+                        {group.count} post{group.count === 1 ? '' : 's'}
+                      </span>
+                      <span className="ml-auto text-right text-xs text-glow-text/70">
+                        mean {group.mean.toLocaleString()} · median {group.median.toLocaleString()}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                {/* Median is shown beside mean on purpose: engagement is
+                    long-tailed and a single viral post can make the mean
+                    describe something that never typically happens. */}
+                <p className="text-[11px] text-glow-text/40">
+                  Median is shown beside the mean because engagement is long-tailed — one viral post can pull the mean far from what a typical post gets.
+                </p>
+              </div>
+            )}
           </GlowSection>
 
           <GlowSection title="Top Posts" description={`Highest-engagement real posts on ${platformLabel}`}>
