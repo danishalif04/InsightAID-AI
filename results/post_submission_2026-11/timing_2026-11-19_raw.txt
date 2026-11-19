@@ -1,0 +1,67 @@
+Post-submission Task 2 — end-to-end page timing.
+Production build (npm run build + npm run preview), measured against
+http://localhost:4173. Run 1 was the pre-registered warm-up and is
+DISCARDED. Runs 2-6 are the five measured runs.
+
+Console output, verbatim, as emitted by the afterAll reporter in
+e2e/journey-existing-data.spec.js.
+
+Run 2:-
+End-to-end response time (navigation start to network idle)
+  Measured against: http://localhost:4173
+  Dashboard                      7079 ms
+  Sentiment Analysis             1604 ms
+  Forecasting                    4079 ms
+  Crisis Detection               4626 ms
+  Recommendations                4094 ms
+  SLOWEST                        7079 ms (Dashboard)
+  Target < 3000 ms: NOT met
+
+Run 3:-
+End-to-end response time (navigation start to network idle)
+  Measured against: http://localhost:4173
+  Dashboard                      7633 ms
+  Sentiment Analysis             1667 ms
+  Forecasting                    4550 ms
+  Crisis Detection               4779 ms
+  Recommendations                5105 ms
+  SLOWEST                        7633 ms (Dashboard)
+  Target < 3000 ms: NOT met
+
+Run 4:-
+End-to-end response time (navigation start to network idle)
+  Measured against: http://localhost:4173
+  Dashboard                      7124 ms
+  Sentiment Analysis             1583 ms
+  Forecasting                    4251 ms
+  Crisis Detection               4387 ms
+  Recommendations                4039 ms
+  SLOWEST                        7124 ms (Dashboard)
+  Target < 3000 ms: NOT met
+
+Run 5:-
+End-to-end response time (navigation start to network idle)
+  Measured against: http://localhost:4173
+  Dashboard                      4687 ms
+  Sentiment Analysis             1534 ms
+  Forecasting                    3510 ms
+  Crisis Detection               3916 ms
+  Recommendations                3988 ms
+  SLOWEST                        4687 ms (Dashboard)
+  Target < 3000 ms: NOT met
+
+Run 6:-
+End-to-end response time (navigation start to network idle)
+  Measured against: http://localhost:4173
+  Dashboard                      4496 ms
+  Sentiment Analysis             1552 ms
+  Forecasting                    3833 ms
+  Crisis Detection               4145 ms
+  Recommendations                3712 ms
+  SLOWEST                        4496 ms (Dashboard)
+  Target < 3000 ms: NOT met
+
+Every run additionally emitted one `expect.soft` assertion failure per page
+over 3000 ms, and the test reported "1 failed" each time. That is the
+intended behaviour: the soft assertion records the miss without aborting
+the run, so all five pages are measured. No run was discarded for failing.

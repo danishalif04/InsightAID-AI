@@ -8,12 +8,12 @@ Run date **2026-11-19** · protocol pre-registered `c87a7a9` · change committed
 | Target | At submission | After re-test | Status | Source |
 |---|---|---|---|---|
 | **Chart contrast ≥ 3:1** | Chart green **2.28:1**; **4 of 15** below 3:1 (light theme only) | **15 of 15 pass in both themes.** Re-audit first found **6** failures, not 4 — the submitted audit checked light only | ✅ **NOW MET** | RESULTS.md §Task 1 |
-| **End-to-end page time < 3 s** | Not measured ("2.70 ms computation; end-to-end not measured") | **Still not measured** — no credentials, backend unreachable | ⛔ **UNCHANGED — blocked** | RESULTS.md §Task 2 |
+| **End-to-end page time < 3 s** | Not measured ("2.70 ms computation; end-to-end not measured") | **Now measured, and missed.** 5 runs, production build. Medians: Dashboard **7079**, Crisis **4387**, Recommendations **4039**, Forecasting **4079**, Sentiment **1583** ms. Worst single observation **7633 ms** | ❌ **MEASURED — NOT MET** | RESULTS.md §Task 2 |
 | **Trained sentiment model deployed** | Not deployed — dashboard uses `rating_heuristic_v1` | **Still not deployed.** Recovery attempted 2026-11-19 and failed: the checkpoint was written to Colab's ephemeral disk, not Drive, and was destroyed with the runtime | ⛔ **UNCHANGED — permanently blocked** | RESULTS.md §Task 3 |
 | **Code-mixed accuracy** | Not evaluated | **Still not evaluated** — same lost checkpoint | ⛔ **UNCHANGED — permanently blocked** | RESULTS.md §Task 4 |
 | **Sentiment variant beats sales-only** | Worse in 6 of 8 DM tests; none significant | **Not re-tested** — awaiting confirmation, and blocked by the same checkpoint | ⏸ **NOT STARTED** | RESULTS.md §Task 5 |
 
-**One of five targets moved. Four did not, and the reason in every case is a missing prerequisite, not a failed attempt.**
+**Two of five targets moved: one was fixed, one was measured for the first time and failed.** Of the remaining three, all are blocked by the loss of the trained checkpoint, which was confirmed unrecoverable on 2026-11-19.
 
 ---
 
@@ -29,7 +29,7 @@ Run date **2026-11-19** · protocol pre-registered `c87a7a9` · change committed
 
 ## What this does NOT license saying
 
-- ❌ "Response time is now verified under 3 seconds" — it has **never** been measured end to end.
+- ❌ "Response time is now verified under 3 seconds" — it has now been measured, and **it is not under 3 seconds**. Four of five pages miss, the slowest by more than double.
 - ❌ "The trained model is deployed" — the checkpoint is not even in the repository.
 - ❌ "Code-mixed text is now evaluated" — it is not.
 - ❌ "Sentiment improves the forecast after re-testing" — that re-test has not been run.
@@ -45,7 +45,7 @@ Only one row changes. The rest stand exactly as submitted.
 | Forecast MAPE < 15% | 21.41 · 15.17 · 13.28 across three protocols | PARTIAL · 1 OF 3 |
 | Sentiment variant beats sales-only | Worse in 6 of 8; none significant | NOT MET |
 | UAT overall mean ≥ 4.0 | 4.07 | MET OVERALL |
-| Response time < 3 s | 2.70 ms computation; end-to-end not measured | PARTIAL · NOT SHOWN END-TO-END |
+| **Response time < 3 s** | **At submission 2.70 ms computation, end-to-end not measured. Measured post-submission: 4 of 5 pages miss; slowest median 7079 ms** | **NOT MET · MEASURED AFTER SUBMISSION** |
 | **Chart contrast ≥ 3:1** | **At submission 2.28:1, 4 of 15 failing. Corrected post-submission: 15 of 15 pass in both themes** | **NOT MET AT SUBMISSION · FIXED AFTER** |
 
 Keeping the "at submission" value visible in that row is the point — it shows the examiner the finding *and* the fix, without implying the submitted document said something it did not.
@@ -54,7 +54,7 @@ Keeping the "at submission" value visible in that row is the point — it shows 
 
 | Need | Unblocks |
 |---|---|
-| `E2E_TEST_EMAIL` / `E2E_TEST_PASSWORD` + an unpaused backend | Task 2 |
+| ~~`E2E_TEST_EMAIL` / `E2E_TEST_PASSWORD` + an unpaused backend~~ — **supplied; Task 2 is complete** | Task 2 |
 | ~~The trained XLM-R checkpoint~~ — **confirmed lost 2026-11-19; cannot be unblocked without training a new model** | Tasks 3, 4, 5 |
 | SentiBahasaRojak licence check | Task 4 |
 | Your explicit confirmation | Task 5 |
@@ -77,3 +77,34 @@ The honest answer, in full:
 **None of the submitted sentiment metrics depend on the weights file.** The accuracy
 figures are evidenced by `O1_SCORECARD.md` and `model_versions_v20261020-171546.json`,
 both intact and unmodified.
+
+---
+
+## If asked at the viva: "your system is slower than 3 seconds — doesn't that fail Objective 3?"
+
+The answer to give, in full, without hedging:
+
+> Yes, on this measurement it fails. The dissertation reports a 2.70 ms
+> computation time and states explicitly that end-to-end was not measured. After
+> submission I measured it: production build, one discarded warm-up, five runs,
+> median and maximum per page. Four of the five pages exceed 3 seconds. The
+> Dashboard has a median of 7.1 seconds. I am reporting that as not met.
+>
+> Three things qualify the number without excusing it. The metric is
+> navigation-to-network-idle, which I pre-registered as a deliberately
+> conservative proxy — it waits for every trailing request, so a user sees a
+> usable page earlier than this figure suggests. The measurement is on a
+> development laptop over home broadband to a free-tier Supabase instance, which
+> is not controlled infrastructure. And the runs drifted within the session, from
+> about 7.1 down to 4.5 seconds, which I report rather than average away — but
+> even the fastest runs miss the target.
+>
+> What I would do next is profile the Dashboard specifically. It is the slowest
+> page by a wide margin while Sentiment, on the same stack and the same backend,
+> comes in at 1.6 seconds — so the bottleneck is that page's own query pattern,
+> not the architecture.
+
+**Why this is a strong answer rather than a weak one:** you found the gap yourself,
+pre-registered the method before running, reported the number that hurt, and can
+name the next diagnostic step. The alternative — leaving "not measured" on the
+slide — invites exactly the same question with no answer attached.

@@ -8,7 +8,7 @@ Submitted artefacts (`ml/sentiment/results/`, `ml/forecasting/results/protocol_s
 | Task | Status | Why |
 |---|---|---|
 | **1 — Chart contrast** | ✅ **Complete — target met** | See below |
-| **2 — End-to-end page time** | ⛔ **Not run — blocked** | No credentials; backend unreachable from this environment |
+| **2 — End-to-end page time** | ✅ **Run — target NOT met** | Measured; 4 of 5 pages over 3000 ms, slowest median 7079 ms |
 | **3 — Deploy trained sentiment model** | ⛔ **Not run — blocked** | No trained checkpoint exists in the repository |
 | **4 — Code-mixed evaluation** | ⛔ **Not run — blocked** | Same missing checkpoint; corpus licence unverified |
 | **5 — Sentiment-as-regressor re-test** | ⏸ **Not started** | Awaiting explicit confirmation, and blocked by the same checkpoint |
@@ -119,17 +119,82 @@ npx eslint . && npx vitest@5.1.1 run && npm run build
 
 ---
 
-# TASK 2 — End-to-end page time ⛔ NOT RUN
+# TASK 2 — End-to-end page time ⛔ TARGET NOT MET
 
-**Target:** < 3000 ms per analysis page. **Original value at submission:** not measured (Dissertation Table 4.9: *"2.70 ms computation; end-to-end not measured"*). **New value: still not measured.**
+**Target:** < 3000 ms per analysis page.
+**Original value at submission:** not measured (Dissertation Table 4.9: *"2.70 ms computation; end-to-end not measured"*).
+**New value: measured. 4 of the 5 pages miss the target. The slowest page has a median of 7079 ms — more than twice the target.**
 
-**Blocker, verified before the run:**
-- `E2E_TEST_EMAIL` / `E2E_TEST_PASSWORD` are unset. `e2e/helpers.js` deliberately `test.skip()`s without them rather than faking a session — so the test does not fail, it declines to run.
-- A DNS query for the Supabase host **timed out** from this environment, so backend reachability could not be confirmed either way.
+Run date **2026-11-19**. Production build (`npm run build` + `npm run preview`), measured against `http://localhost:4173`, confirmed by the `Measured against:` line the harness prints on every run. One warm-up run, discarded as pre-registered, then **5 measured runs**. No run was excluded for its result.
 
-**Nothing was estimated, simulated or inferred in place of a measurement.** The pre-registered method in PROTOCOL.md (production build, one discarded warm-up, 5 measured runs, median **and** maximum per page, navigation-to-network-idle declared as a conservative proxy) stands ready to run unchanged.
+### Result — median and maximum per page
 
-**To unblock:** supply the two environment variables for a confirmed account, and an unpaused backend.
+| Page | n | Min | **Median** | **Max** | Verdict |
+|---|---|---|---|---|---|
+| Dashboard | 5 | 4496 | **7079** | **7633** | ❌ FAIL |
+| Sentiment Analysis | 5 | 1534 | **1583** | **1667** | ✅ PASS |
+| Forecasting | 5 | 3510 | **4079** | **4550** | ❌ FAIL |
+| Crisis Detection | 5 | 3916 | **4387** | **4779** | ❌ FAIL |
+| Recommendations | 5 | 3712 | **4039** | **5105** | ❌ FAIL |
+
+All values in milliseconds.
+**Slowest page by median: Dashboard, 7079 ms. Worst single observation: 7633 ms. Only 1 of 5 pages meets the target on every run.**
+
+**Stated plainly: the response-time target is NOT met.** The dissertation's Table 4.9 entry reports a 2.70 ms *computation* time and states that end-to-end was not measured. That remains accurate. This re-test supplies the missing end-to-end measurement, and it misses the target on four of five pages. Nothing here reduces the gap; it quantifies it.
+
+### Within-session drift, reported rather than averaged away
+
+The five runs were not homogeneous. Dashboard measured 7079, 7633 and 7124 ms on runs 2–4, then 4687 and 4496 ms on runs 5–6 — a drop of roughly 2.5 s partway through the session, visible on the other pages too. The cause was not isolated (plausibly Supabase connection warming, local caching or machine load; none was verified). **All five runs are reported and all five are included in the median and maximum.** Reporting only the faster pair would have halved the headline number and would have been cherry-picking, which the protocol forbids.
+
+Even taking only the two fastest runs, the Dashboard remains above 4400 ms. **The target is missed under every subset of this data**, so the drift changes the magnitude of the miss, not the verdict.
+
+### Measurement definition and its limits
+
+Timing is **navigation start → `networkidle`**, as pre-registered. This is a **conservative proxy**, deliberately chosen, and it is stated here because it materially affects interpretation:
+
+- It waits for the network to go quiet for 500 ms, so it includes every Supabase query, every lazy-loaded route chunk, and any trailing request — **including requests that do not block what the user sees**.
+- A user may perceive the page as usable **before** this moment. Time-to-first-contentful-paint or time-to-interactive would both be lower.
+- It therefore **overstates** perceived responsiveness relative to a paint-based metric, and **understates** nothing. It is the pessimistic reading.
+
+**This does not rescue the result.** A page whose network traffic is still settling at 7 s is doing substantial work after navigation, and the honest claim is the one above: the target is not met on this metric. Re-measuring with a more favourable metric *after* seeing these numbers would be exactly the post-hoc change of method the protocol forbids, and was not done.
+
+### Harness corrections made before the measured runs
+
+The suite could not produce a per-page result until three stale selectors were fixed. All three were corrected and committed **before** any measured run, and none of them touches a timing, a target, the page set or the pass/fail rule:
+
+| Commit | Fix |
+|---|---|
+| `14ca047` | The journey clicked `role=tab, name=/E-Commerce/i`. No such tab exists — `ModeSwitcher.jsx` renders a read-only badge (`role="status"`), and the labels are now "Malaysian Local Shop" and "Business Startup". The click consumed the full 30 s test timeout and aborted the run, so only the Dashboard was ever measured. Also raised the per-test timeout to 120 s. |
+| `0cbef22` | `"Crisis Detection Center"` → the page renders **Early-Warning Crisis Detection**; `"AI Recommendation Engine"` → the page renders **AI Recommendations**. |
+
+An earlier, now-superseded set of five runs (`timing_run_1..5.txt`) measured the **Dashboard only**, and against the dev server, for these reasons. Those files are retained in this folder; they are **not** the result and are not used in the table above.
+
+### A parser defect found and fixed before the numbers were trusted
+
+The first version of `summarise_timing.mjs` built its regex inside a JavaScript template literal, where `\s` collapses to a bare `s`. It parsed **zero** samples from every page — and then reported **"OVERALL: target < 3000 ms is MET"**, because an empty sample yields `max = -Infinity`, which compares as less than 3000.
+
+This is recorded deliberately. It is precisely the failure mode CLAUDE.md's honesty rule exists to catch: a script that silently reports a pass it never computed. The script now **throws** if any page has zero samples rather than returning a verdict, and the table above was regenerated after the fix.
+
+### Reproduce
+
+```bash
+node results/post_submission_2026-11/summarise_timing.mjs
+```
+
+Re-measuring from scratch:
+```powershell
+npm run build; npm run preview            # terminal A
+$env:E2E_TEST_EMAIL='<confirmed account>' # terminal B
+$env:E2E_TEST_PASSWORD='<password>'
+$env:E2E_BASE_URL='http://localhost:4173'
+npx playwright test e2e/journey-existing-data.spec.js --reporter=list
+```
+One warm-up, discard it; five measured runs.
+
+**Raw console output:** [`timing_2026-11-19_raw.txt`](timing_2026-11-19_raw.txt) — verbatim, all five runs.
+**Commits:** harness `14ca047`, `0cbef22`.
+
+**Machine:** the author's development laptop, Windows 11 Pro 10.0.26200, local preview server on `localhost`, Supabase accessed over the author's home broadband. **The network path to Supabase is not controlled and not characterised**, and it is a plausible contributor to both the absolute numbers and the drift. A measurement on controlled infrastructure would be a different experiment, and is not claimed here.
 
 ---
 
