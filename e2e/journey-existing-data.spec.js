@@ -95,13 +95,13 @@ test.describe('Journey 1 — existing-data walkthrough', () => {
 
     await test.step('View Crisis', async () => {
       const elapsedMs = await openTimed(page, '/crisis-detection', 'Crisis Detection')
-      await expect(page.getByRole('heading', { name: 'Crisis Detection Center' })).toBeVisible()
+      await expect(page.getByRole('heading', { name: 'Crisis Detection' })).toBeVisible()
       expect.soft(elapsedMs, `Crisis Detection took ${elapsedMs}ms, target is <3000ms`).toBeLessThan(3000)
     })
 
     await test.step('View Recommendation', async () => {
       const elapsedMs = await openTimed(page, '/recommendations', 'Recommendations')
-      await expect(page.getByRole('heading', { name: 'AI Recommendation Engine' })).toBeVisible()
+      await expect(page.getByRole('heading', { name: 'AI Recommendations' })).toBeVisible()
       expect.soft(elapsedMs, `Recommendations took ${elapsedMs}ms, target is <3000ms`).toBeLessThan(3000)
     })
   })
