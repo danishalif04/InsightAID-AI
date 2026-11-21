@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Sparkles } from 'lucide-react'
 import brandMark from '@/assets/insightaid-mark.png'
+import brandLockup from '@/assets/insightaid-lockup.png'
 import Button from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { useAuth } from '@/hooks/useAuth'
@@ -89,18 +90,20 @@ export default function Login() {
               aria-hidden="true"
               width={40}
               height={40}
-              className="size-10 object-contain [filter:drop-shadow(0_4px_10px_rgba(34,164,95,0.35))]"
+              className="brand-glow size-10 object-contain"
             />
             <span className="text-sm font-semibold uppercase tracking-wide text-glow-text/70">InsightAid AI</span>
           </div>
           <div>
+            {/* Full lockup - glyph + wordmark - as the hero. The artwork is
+                920 x 400, so width/height keep the space reserved before it
+                loads and the layout does not jump. */}
             <img
-              src={brandMark}
-              alt=""
-              aria-hidden="true"
-              width={128}
-              height={128}
-              className="mb-6 size-36 object-contain [filter:drop-shadow(0_18px_40px_rgba(34,164,95,0.4))]"
+              src={brandLockup}
+              alt="InsightAid AI"
+              width={920}
+              height={400}
+              className="brand-glow brand-glow--breathe mb-8 h-auto w-full max-w-[460px] object-contain"
             />
             <h1 className="text-[2.75rem] font-semibold leading-[1.05] tracking-tight text-glow-text" style={{ fontFamily: 'var(--font-ui)' }}>
               Decisions, backed by{' '}
@@ -123,12 +126,14 @@ export default function Login() {
         <div className="flex items-center justify-center p-4 sm:p-8">
           <div className="w-full max-w-sm rounded-3xl border border-glow-border bg-glow-surface-elevated p-8">
             <div className="mb-4 flex flex-col items-center gap-2 text-center lg:hidden">
+              {/* Was a rounded box-shadow, which drew a square around the
+                  transparent artwork. The lockup reads well at this width. */}
               <img
-                src={brandMark}
+                src={brandLockup}
                 alt="InsightAid AI"
-                width={64}
-                height={64}
-                className="size-16 rounded-2xl shadow-[0_0_0_1px_rgba(34,197,94,0.25),0_12px_32px_-14px_rgba(34,197,94,0.6)]"
+                width={920}
+                height={400}
+                className="brand-glow h-auto w-60 object-contain"
               />
             </div>
             <h2 className="text-center text-lg font-semibold text-glow-text lg:text-left">

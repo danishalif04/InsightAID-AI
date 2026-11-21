@@ -7,7 +7,10 @@ export default [
   // playwright-report/ and test-results/ are generated: they contain
 // vendored, minified bundles (CodeMirror, the trace viewer) that are
 // not this project's source and produce hundreds of false errors.
-  { ignores: ['dist', 'node_modules', 'playwright-report', 'test-results', 'coverage'] },
+  // insightaid-demo/ is the separate Remotion video project: TypeScript, with
+  // its own `tsc --noEmit` check, and a generated build/ of bundled vendor
+  // code. This JS-only config was never meant to lint it.
+  { ignores: ['dist', 'node_modules', 'playwright-report', 'test-results', 'coverage', 'insightaid-demo'] },
   {
     files: ['**/*.{js,jsx}'],
     languageOptions: {

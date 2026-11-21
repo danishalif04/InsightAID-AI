@@ -225,3 +225,62 @@
   min-height: 44px;
   min-width: 44px;
 }
+
+/* ---------------------------------------------------------------------------
+ * Brand lockup glow (login page)
+ *
+ * Two layers, each doing a job:
+ *   - a tight dark edge, so the cream wordmark still reads on the LIGHT theme,
+ *     where cream-on-near-white would otherwise wash out;
+ *   - a soft brand-green bloom, the glow itself.
+ * drop-shadow (not box-shadow) so the glow follows the transparent artwork's
+ * outline instead of drawing a rectangle around it.
+ *
+ * The slow "breathing" pulse runs only when the OS has NOT asked for reduced
+ * motion, and Low-Sensory mode drops both the pulse and the bloom - a pulsing
+ * coloured glow is exactly the visual intensity that mode exists to remove.
+ * ------------------------------------------------------------------------- */
+.brand-glow {
+  filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.55)) drop-shadow(0 2px 3px rgba(0, 0, 0, 0.3))
+    drop-shadow(0 0 18px rgba(34, 197, 94, 0.32));
+}
+
+:where(.dark) .brand-glow {
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.6)) drop-shadow(0 0 22px rgba(34, 197, 94, 0.45));
+}
+
+@keyframes brand-glow-breathe {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.55)) drop-shadow(0 2px 3px rgba(0, 0, 0, 0.3))
+      drop-shadow(0 0 12px rgba(34, 197, 94, 0.22));
+  }
+  50% {
+    filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.55)) drop-shadow(0 2px 3px rgba(0, 0, 0, 0.3))
+      drop-shadow(0 0 30px rgba(34, 197, 94, 0.5));
+  }
+}
+
+@keyframes brand-glow-breathe-dark {
+  0%,
+  100% {
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.6)) drop-shadow(0 0 14px rgba(34, 197, 94, 0.3));
+  }
+  50% {
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.6)) drop-shadow(0 0 38px rgba(34, 197, 94, 0.62));
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .brand-glow--breathe {
+    animation: brand-glow-breathe 4.5s ease-in-out infinite;
+  }
+  :where(.dark) .brand-glow--breathe {
+    animation-name: brand-glow-breathe-dark;
+  }
+}
+
+.ui-low-sensory .brand-glow {
+  filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.55));
+  animation: none !important;
+}
