@@ -7,3 +7,9 @@ build/
 # Original audio pack (male + female VO, previews). 27 MB of binaries -
 # kept locally, not in git. The clips the video actually uses are in public/.
 audio-source/
+
+# Competition VO: raw conversions (inputs to scripts/clean_vo.py, rebuildable from
+# the owner's m4a files) and the superseded c07/c08 clips. Only the cleaned
+# clips the video uses (public/assets/vo-comp/) are tracked.
+public/assets/vo-comp-raw/
+public/assets/vo-comp-old/

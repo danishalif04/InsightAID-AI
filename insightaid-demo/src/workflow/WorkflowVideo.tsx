@@ -35,10 +35,12 @@ export const WorkflowVideo: React.FC<{
   overlay?: React.ReactNode
   /** Scenes whose captions sit under the app window rather than centred. */
   windowScenes: number[]
-}> = ({ lines, scenes, voDir, voFrames, cues, total, overlay, windowScenes }) => {
+  voLead?: number
+  musicBase?: number
+}> = ({ lines, scenes, voDir, voFrames, cues, total, overlay, windowScenes, voLead = VO_LEAD, musicBase = MUSIC_BASE }) => {
   const windows = lines
     .filter((l) => voFile(voDir, l.scene) && voFrames[l.scene])
-    .map((l) => [l.from + VO_LEAD, l.from + VO_LEAD + voFrames[l.scene]] as const)
+    .map((l) => [l.from + voLead, l.from + voLead + voFrames[l.scene]] as const)
 
   const musicVolume = (f: number) => {
     let duck = 1
@@ -47,7 +49,7 @@ export const WorkflowVideo: React.FC<{
     }
     const fadeIn = interpolate(f, [0, 15], [0, 1], clamp)
     const fadeOut = interpolate(f, [total - 45, total], [1, 0], clamp)
-    return MUSIC_BASE * duck * fadeIn * fadeOut
+    return musicBase * duck * fadeIn * fadeOut
   }
 
   return (
@@ -60,7 +62,7 @@ export const WorkflowVideo: React.FC<{
           <Sequence key={line.scene} from={line.from} durationInFrames={duration} name={`S${line.scene}`}>
             <Scene duration={duration} />
             {clip && (
-              <Sequence from={VO_LEAD} name={`VO s${line.scene}`}>
+              <Sequence from={voLead} name={`VO s${line.scene}`}>
                 <Audio src={staticFile(clip)} />
               </Sequence>
             )}
@@ -76,7 +78,7 @@ export const WorkflowVideo: React.FC<{
       })}
       {overlay}
       {PUBLIC.has('assets/audio/music.mp3') && <Audio src={staticFile('assets/audio/music.mp3')} volume={musicVolume} />}
-      <WorkflowCaptions lines={lines} voFrames={voFrames} voDir={voDir} windowScenes={windowScenes} />
+      <WorkflowCaptions lines={lines} voFrames={voFrames} voDir={voDir} windowScenes={windowScenes} voLead={voLead} />
     </AbsoluteFill>
   )
 }
@@ -97,18 +99,19 @@ function phrases(text: string): string[] {
 }
 
 /** Captions paced across the real clip length when one exists, else across the scene. */
-const WorkflowCaptions: React.FC<{ lines: Line[]; voFrames: Record<number, number>; voDir: string; windowScenes: number[] }> = ({
+const WorkflowCaptions: React.FC<{ lines: Line[]; voFrames: Record<number, number>; voDir: string; windowScenes: number[]; voLead: number }> = ({
   lines,
   voFrames,
   voDir,
   windowScenes,
+  voLead,
 }) => {
   const frame = useCurrentFrame()
   const schedule = lines.flatMap((line) => {
     const ps = phrases(line.text)
     const words = ps.map((p) => p.split(/\s+/).length)
     const totalWords = words.reduce((a, b) => a + b, 0)
-    const start = line.from + VO_LEAD
+    const start = line.from + voLead
     const span = voFile(voDir, line.scene) && voFrames[line.scene] ? voFrames[line.scene] : line.to - start - 10
     let cursor = start
     return ps.map((p, i) => {
