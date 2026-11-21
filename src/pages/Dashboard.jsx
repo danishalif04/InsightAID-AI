@@ -22,6 +22,7 @@ import {
   PackageSearch,
   RefreshCw,
   Sparkles,
+  Store,
   X,
 } from 'lucide-react'
 import Badge from '@/components/ui/Badge'
@@ -47,6 +48,8 @@ import { CHART_COLORS } from '@/theme/chartTheme'
 import { PLATFORM_COLORS as PLATFORM_COLOR_MAP } from '@/config/colorTokens'
 import { capitalize, formatCurrencyMYR } from '@/utils/formatters'
 import { getProfile } from '@/services/businessProfileService'
+import { resolveStoreName } from '@/utils/storeName'
+import { readStoredShop } from '@/features/localshop/store/storedShop'
 import { getDashboardData } from '@/services/dashboardService'
 import BusinessPlanningPanel from '@/components/common/BusinessPlanningPanel'
 import BusinessOverviewCard from '@/components/common/BusinessOverviewCard'
@@ -556,6 +559,11 @@ export default function Dashboard() {
   const showOnboardingBanner = businessProfile && !businessProfile.exists && !dismissedBanner
   const showPlanningPanel =
     businessProfile?.exists && businessProfile.dataAvailabilityPath === 'no_data'
+  const storeName = resolveStoreName({
+    mode,
+    profileName: businessProfile?.values?.business_name,
+    localShopName: readStoredShop()?.name,
+  })
 
   return (
     <div className="space-y-6">
@@ -564,6 +572,21 @@ export default function Dashboard() {
         title="Business Health, at a Glance"
         highlight="Glance"
         description="Real sentiment, crisis risk, and revenue signals — recomputed from your own data on every visit."
+        actions={
+          storeName ? (
+            <div className="flex items-center gap-3 rounded-2xl border border-glow-border bg-glow-surface-elevated px-4 py-3">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-glow-brand/15">
+                <Store className="size-5 text-glow-brand" aria-hidden="true" />
+              </span>
+              <div className="min-w-0">
+                <p className="text-[11px] font-medium uppercase tracking-wide text-glow-text/50">Store</p>
+                <p className="truncate text-lg font-semibold text-glow-text" data-testid="dashboard-store-name">
+                  {storeName}
+                </p>
+              </div>
+            </div>
+          ) : null
+        }
       />
 
       {showPlanningPanel ? (

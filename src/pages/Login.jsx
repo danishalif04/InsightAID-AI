@@ -174,6 +174,10 @@ export default function Login() {
               <Link to={PATHS.welcome} className="hover:underline hover:text-glow-text/60">
                 Learn more about InsightAid AI
               </Link>
+              {' · '}
+              <Link to={`${PATHS.welcome}#guide`} className="hover:underline hover:text-glow-text/60">
+                How to use the app
+              </Link>
             </p>
 
             {DEMO_ACCOUNTS.length > 0 && (

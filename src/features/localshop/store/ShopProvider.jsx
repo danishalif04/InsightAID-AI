@@ -2,16 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { DEMO_SHOP } from '../data/demoShop'
 import { ShopContext } from './shop-context'
 
-const STORAGE_KEY = 'insightaid.localshop.shop'
-
-function readStoredShop() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? JSON.parse(raw) : null
-  } catch {
-    return null
-  }
-}
+import { readStoredShop, SHOP_STORAGE_KEY as STORAGE_KEY } from './storedShop'
 
 /**
  * Local Shop working state. Backed by localStorage for now so the demo

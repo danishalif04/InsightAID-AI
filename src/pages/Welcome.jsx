@@ -1,4 +1,6 @@
-import { Link } from 'react-router-dom'
+import { useEffect } from 'react'
+import { Link, useLocation } from 'react-router-dom'
+import UserGuide from '@/components/common/UserGuide'
 import {
   AlertTriangle,
   Check,
@@ -124,6 +126,14 @@ function GlowSection({ title, description, children, className = '' }) {
 }
 
 export default function Welcome() {
+  const { hash } = useLocation()
+  // Client-side navigation to /welcome#guide doesn't scroll by itself.
+  useEffect(() => {
+    if (!hash) return
+    const el = document.getElementById(hash.slice(1))
+    if (el) el.scrollIntoView({ block: 'start' })
+  }, [hash])
+
   return (
     <div className="relative min-h-screen bg-glow-bg">
       <div
@@ -174,6 +184,11 @@ export default function Welcome() {
                 Try the demo
               </Button>
             </Link>
+            <a href="#guide">
+              <Button variant="glowSecondary" size="md">
+                How to use
+              </Button>
+            </a>
             <a href="#pricing">
               <Button variant="glowSecondary" size="md">
                 See pricing
@@ -194,6 +209,9 @@ export default function Welcome() {
             </div>
           ))}
         </section>
+
+        {/* Step-by-step guide for both pathways */}
+        <UserGuide />
 
         {/* FAQ */}
         <GlowSection title="Frequently Asked Questions" description="Straight answers about what this system actually does.">
