@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>INSIGHTAID AI · AIMIX: IID 2026 Poster</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500;600;700;800&family=Instrument+Serif:ital@1&family=Noto+Sans+SC:wght@600;700&display=block" rel="stylesheet" />
+<style>
+  /* One type scale, one spacing unit, one radius. Body text never below 26px
+     before fit-scaling; sources/references are the only small text. */
+  @page { size: 594mm 841mm; margin: 0; }
+  :root {
+    --bg: #060A08; --panel: #0D1511; --panel2: #111C16; --line: rgba(255,255,255,0.08);
+    --emerald: #22C55E; --mint: #34D399; --lime: #A3E635; --gold: #FBBF24;
+    --text: #EEF4F0; --muted: #9BAAA3; --faint: #7A8982;
+    --pad: 60px; --gap: 18px; --r: 20px; --cp: 26px;
+    --h-title: 132px; --h-sec: 50px; --h-sub: 32px; --body: 30px; --small: 27px; --src: 23px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 2245px; height: 3179px; background: var(--bg); }
+  body { font-family: Inter, sans-serif; color: var(--text); font-size: var(--body); line-height: 1.35; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .zh { font-family: 'Noto Sans SC', Inter, sans-serif; }
+  h1, h2, h3, h4, h5, .jk { font-family: 'Plus Jakarta Sans', Inter, sans-serif; }
+  .poster { position: relative; width: 2245px; height: 3179px; overflow: hidden;
+    background: radial-gradient(1100px 700px at 80% 6%, rgba(34,197,94,0.15), transparent 70%),
+                radial-gradient(1400px 800px at 50% 105%, rgba(34,197,94,0.09), transparent 70%), var(--bg); }
+  .grid-bg { position: absolute; inset: 0; background-image: radial-gradient(rgba(255,255,255,0.045) 1.4px, transparent 1.4px); background-size: 40px 40px; }
+  .content { position: absolute; inset: var(--pad); display: flex; flex-direction: column; gap: var(--gap); }
+  .content > * { flex-shrink: 0; }
+  .row { display: grid; gap: var(--gap); }
+  .em { color: var(--emerald); }
+  .src { font-size: var(--src); color: var(--faint); }
+  .label { display: inline-block; font-size: 20px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; padding: 4px 12px; border-radius: 999px; vertical-align: middle; font-family: Inter; }
+  .l-done { color: var(--emerald); border: 1.5px solid rgba(34,197,94,.6); }
+  .l-plan { color: var(--gold); border: 1.5px solid rgba(251,191,36,.6); }
+  .l-real { color: var(--mint); border: 1.5px solid rgba(52,211,153,.55); background: rgba(6,10,8,.8); }
+
+  .sec { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: var(--cp); }
+  .sh { display: flex; align-items: baseline; gap: 18px; margin-bottom: 16px; }
+  .sh .n { font-family: 'Plus Jakarta Sans'; font-weight: 800; font-size: 34px; color: var(--emerald); }
+  .sh h2 { font-size: var(--h-sec); font-weight: 800; letter-spacing: -.02em; line-height: 1.05; }
+  .sh .rule { flex: 1; height: 2px; background: linear-gradient(90deg, rgba(34,197,94,.45), transparent); align-self: center; }
+
+  .header { display: flex; align-items: center; justify-content: space-between; height: 96px; }
+  .header .l, .header .r { display: flex; align-items: center; gap: 24px; }
+  .utp { height: 66px; }
+  .team-mark { display: flex; align-items: center; gap: 12px; padding-left: 24px; border-left: 1px solid var(--line); }
+  .team-mark b { font-family: 'Plus Jakarta Sans'; font-size: 32px; font-weight: 800; }
+  .event { text-align: center; font-family: 'Plus Jakarta Sans'; font-weight: 800; font-size: 32px; }
+  .event small { display: block; font-family: Inter; font-weight: 600; font-size: 22px; color: var(--muted); letter-spacing: .12em; }
+  .track { padding: 10px 20px; border-radius: 12px; border: 1.5px solid rgba(34,197,94,.55); font-weight: 800; font-size: 22px; color: var(--mint); }
+  .sdg { width: 62px; height: 62px; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; font-family: 'Plus Jakarta Sans'; font-weight: 800; line-height: 1; flex-shrink: 0; }
+  .sdg span { font-size: 10px; letter-spacing: .08em; } .sdg b { font-size: 30px; }
+  .s8 { background: #A21942; } .s9 { background: #FD6925; } .s10 { background: #DD1367; }
+
+  .hero { display: grid; grid-template-columns: 1fr 700px; align-items: center; height: 270px; }
+  .title { display: flex; align-items: center; gap: 26px; }
+  .title img { height: 128px; }
+  .title h1 { font-size: var(--h-title); font-weight: 800; letter-spacing: -.045em; line-height: .9; white-space: nowrap; }
+  .title h1 .ai { background: linear-gradient(120deg, #34D399, #22C55E 45%, #A3E635); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .subtitle { font-size: 31px; font-weight: 600; line-height: 1.25; margin-top: 14px; max-width: 1240px; color: #DCE6E0; }
+  .tagline { font-family: 'Instrument Serif', serif; font-style: italic; font-size: 50px; color: var(--gold); margin-top: 6px; }
+  .devices { position: relative; height: 270px; }
+  .laptop { position: absolute; left: 40px; top: 2px; width: 470px; }
+  .laptop .scr { border-radius: 14px 14px 4px 4px; padding: 10px; background: #0A0F0C; border: 2px solid #26322C; box-shadow: 0 30px 70px rgba(0,0,0,.6); }
+  .laptop img { width: 100%; display: block; border-radius: 6px; }
+  .laptop .base { height: 18px; margin: 0 -34px; background: linear-gradient(#34413A, #19221E); border-radius: 0 0 20px 20px; }
+  .phone { position: absolute; right: 20px; top: 0; width: 122px; padding: 7px; border-radius: 26px; background: #0A0F0C; border: 2px solid #2C3832; box-shadow: 0 24px 60px rgba(0,0,0,.6); }
+  .phone img { width: 100%; display: block; border-radius: 20px; }
+  .devices .label { position: absolute; left: 30px; bottom: 2px; }
+
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 34px; }
+  .stat { display: grid; grid-template-columns: 250px 1fr; gap: 16px; align-items: center; }
+  .stat .big { font-family: 'Plus Jakarta Sans'; font-weight: 800; font-size: 88px; line-height: 1; color: var(--emerald); letter-spacing: -.03em; }
+  .stat p { font-size: var(--body); line-height: 1.25; }
+  .stat .src { display: block; margin-top: 4px; }
+  .gaps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); }
+  .gap { display: flex; gap: 12px; align-items: center; font-size: var(--small); font-weight: 600; line-height: 1.25; }
+  .ic { width: 52px; height: 52px; flex-shrink: 0; border-radius: 14px; background: rgba(34,197,94,.12); display: flex; align-items: center; justify-content: center; }
+  .ic svg { width: 30px; height: 30px; stroke: var(--mint); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  .obj { display: grid; grid-template-columns: 66px 1fr; gap: 16px; padding: 11px 0; border-top: 1px solid var(--line); }
+  .obj:first-of-type { border-top: 0; padding-top: 2px; }
+  .obj .k { font-family: 'Plus Jakarta Sans'; font-weight: 800; font-size: 42px; color: var(--gold); line-height: 1; }
+  .obj h3 { font-size: var(--h-sub); font-weight: 800; line-height: 1.15; }
+  .obj p { font-size: var(--small); color: var(--muted); margin-top: 6px; line-height: 1.32; }
+
+  .paths { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; }
+  .path { border-radius: 18px; padding: 24px; background: var(--panel2); border: 1px solid var(--line); }
+  .path.a { border-top: 5px solid var(--gold); } .path.b { border-top: 5px solid var(--emerald); }
+  .path .kick { font-size: 22px; font-weight: 800; letter-spacing: .14em; }
+  .path.a .kick { color: var(--gold); } .path.b .kick { color: var(--emerald); }
+  .path h3 { font-size: 36px; font-weight: 800; line-height: 1.1; margin-top: 4px; }
+  .path .who { font-size: var(--small); color: var(--muted); margin-top: 4px; }
+  .path .body { display: grid; grid-template-columns: 500px 1fr; gap: 24px; margin-top: 16px; align-items: start; }
+  .shot { border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,.14); box-shadow: 0 14px 34px rgba(0,0,0,.45); }
+  .shot img { display: block; width: 100%; }
+  .shot + .shot { margin-top: 12px; }
+  .ticks { list-style: none; }
+  .ticks li { font-size: var(--small); font-weight: 600; line-height: 1.2; padding: 7px 0 7px 42px; position: relative; border-bottom: 1px solid var(--line); }
+  .ticks li:last-child { border-bottom: 0; }
+  .ticks li::before { content: '✓'; position: absolute; left: 0; top: 7px; width: 31px; height: 31px; border-radius: 50%; background: rgba(34,197,94,.16); color: var(--emerald); font-weight: 900; font-size: 19px; display: flex; align-items: center; justify-content: center; }
+  .path.a .ticks li::before { background: rgba(251,191,36,.16); color: var(--gold); }
+  .paths-foot { display: flex; justify-content: center; align-items: center; gap: 16px; margin-top: 14px; font-family: 'Plus Jakarta Sans'; font-weight: 800; font-size: 30px; }
+
+  .arch { display: grid; grid-template-columns: repeat(5, 1fr); }
+  .layer { position: relative; padding-right: 34px; }
+  .layer .no { font-family: 'Plus Jakarta Sans'; font-weight: 800; font-size: 25px; color: var(--emerald); margin-left: 12px; }
+  .layer .top { display: flex; align-items: center; }
+  .layer h4 { font-size: 29px; font-weight: 800; line-height: 1.1; margin-top: 10px; }
+  .layer p { font-size: var(--small); color: var(--muted); margin-top: 8px; line-height: 1.3; }
+  .layer:not(:last-child) .top::after { content: ''; flex: 1; height: 2px; margin: 0 6px 0 18px; background: linear-gradient(90deg, rgba(34,197,94,.15), rgba(34,197,94,.7)); }
+  .layer:not(:last-child) .top::before { content: ''; position: absolute; right: 22px; top: 16px; border-left: 16px solid var(--emerald); border-top: 10px solid transparent; border-bottom: 10px solid transparent; }
+  .logos { display: flex; gap: 6px; margin-top: 10px; }
+  .logos img { width: 32px; height: 32px; border-radius: 7px; object-fit: cover; background: #fff; }
+  .logos img.clear { object-fit: contain; background: transparent; border-radius: 0; }
+
+  .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .kpi { padding: 14px 22px; border-radius: 16px; background: var(--panel2); border: 1px solid var(--line); }
+  .kpi .cat { font-size: 21px; font-weight: 800; letter-spacing: .12em; color: var(--muted); }
+  .kpi b { display: block; font-family: 'Plus Jakarta Sans'; font-size: 62px; font-weight: 800; line-height: 1.05; color: var(--emerald); letter-spacing: -.02em; margin-top: 4px; }
+  .kpi span { font-size: var(--small); }
+  .kpi .src { display: block; margin-top: 4px; }
+  .charts { display: grid; grid-template-columns: 1fr 1fr 1.08fr; gap: 44px; margin-top: 18px; }
+  .charts h4 { font-size: 32px; font-weight: 800; }
+  .charts svg { width: 560px !important; height: auto; display: block; }
+  .charts .sub { font-size: var(--src); color: var(--faint); margin: 0 0 4px; }
+  .method { display: grid; grid-template-columns: 1.25fr 1fr; gap: 20px; margin-top: 18px; }
+  .box { padding: 18px 22px; border-radius: 16px; font-size: var(--small); line-height: 1.38; }
+  .box.m { background: var(--panel2); border: 1px solid var(--line); }
+  .box.w { border: 1.5px solid rgba(251,191,36,.5); background: rgba(251,191,36,.05); }
+  .box h5 { font-size: 23px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 6px; }
+  .box.m h5 { color: var(--mint); } .box.w h5 { color: var(--gold); }
+  .box ul { list-style: none; } .box li { padding-left: 22px; position: relative; margin-top: 4px; } .box li::before { content: '•'; position: absolute; left: 4px; color: var(--muted); }
+
+  table { width: 100%; border-collapse: collapse; font-size: var(--small); }
+  th { font-family: 'Plus Jakarta Sans'; font-size: 23px; font-weight: 800; color: var(--muted); padding: 0 6px 12px; text-align: center; line-height: 1.15; vertical-align: bottom; }
+  th:first-child, td:first-child { text-align: left; }
+  td { padding: 6px 6px; border-top: 1px solid var(--line); text-align: center; font-weight: 600; }
+  .y { color: var(--emerald); font-weight: 900; font-size: 28px; }
+  .n { color: #5F6E67; font-weight: 700; font-size: 26px; }
+  .p { color: var(--gold); font-weight: 700; font-size: 22px; }
+  .us { background: rgba(34,197,94,.09); }
+  th.us { color: var(--mint); border-radius: 12px 12px 0 0; }
+
+  .tg { font-size: 21px; font-weight: 800; letter-spacing: .12em; color: var(--muted); margin-bottom: 12px; }
+  .tech { display: flex; flex-wrap: wrap; gap: 10px; }
+  .tc { display: flex; align-items: center; gap: 8px; padding: 5px 14px 5px 5px; border-radius: 999px; background: var(--panel2); border: 1px solid var(--line); font-size: var(--small); font-weight: 700; }
+  .tc img { width: 32px; height: 32px; border-radius: 9px; object-fit: contain; background: #fff; padding: 3px; }
+  .rai { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 24px; }
+  .ri { display: flex; gap: 12px; align-items: center; font-size: var(--small); line-height: 1.3; }
+  .ri .ic { width: 46px; height: 46px; } .ri .ic svg { width: 26px; height: 26px; }
+  .quote { margin-top: 16px; padding: 12px 22px; border-left: 5px solid var(--emerald); background: rgba(34,197,94,.07); border-radius: 0 14px 14px 0; font-family: 'Plus Jakarta Sans'; font-weight: 800; font-size: 28px; line-height: 1.2; }
+
+  .sdgs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .sdgc .sdg { width: 80px; height: 80px; border-radius: 10px; }
+  .sdgc .sdg b { font-size: 40px; } .sdgc .sdg span { font-size: 12px; }
+  .sdgc h4 { font-size: 28px; font-weight: 800; margin-top: 12px; line-height: 1.15; }
+  .sdgc p { font-size: var(--small); color: var(--muted); margin-top: 6px; line-height: 1.3; }
+  .timeline { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 24px; padding-top: 36px; }
+  .timeline::before { content: ''; position: absolute; left: 10px; right: 10px; top: 11px; height: 3px; background: linear-gradient(90deg, var(--emerald) 0 30%, rgba(251,191,36,.55) 36% 100%); }
+  .tl { position: relative; }
+  .tl::before { content: ''; position: absolute; left: 0; top: -34px; width: 22px; height: 22px; border-radius: 50%; background: var(--gold); border: 4px solid var(--panel); }
+  .tl.done::before { background: var(--emerald); }
+  .tl b { font-family: 'Plus Jakarta Sans'; font-size: 40px; font-weight: 800; }
+  .tl p { font-size: var(--small); line-height: 1.3; margin-top: 4px; }
+
+  .concl { list-style: none; }
+  .concl li { font-size: var(--small); font-weight: 600; line-height: 1.25; padding: 5px 0 5px 44px; position: relative; }
+  .concl li::before { content: '✓'; position: absolute; left: 0; top: 5px; width: 32px; height: 32px; border-radius: 50%; background: var(--emerald); color: #04210F; font-weight: 900; font-size: 20px; display: flex; align-items: center; justify-content: center; }
+  .cta { font-family: 'Plus Jakarta Sans'; font-weight: 800; font-size: 34px; line-height: 1.1; margin: 14px 0 14px; }
+  .qrs { display: flex; gap: 26px; }
+  .qrbox { text-align: center; }
+  .qr { width: 210px; height: 210px; padding: 10px; border-radius: 16px; background: #fff; }
+  .qr svg { width: 100%; height: 100%; display: block; }
+  .qr.pending { background: transparent; border: 3px dashed var(--gold); display: flex; align-items: center; justify-content: center; }
+  .qr-pending { color: var(--gold); font-weight: 800; font-size: 26px; text-align: center; }
+  .qr-label { font-size: 25px; font-weight: 800; margin-top: 12px; line-height: 1.2; }
+
+  .team { position: relative; overflow: hidden; padding: 0; display: flex; flex-direction: column; justify-content: flex-end; }
+  .team .glow { position: absolute; inset: 0; background: radial-gradient(400px 380px at 50% 36%, rgba(34,197,94,.22), transparent 70%); }
+  .team .portrait { position: absolute; left: 50%; transform: translateX(-50%); top: 26px; bottom: 214px; height: calc(100% - 240px); width: auto; object-fit: contain; object-position: top; filter: drop-shadow(0 0 2px rgba(52,211,153,.7)); }
+  .team .card { position: relative; margin: 0 20px 20px; padding: 18px 20px; border-radius: 16px; background: rgba(6,10,8,.92); border: 1px solid rgba(34,197,94,.4); }
+  .team .who { font-family: 'Plus Jakarta Sans'; font-weight: 800; font-size: 34px; line-height: 1.1; }
+  .team .role { font-size: 24px; font-weight: 700; color: var(--mint); margin-top: 4px; }
+  .team .line { font-size: 22px; color: var(--muted); margin-top: 8px; line-height: 1.32; }
+  .team .sup { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 23px; line-height: 1.3; }
+  .team .sup b { display: block; color: var(--gold); font-size: 18px; letter-spacing: .1em; }
+
+  .refs { font-size: var(--src); color: var(--faint); line-height: 1.4; }
+  .refs b { color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="poster">
+  <div class="grid-bg"></div>
+  <div class="content">
+
+    <div class="header">
+      <div class="l">
+        <img class="utp" src="assets/utp.png" alt="Universiti Teknologi PETRONAS" />
+        <div class="team-mark">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c2 2.2 2.6 4 1.6 5.8-.6-1-1.4-1.6-2.3-1.8.4 1.3-.2 2.5-1.3 3.2C8.6 8 9 5.3 12 2z" fill="#FBBF24" stroke="#FBBF24"/><path d="M8 11h8l-1.6 3.2H9.6z"/><path d="M10.6 14.2 11.3 22h1.4l.7-7.8"/></svg>
+          <b>Team Suluh</b>
+        </div>
+      </div>
+      <div class="event">AIMIX: IID 2026<small>CATEGORY B (IPT) · ONLINE</small></div>
+      <div class="r">
+        <div class="track">Track B1 · Artificial Intelligence &amp; Data Science</div>
+        <div class="sdg s8"><span>SDG</span><b>8</b></div><div class="sdg s9"><span>SDG</span><b>9</b></div><div class="sdg s10"><span>SDG</span><b>10</b></div>
+      </div>
+    </div>
+
+    <div class="hero">
+      <div>
+        <div class="title"><img src="assets/glyph.png" alt="" /><h1>INSIGHTAID <span class="ai">AI</span></h1></div>
+        <div class="subtitle">An Intelligent Decision Support System for Data-Driven Business Analytics in Early-Stage Startups</div>
+        <div class="tagline">Decisions, backed by evidence.</div>
+      </div>
+      <div class="devices">
+        <div class="laptop"><div class="scr"><img src="assets/s-dashboard.jpg" alt="Executive dashboard" /></div><div class="base"></div></div>
+        <div class="phone"><img src="assets/s7-mobile.png" alt="Mobile view" /></div>
+        <span class="label l-real">Real app screens · demo account</span>
+      </div>
+    </div>
+
+    <div class="row" style="grid-template-columns: 1.28fr 1fr;">
+      <section class="sec">
+        <div class="sh"><span class="n">01</span><h2>The Startup Intelligence Gap</h2><span class="rule"></span></div>
+        <div class="stats">
+          <div class="stat"><div class="big">~90%</div><div><p>of startups eventually fail</p><span class="src">Startup Genome, 2025</span></div></div>
+          <div class="stat"><div class="big">42%</div><div><p>fail because there is no market need</p><span class="src">CB Insights, 2025</span></div></div>
+          <div class="stat"><div class="big">70%</div><div><p>of SMEs use no business-intelligence tools</p><span class="src">Statista, 2025</span></div></div>
+          <div class="stat"><div class="big">60%</div><div><p>react only after the damage is visible</p><span class="src">McKinsey, 2022</span></div></div>
+        </div>
+        <div class="gaps">
+          <div class="gap"><div class="ic"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></div>BI is unaffordable</div>
+          <div class="gap"><div class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 17.5h7M17.5 14v7"/></svg></div>Sales &amp; social data are fragmented</div>
+          <div class="gap"><div class="ic"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>Feedback in 3 languages goes unread</div>
+          <div class="gap"><div class="ic"><svg viewBox="0 0 24 24"><path d="m10.3 3.9-8.2 14A2 2 0 0 0 3.8 21h16.4a2 2 0 0 0 1.7-3.1l-8.2-14a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg></div>No forecast, no early warning</div>
+        </div>
+      </section>
+      <section class="sec">
+        <div class="sh"><span class="n">02</span><h2>Objectives</h2><span class="rule"></span></div>
+        <div class="obj"><div class="k">01</div><div><h3>Multilingual Sentiment Analysis</h3><p>XLM-RoBERTa for customer opinion in English, Bahasa Melayu, Mandarin and code-mixed text.</p></div></div>
+        <div class="obj"><div class="k">02</div><div><h3>Sentiment-Enhanced Sales Forecasting</h3><p>Compare models, including a sentiment-input variant, with rolling-origin validation.</p></div></div>
+        <div class="obj"><div class="k">03</div><div><h3>Integrated AI Decision Support System</h3><p>Crisis detection, explainable recommendations, planning tools and a controlled AI assistant.</p></div></div>
+      </section>
+    </div>
+
+    <section class="sec">
+      <div class="sh"><span class="n">03</span><h2>Our Solution: Two Pathways, One App</h2><span class="rule"></span></div>
+      <div class="paths">
+        <div class="path a">
+          <div class="kick">PATHWAY A</div>
+          <h3>Malaysian Local Shop</h3>
+          
+          <div class="body">
+            <div class="shot"><img src="assets/s-whatif.jpg" alt="What-if simulator" /></div>
+            <ul class="ticks">
+              <li>No historical sales data required</li>
+              <li>AI-assisted business plan</li>
+              <li>Product &amp; pricing exploration</li>
+              <li>Startup capital &amp; margin calculations</li>
+              <li>What-if price simulation</li>
+              <li>Planning assistant in Malay or English</li>
+            </ul>
+          </div>
+        </div>
+        <div class="path b">
+          <div class="kick">PATHWAY B</div>
+          <h3>Business Startup</h3>
+          
+          <div class="body">
+            <div class="shot"><img src="assets/s-crisis.jpg" alt="Crisis detection" /></div>
+            <ul class="ticks">
+              <li>Sales &amp; review data upload</li>
+              <li>Multilingual sentiment analysis</li>
+              <li>Early crisis detection with evidence</li>
+              <li>Revenue forecasting</li>
+              <li>Evidence-backed recommendations</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="paths-foot">You decide. <span class="em">The AI shows the evidence.</span> <span class="label l-real">all screens: real app</span></div>
+    </section>
+
+    <section class="sec">
+      <div class="sh"><span class="n">04</span><h2>How It Works: Five-Layer Architecture</h2><span class="rule"></span></div>
+      <div class="arch">
+        <div class="layer"><div class="top"><div class="ic"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><span class="no">01</span></div><h4>Data Collection</h4><p>Uploaded sales, reviews &amp; social posts</p><div class="logos"><img src="assets/tiktok.jpg" alt=""/><img src="assets/x.jpg" alt=""/><img src="assets/threads.jpg" alt=""/><img class="clear" src="assets/shopee-bag.png" alt="Shopee"/></div></div>
+        <div class="layer"><div class="top"><div class="ic"><svg viewBox="0 0 24 24"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg></div><span class="no">02</span></div><h4>Data Processing</h4><p>Language detection, cleaning, daily &amp; weekly aggregates</p></div>
+        <div class="layer"><div class="top"><div class="ic"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></svg></div><span class="no">03</span></div><h4>Storage</h4><p>Supabase PostgreSQL with row-level security</p></div>
+        <div class="layer"><div class="top"><div class="ic"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"/></svg></div><span class="no">04</span></div><h4>AI Engine</h4><p>Sentiment, crisis rules, forecasting, recommendations</p></div>
+        <div class="layer"><div class="top"><div class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg></div><span class="no">05</span></div><h4>Decision Dashboard</h4><p>Alerts, forecasts, actions and the AI assistant</p></div>
+      </div>
+    </section>
+
+    <section class="sec">
+      <div class="sh"><span class="n">05</span><h2>Results: Measured, Not Claimed</h2><span class="rule"></span></div>
+      <div class="kpis">
+        <div class="kpi"><div class="cat">MODEL EVALUATION</div><b>{{XLMR}}%</b><span>XLM-RoBERTa sentiment accuracy (target ≥ 80%, met)</span><span class="src">10,769 held-out test comments</span></div>
+        <div class="kpi"><div class="cat">USER ACCEPTANCE</div><b>4.07 / 5</b><span>UAT mean score (target ≥ 4.0, met)</span><span class="src">n = 15 participants</span></div>
+        <div class="kpi"><div class="cat">SOFTWARE TESTING</div><b>565</b><span>automated unit tests passing</span><span class="src">verifies the code, not model accuracy</span></div>
+      </div>
+      <div class="charts">
+        <div><h4>Sentiment accuracy by model</h4><div class="sub">same test set, original language</div>{{CHART_MODELS}}</div>
+        <div><h4>XLM-RoBERTa by language</h4><div class="sub">each language must reach ≥ 75%</div>{{CHART_LANG}}</div>
+        <div><h4>Forecast error (MAPE), best model</h4><div class="sub">lower is better · target &lt; 15% · met in {{MET_MAPE}} of {{N_PROTO}} protocols (weekly only)</div>{{CHART_MAPE}}</div>
+      </div>
+      <div class="method">
+        <div class="box m"><h5>Methodology</h5><ul>
+          <li><b>Sentiment:</b> 107,171 labelled comments (5 public sources); 85,639 train, 10,763 validation, 10,769 test, no overlap.</li>
+          <li><b>Forecasting:</b> Olist sales, 470 days. Rolling-origin: train on the past, forecast the next <i>h</i> days, roll forward. MAPE, MAE, RMSE, MASE.</li>
+        </ul></div>
+        <div class="box w"><h5>Findings &amp; not yet evaluated</h5><ul>
+          <li>Sentiment input: <b>no significant</b> forecast gain ({{DM_WINS}} of {{N_DM}} DM tests, run {{RUN}}).</li>
+          <li>Code-mixed text not yet evaluated; live app uses a rating heuristic.</li>
+          <li>Crisis accuracy not measured (no labelled set).</li>
+        </ul></div>
+      </div>
+    </section>
+
+    <div class="row" style="grid-template-columns: 1fr 1fr;">
+      <section class="sec">
+        <div class="sh"><span class="n">06</span><h2>Why INSIGHTAID AI?</h2><span class="rule"></span></div>
+        <table>
+          <tr><th></th><th>Spread-<br/>sheets</th><th>Enterprise<br/>BI</th><th>Social<br/>listening</th><th class="us">INSIGHTAID<br/>AI</th></tr>
+          <tr><td>Affordable for early-stage businesses</td><td class="y">✓</td><td class="n">—</td><td class="n">—</td><td class="us y">✓</td></tr>
+          <tr><td>BM · <span class="zh">中文</span> · EN sentiment</td><td class="n">—</td><td class="n">—</td><td class="p">varies</td><td class="us y">✓</td></tr>
+          <tr><td>Early crisis detection</td><td class="n">—</td><td class="n">—</td><td class="y">✓</td><td class="us y">✓</td></tr>
+          <tr><td>Sales forecasting</td><td class="n">—</td><td class="y">✓</td><td class="n">—</td><td class="us y">✓</td></tr>
+          <tr><td>Recommendations with evidence</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="us y">✓</td></tr>
+          <tr><td>Works with no sales history</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="us y">✓</td></tr>
+        </table>
+        <div class="src" style="margin-top:10px">Typical capabilities by tool category; individual products vary.</div>
+      </section>
+      <section class="sec">
+        <div class="sh"><span class="n">07</span><h2>Tech Stack &amp; Responsible AI</h2><span class="rule"></span></div>
+        <div class="tg">TECHNOLOGY</div>
+        <div class="tech">
+          <div class="tc"><img src="assets/react.png" alt=""/>React</div><div class="tc"><img src="assets/vite.jpg" alt=""/>Vite</div><div class="tc"><img src="assets/tailwind.webp" alt=""/>Tailwind CSS</div><div class="tc"><img src="assets/supabase.webp" alt=""/>Supabase PostgreSQL</div><div class="tc"><img src="assets/python.webp" alt=""/>Python</div><div class="tc"><img src="assets/huggingface.svg" alt=""/>XLM-RoBERTa</div><div class="tc"><img src="assets/prophet.png" alt=""/>Prophet</div>
+        </div>
+        <div class="tg" style="margin-top:18px">RESPONSIBLE AI</div>
+        <div class="rai">
+          <div class="ri"><div class="ic"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div><b>Row-level security</b> per business</div></div>
+          <div class="ri"><div class="ic"><svg viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></div><div><b>Evidence</b> behind every recommendation</div></div>
+          <div class="ri"><div class="ic"><svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h8M8 14h4"/></svg></div><div><b>Deterministic</b> calculations in code</div></div>
+          <div class="ri"><div class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg></div><div><b>Human decides</b>; AI advises</div></div>
+        </div>
+        <div class="quote">“AI explains the evidence. <span class="em">The system calculates the results.</span>”</div>
+      </section>
+    </div>
+
+    <div class="row" style="grid-template-columns: 1.15fr 1fr 470px; flex: 1 1 auto; flex-shrink: 1;">
+      <section class="sec">
+        <div class="sh"><span class="n">08</span><h2>Impact, SDGs &amp; Roadmap</h2><span class="rule"></span></div>
+        <div class="sdgs">
+          <div class="sdgc"><div class="sdg s8"><span>SDG</span><b>8</b></div><h4>Decent Work &amp; Economic Growth</h4><p>Helps micro-businesses plan and act before losses grow.</p></div>
+          <div class="sdgc"><div class="sdg s9"><span>SDG</span><b>9</b></div><h4>Industry, Innovation &amp; Infrastructure</h4><p>Affordable AI analytics built on free, open-source tools.</p></div>
+          <div class="sdgc"><div class="sdg s10"><span>SDG</span><b>10</b></div><h4>Reduced Inequalities</h4><p>BI for non-technical, Malay-speaking owners.</p></div>
+        </div>
+        <div class="timeline">
+          <div class="tl done"><b>2026</b> <span class="label l-done">done</span><p>Working prototype · FYP II · AIMIX: IID 2026</p></div>
+          <div class="tl"><b>2027</b> <span class="label l-plan">planned</span><p>Business pilot · model improvements &amp; validation</p></div>
+          <div class="tl"><b>2028</b> <span class="label l-plan">planned</span><p>More marketplace integrations · wider adoption</p></div>
+        </div>
+      </section>
+      <section class="sec">
+        <div class="sh"><span class="n">09</span><h2>Conclusion</h2><span class="rule"></span></div>
+        <ul class="concl">
+          <li>Multilingual customer insight in BM, <span class="zh">中文</span> &amp; EN</li>
+          <li>Business decisions backed by evidence</li>
+          <li>Affordable analytics for early-stage businesses</li>
+          <li>Accessible BI, even with no sales history</li>
+        </ul>
+        <div class="cta">Experience Smarter <span class="em">Business Decisions.</span></div>
+        <div class="qrs">
+          <div class="qrbox">{{QR_VIDEO}}</div>
+          <div class="qrbox">{{QR_GITHUB}}</div>
+          <div class="qrbox">{{QR_APP}}</div>
+        </div>
+      </section>
+      <section class="sec team">
+        <div class="glow"></div>
+        <img class="portrait" src="assets/danish.png" alt="Danish Alif" />
+        <div class="card">
+          <div class="who">Danish Alif</div>
+          <div class="role">Team Leader &amp; Developer · Team Suluh</div>
+          <div class="line">Muhammad Danish Alif Bin Azrul (22006390)<br/>Universiti Teknologi PETRONAS<br/>muhammad_22006390@utp.edu.my</div>
+          <div class="sup"><b>SUPERVISOR</b>Ts. Ahmad Izuddin Bin Zainal Abidin</div>
+        </div>
+      </section>
+    </div>
+
+    <div class="refs"><b>References.</b> Industry statistics as cited in the FYP proposal: Startup Genome (2025) · CB Insights (2025) · Statista (2025) · McKinsey &amp; Company (2022). Conneau, A., et al. (2020). Unsupervised cross-lingual representation learning at scale. <i>Proc. ACL</i>, 8440–8451. Taylor, S. J., &amp; Letham, B. (2018). Forecasting at scale. <i>The American Statistician, 72</i>(1), 37–45. Olist (2018). Brazilian e-commerce public dataset, Kaggle.</div>
+  </div>
+</div>
+</body>
+</html>
