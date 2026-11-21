@@ -1,0 +1,9 @@
+node_modules/
+out/
+stills/
+.remotion/
+build/
+
+# Original audio pack (male + female VO, previews). 27 MB of binaries -
+# kept locally, not in git. The clips the video actually uses are in public/.
+audio-source/
