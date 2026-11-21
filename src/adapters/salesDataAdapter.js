@@ -41,7 +41,7 @@ export const salesDataAdapter = {
       message:
         status.status === SOURCE_STATUS.CONNECTED
           ? `${status.recordCount} sales row(s) on record.`
-          : 'No sales data uploaded yet — use Upload Dataset above.',
+          : 'No sales data uploaded yet. Use Upload Dataset above.',
     }
   },
 }

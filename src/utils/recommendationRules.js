@@ -61,7 +61,7 @@ export function generateRecommendations(context = {}) {
       category: 'Operations',
       priority: 'medium',
       title: 'Complete your business profile',
-      evidence: ['No business profile has been saved yet — recommendations that depend on it cannot run.'],
+      evidence: ['No business profile has been saved yet, recommendations that depend on it cannot run.'],
     })
   }
 
@@ -118,7 +118,7 @@ export function generateRecommendations(context = {}) {
         category: 'Growth',
         priority: 'low',
         title: 'Consider scaling marketing spend',
-        evidence: [`Crisis risk is normal with sufficient data, and data readiness is ${dataReadiness.level}/5 (${dataReadiness.levelLabel}) — no negative signals are currently triggered.`],
+        evidence: [`Crisis risk is normal with sufficient data, and data readiness is ${dataReadiness.level}/5 (${dataReadiness.levelLabel}), no negative signals are currently triggered.`],
       })
     }
   }
@@ -144,7 +144,7 @@ export function generateRecommendations(context = {}) {
       id: 'breakeven_gap',
       category: 'Investment',
       priority: 'high',
-      title: 'Review pricing or costs — expected volume falls short of break-even',
+      title: 'Review pricing or costs, expected volume falls short of break-even',
       evidence: [`Expected monthly units (${expectedScenario.units}) is below the ${breakEven.units}-unit break-even point.`],
     })
   }
@@ -157,7 +157,7 @@ export function generateRecommendations(context = {}) {
         id: 'growth_below_target',
         category: 'Marketing',
         priority: 'medium',
-        title: 'Reassess growth channels — projected growth falls short of your target',
+        title: 'Reassess growth channels, projected growth falls short of your target',
         evidence: [
           `Growth-case revenue (RM${growthScenario.revenue.toFixed(2)}) is ${Math.round(shortfall * 100)}% below your revenue target (RM${assumptions.revenue_target}).`,
         ],

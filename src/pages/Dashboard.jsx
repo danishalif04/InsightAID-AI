@@ -209,7 +209,7 @@ function DashboardBody({ data, granularity, onGranularityChange }) {
       {!hasKpis ? (
         <EmptyState
           icon={ClipboardList}
-          message="No KPIs computable yet — upload sales, review, or social data via Dataset Management."
+          message="No KPIs computable yet. Upload sales, review, or social data via Dataset Management."
         />
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -229,7 +229,7 @@ function DashboardBody({ data, granularity, onGranularityChange }) {
                 Crisis Risk
                 <InfoPopover
                   label="About Crisis Risk"
-                  guide="A 0-100 score from 7 real signals (negative-sentiment level/velocity, mention-volume level/velocity, rating deterioration, sentiment anomaly, review-volume anomaly), each compared against this business's own recent baseline — never a fixed threshold. See Crisis Detection for the full breakdown."
+                  guide="A 0-100 score from 7 real signals (negative-sentiment level/velocity, mention-volume level/velocity, rating deterioration, sentiment anomaly, review-volume anomaly), each compared against this business's own recent baseline, never a fixed threshold. See Crisis Detection for the full breakdown."
                 />
               </p>
               <p className={`mt-1.5 text-4xl font-bold tracking-tight ${RISK_TONES[crisis.riskLevel] ?? 'text-glow-text'}`}>
@@ -247,7 +247,7 @@ function DashboardBody({ data, granularity, onGranularityChange }) {
                 Revenue Forecast
                 <InfoPopover
                   label="About Revenue Forecast"
-                  guide="The next predicted day's revenue from this account's best-performing forecasting model run (see Forecasting for the full comparison). MAPE is that model's average forecast error on past data — lower is more accurate."
+                  guide="The next predicted day's revenue from this account's best-performing forecasting model run (see Forecasting for the full comparison). MAPE is that model's average forecast error on past data, lower is more accurate."
                 />
               </p>
               <p className="mt-1.5 text-4xl font-bold tracking-tight tabular-nums text-glow-text">
@@ -269,8 +269,8 @@ function DashboardBody({ data, granularity, onGranularityChange }) {
           title="Sentiment Trend"
           subtitle={
             isMonthly
-              ? 'By calendar month, by sentiment label — shows whether customer sentiment is improving or worsening over time; each month\'s three bands always add up to 100%.'
-              : 'Last 14 days, by sentiment label — shows whether customer sentiment is improving or worsening over time; each day\'s three bands always add up to 100%.'
+              ? 'By calendar month, by sentiment label, shows whether customer sentiment is improving or worsening over time; each month\'s three bands always add up to 100%.'
+              : 'Last 14 days, by sentiment label, shows whether customer sentiment is improving or worsening over time; each day\'s three bands always add up to 100%.'
           }
           readingGuide="Each bar is split into positive/neutral/negative shares that always add to 100%. A growing green band over time means sentiment is improving. Switch Day/Month above to zoom out to a longer trend."
           surface="glow"
@@ -304,7 +304,7 @@ function DashboardBody({ data, granularity, onGranularityChange }) {
                 <YAxis tick={{ fontSize: 12 }} axisLine={false} tickLine={false} unit="%" />
                 <Tooltip
                   content={
-                    <ChartTooltip formatter={(value) => (value != null ? `${value}%` : '—')} />
+                    <ChartTooltip formatter={(value) => (value != null ? `${value}%` : 'N/A')} />
                   }
                 />
                 <Legend iconType="circle" wrapperStyle={{ fontSize: 12 }} />
@@ -345,8 +345,8 @@ function DashboardBody({ data, granularity, onGranularityChange }) {
 
         <ChartCard
           title="Platform Distribution"
-          subtitle="Mentions by platform, ranked highest to lowest — shows which channel generates the most conversation right now, so attention or budget can follow it."
-          readingGuide="Bars are ranked longest to shortest by mention volume — the top bar is where most of the conversation is happening right now."
+          subtitle="Mentions by platform, ranked highest to lowest, shows which channel generates the most conversation right now, so attention or budget can follow it."
+          readingGuide="Bars are ranked longest to shortest by mention volume, the top bar is where most of the conversation is happening right now."
           surface="glow"
           ariaLabel="Platform distribution bar chart, ranked by mention volume"
           status="success"
@@ -397,7 +397,7 @@ function DashboardBody({ data, granularity, onGranularityChange }) {
           subtitle={
             isMonthly
               ? 'Mentions by platform, by calendar month.'
-              : 'Mentions by platform, last 7 days — a sudden same-day spike across platforms is often the first visible sign of a developing issue.'
+              : 'Mentions by platform, last 7 days, a sudden same-day spike across platforms is often the first visible sign of a developing issue.'
           }
           readingGuide="Each bar is one period, split by platform. Switch Day/Month above to zoom out to a longer trend."
           surface="glow"
@@ -448,10 +448,10 @@ function DashboardBody({ data, granularity, onGranularityChange }) {
 
       <GlowSection
         title="Product Performance"
-        description="Ranked by real revenue from your uploaded sales data — not units sold, so a cheap, high-volume item doesn't outrank a pricier one it's actually behind."
+        description="Ranked by real revenue from your uploaded sales data, not units sold, so a cheap, high-volume item doesn't outrank a pricier one it's actually behind."
       >
         {data.topProducts.length === 0 ? (
-          <EmptyState icon={PackageSearch} message="No product-level sales data yet — upload a sales dataset with a product column via Dataset Management." />
+          <EmptyState icon={PackageSearch} message="No product-level sales data yet. Upload a sales dataset with a product column via Dataset Management." />
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             <ProductRankList
@@ -518,7 +518,7 @@ function DashboardBody({ data, granularity, onGranularityChange }) {
           {data.recommendations.length === 0 ? (
             <EmptyState
               icon={Lightbulb}
-              message="No recommendations right now — nothing is fabricated to fill this space."
+              message="No recommendations right now, nothing is fabricated to fill this space."
             />
           ) : (
             <ul className="space-y-3">
@@ -571,7 +571,7 @@ export default function Dashboard() {
         eyebrow="Executive Overview"
         title="Business Health, at a Glance"
         highlight="Glance"
-        description="Real sentiment, crisis risk, and revenue signals — recomputed from your own data on every visit."
+        description="Real sentiment, crisis risk, and revenue signals, recomputed from your own data on every visit."
         actions={
           storeName ? (
             <div className="flex items-center gap-3 rounded-2xl border border-glow-border bg-glow-surface-elevated px-4 py-3">
@@ -618,7 +618,7 @@ export default function Dashboard() {
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold text-glow-text">Set up your business profile</p>
                   <p className="mt-0.5 text-xs text-glow-text/60">
-                    Tell us about your business — with or without existing data — so InsightAid can
+                    Tell us about your business, with or without existing data, so InsightAid can
                     tailor this dashboard to you.
                   </p>
                 </div>

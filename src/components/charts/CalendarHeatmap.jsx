@@ -38,7 +38,7 @@ export default function CalendarHeatmap({
               key={cell.date}
               title={
                 cell.value != null
-                  ? `${cell.date}: ${valueFormat ? valueFormat(cell.value) : cell.value}${cell.note ? ` — ${cell.note}` : ''}`
+                  ? `${cell.date}: ${valueFormat ? valueFormat(cell.value) : cell.value}${cell.note ? `, ${cell.note}` : ''}`
                   : cell.date
               }
               className="size-3.5 rounded-sm"

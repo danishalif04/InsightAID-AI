@@ -97,15 +97,15 @@ export default function SocialIntelligence() {
 
           <GlowSection title="Platform Comparison" description="Real post count, engagement volume, and sentiment per platform">
             {data.platformComparison.length === 0 ? (
-              <EmptyState icon={Users} message="No platform data yet — upload social/review data via Dataset Management." />
+              <EmptyState icon={Users} message="No platform data yet. Upload social/review data via Dataset Management." />
             ) : (
               <Table
                 columns={[
                   { key: 'platform', label: 'Platform', render: (row) => capitalize(row.platform) },
                   { key: 'postCount', label: 'Posts', align: 'right', render: (row) => row.postCount.toLocaleString() },
                   { key: 'mentionVolume', label: 'Engagement Volume', align: 'right', render: (row) => row.mentionVolume.toLocaleString() },
-                  { key: 'avgEngagement', label: 'Avg. Engagement', align: 'right', render: (row) => (row.avgEngagement != null ? row.avgEngagement.toLocaleString() : '—') },
-                  { key: 'topLanguage', label: 'Top Language', render: (row) => row.topLanguage ?? '—' },
+                  { key: 'avgEngagement', label: 'Avg. Engagement', align: 'right', render: (row) => (row.avgEngagement != null ? row.avgEngagement.toLocaleString() : 'N/A') },
+                  { key: 'topLanguage', label: 'Top Language', render: (row) => row.topLanguage ?? 'N/A' },
                   {
                     key: 'sentimentScorePercent',
                     label: 'Sentiment',
@@ -116,9 +116,9 @@ export default function SocialIntelligence() {
                       ) : (
                         <span
                           className="italic text-glow-text/40"
-                          title="No rated reviews captured for this platform yet — this platform's posts come from a template with no rating column, so the rating-heuristic sentiment score can never be computed for it."
+                          title="No rated reviews captured for this platform yet, this platform's posts come from a template with no rating column, so the rating-heuristic sentiment score can never be computed for it."
                         >
-                          — (no ratings)
+                          N/A (no ratings)
                         </span>
                       ),
                   },
@@ -202,7 +202,7 @@ export default function SocialIntelligence() {
               exists to catch. */}
           <GlowSection
             title="Reach by Sentiment"
-            description={`Engagement carried by each sentiment on ${platformLabel} — no author identity is stored, so accounts are never ranked`}
+            description={`Engagement carried by each sentiment on ${platformLabel}, no author identity is stored, so accounts are never ranked`}
           >
             {reach.rated === 0 ? (
               <EmptyState
@@ -218,7 +218,7 @@ export default function SocialIntelligence() {
                     </p>
                     <p className="text-xs text-glow-text/60">
                       {reach.negativeToPositiveRatio > 1
-                        ? 'Negative posts carry more engagement than positive ones here — complaints are travelling further than praise.'
+                        ? 'Negative posts carry more engagement than positive ones here, complaints are travelling further than praise.'
                         : 'Negative posts carry less engagement than positive ones here.'}
                     </p>
                   </div>
@@ -245,7 +245,7 @@ export default function SocialIntelligence() {
                     long-tailed and a single viral post can make the mean
                     describe something that never typically happens. */}
                 <p className="text-[11px] text-glow-text/40">
-                  Median is shown beside the mean because engagement is long-tailed — one viral post can pull the mean far from what a typical post gets.
+                  Median is shown beside the mean because engagement is long-tailed, one viral post can pull the mean far from what a typical post gets.
                 </p>
               </div>
             )}

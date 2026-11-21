@@ -98,7 +98,7 @@ export default function StartupCapitalPlanner() {
       await saveStartupCapital({ items, availableCapital: availableNumeric })
       notify('Startup capital plan saved.')
     } catch {
-      notify('Could not save your startup capital plan — please try again.', 'error')
+      notify('Could not save your startup capital plan, please try again.', 'error')
     } finally {
       setSaving(false)
     }
@@ -109,13 +109,13 @@ export default function StartupCapitalPlanner() {
   return (
     <GlowSection
       title="Startup Capital Planner"
-      description="How much money you need before opening or expanding — a sum of your own entered figures, nothing guessed."
+      description="How much money you need before opening or expanding, a sum of your own entered figures, nothing guessed."
     >
       {isIllustrative && (
         <div className="mb-4 flex items-start gap-2.5 rounded-2xl border border-amber-400/30 bg-amber-400/10 p-3">
           <Sparkles className="mt-0.5 size-4 shrink-0 text-amber-400" aria-hidden="true" />
           <p className="text-xs leading-relaxed text-glow-text/70">
-            <span className="font-semibold text-amber-400">Illustrative example</span> — the totals and chart below
+            <span className="font-semibold text-amber-400">Illustrative example</span>, the totals and chart below
             show a sample setup budget. Type your own figures into the fields and they replace it immediately;
             only what you type is ever saved.
           </p>

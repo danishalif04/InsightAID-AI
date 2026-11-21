@@ -159,7 +159,7 @@ export default function WhatIf() {
             <div className={`rounded-2xl border p-4 ${loss ? 'border-rose-500/40 bg-rose-500/5' : 'border-glow-border bg-glow-surface-elevated'}`}>
               <p className="text-[11px] font-medium uppercase tracking-wide text-glow-text/50">Monthly operating result</p>
               <p className={`mt-2 text-2xl font-semibold tabular-nums ${loss ? 'text-rose-400' : 'text-glow-text'}`}>
-                {result.ok ? money(result.value) : '—'}
+                {result.ok ? money(result.value) : 'N/A'}
               </p>
             </div>
           </div>
@@ -209,7 +209,7 @@ export default function WhatIf() {
         )}
         <p className="mt-3 flex items-center gap-1.5 text-[11px] text-glow-text/40">
           <Sparkles className="size-3" aria-hidden="true" />
-          Ask the AI assistant to explain these figures — it only ever receives the verified numbers above.
+          Ask the AI assistant to explain these figures, it only ever receives the verified numbers above.
         </p>
       </Section>
     </div>

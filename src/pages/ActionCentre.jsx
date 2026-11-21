@@ -40,7 +40,7 @@ export default function ActionCentre() {
       await updateActionCentreStatus(id, nextStatus)
       reload()
     } catch {
-      notify('Could not update that action — please try again.', 'error')
+      notify('Could not update that action, please try again.', 'error')
     } finally {
       setUpdatingId(null)
     }
@@ -55,12 +55,12 @@ export default function ActionCentre() {
         eyebrow="Follow-through"
         title="Action Centre"
         highlight="Centre"
-        description="Recommendations you've saved, tracked in one place — accept or dismiss, nothing changes automatically."
+        description="Recommendations you've saved, tracked in one place, accept or dismiss, nothing changes automatically."
       />
 
       <GlowSection title="Pending" description={`${pending.length} awaiting a decision`}>
         {status === 'success' && pending.length === 0 && (
-          <EmptyState message="No pending actions — save a recommendation from AI Recommendations to track it here." />
+          <EmptyState message="No pending actions, save a recommendation from AI Recommendations to track it here." />
         )}
         {pending.length > 0 && (
           <ul className="space-y-3">

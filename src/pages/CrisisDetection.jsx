@@ -171,7 +171,7 @@ function SignalList({ signals, title, description }) {
       {!signals || signals.length === 0 ? (
         <EmptyState
           icon={AlertTriangle}
-          message="No daily sentiment/mention data available yet — upload data via Dataset Management first."
+          message="No daily sentiment/mention data available yet. Upload data via Dataset Management first."
         />
       ) : (
         <ul className="space-y-3">
@@ -343,7 +343,7 @@ function CrisisDetectionContent() {
         eyebrow={modeConfig.label}
         title="Early-Warning Crisis Detection"
         highlight="Crisis"
-        description="A live risk score computed from this business's own recent history — never a fixed threshold that would be unfair to a small business versus a large one."
+        description="A live risk score computed from this business's own recent history, never a fixed threshold that would be unfair to a small business versus a large one."
         actions={
           <>
             {viewedDate && (
@@ -373,7 +373,7 @@ function CrisisDetectionContent() {
       />
 
       {/* The hero gauge, per the brief: "make the risk level a big hero
-          gauge/meter... with glow colour by level" — the whole card's own
+          gauge/meter... with glow colour by level", the whole card's own
           background glow shifts with the real risk level, not just the
           gauge ring itself. */}
       <div
@@ -425,8 +425,8 @@ function CrisisDetectionContent() {
         title="Detected Signals"
         description={
           displayed?.isLive === false
-            ? `Explaining ${displayed.asOfDate} — every signal that day could compute, with measurable evidence.`
-            : 'Every signal this run could compute, with measurable evidence — never an unexplained AI-generated label.'
+            ? `Explaining ${displayed.asOfDate}, every signal that day could compute, with measurable evidence.`
+            : 'Every signal this run could compute, with measurable evidence, never an unexplained AI-generated label.'
         }
       />
 
@@ -435,8 +435,8 @@ function CrisisDetectionContent() {
         title="Risk Timeline"
         subtitle={
           isMonthly
-            ? 'Average risk score by calendar month — click-to-view-a-day, episode bands, and the range brush only apply in Day view.'
-            : 'Click any day to see what the system knew at that point — shaded bands are detected episodes'
+            ? 'Average risk score by calendar month. Click-to-view-a-day, episode bands, and the range brush only apply in Day view.'
+            : 'Click any day to see what the system knew at that point, shaded bands are detected episodes'
         }
         method="real"
         methodNote="Risk score re-run per historical day from the same rule engine as the live detector (src/utils/crisisDetection.js), never a separate model."
@@ -563,7 +563,7 @@ function CrisisDetectionContent() {
       <ChartCard
         surface="glow"
         title="Signal Matrix"
-        subtitle="7 signals x every day in range — color intensity = severity, click a cell to time-travel to that day"
+        subtitle="7 signals x every day in range, color intensity = severity. Click a cell to time-travel to that day"
         method="real"
         methodNote="Each cell re-runs the same real rule evaluation as the Risk Timeline, one signal at a time."
         readingGuide="Each row is one of the 7 signals this system checks; each column is a day. A darker cell means that signal was more severe that day. Click a cell to jump to that day on every other chart."
@@ -590,10 +590,10 @@ function CrisisDetectionContent() {
       <ChartCard
         surface="glow"
         title="Multi-Signal View"
-        subtitle="Mention volume, negative sentiment, average rating, comment volume, and daily revenue — one crosshair"
+        subtitle="Mention volume, negative sentiment, average rating, comment volume, and daily revenue, one crosshair"
         method="real"
-        methodNote="Revenue comes from your own uploaded sales data (src/utils/salesSeries.js); everything else from daily_aggregates/processed_data — the same real tables the rest of this page reads."
-        readingGuide="Five real numbers on the same timeline, stacked so you can compare them. Hover anywhere to see all five values for that exact day at once — useful for spotting which one moved first."
+        methodNote="Revenue comes from your own uploaded sales data (src/utils/salesSeries.js); everything else from daily_aggregates/processed_data, the same real tables the rest of this page reads."
+        readingGuide="Five real numbers on the same timeline, stacked so you can compare them. Hover anywhere to see all five values for that exact day at once, useful for spotting which one moved first."
         height={5 * 120 + 40}
         ariaLabel="Five synced daily metrics: mentions, negative ratio, average rating, comment volume, and revenue"
         status={stackData.status}
@@ -627,7 +627,7 @@ function CrisisDetectionContent() {
             {focusEpisode && (
               <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
                 {lag
-                  ? `Revenue visibly dropped ${lag.lagDays} day(s) after the first signal fired — from a ${formatCurrencyMYR(lag.baselineRevenue)}/day baseline down to ${formatCurrencyMYR(lag.dropRevenue)} on ${lag.dropDate}.`
+                  ? `Revenue visibly dropped ${lag.lagDays} day(s) after the first signal fired, from a ${formatCurrencyMYR(lag.baselineRevenue)}/day baseline down to ${formatCurrencyMYR(lag.dropRevenue)} on ${lag.dropDate}.`
                   : 'Not enough sales history around this episode to compute a real signal-to-revenue lag.'}
               </p>
             )}
@@ -639,14 +639,14 @@ function CrisisDetectionContent() {
         <p className="text-sm text-glow-text/60">
           Drilling into the episode{' '}
           <span className="font-medium text-glow-text">
-            {focusEpisode.start} — {focusEpisode.end}
+            {focusEpisode.start}, {focusEpisode.end}
           </span>{' '}
           ({LEVEL_META[focusEpisode.riskLevel].label} peak).
         </p>
       ) : (
         <GlowSection>
           <p className="text-sm italic text-glow-text/60">
-            No crisis episode detected in the selected range — the Sankey, evidence wall, episode
+            No crisis episode detected in the selected range, the Sankey, evidence wall, episode
             timeline, and replay below have nothing to show.
           </p>
         </GlowSection>
@@ -657,8 +657,8 @@ function CrisisDetectionContent() {
         title="Root-Cause Breakdown"
         subtitle="Platform -> aspect -> product, for negative posts inside the focused episode"
         method="heuristic"
-        methodNote="Aspects come from a transparent multilingual keyword lexicon (src/utils/aspects.js), not a trained classifier — see 'Keyword lexicon (heuristic)'. Product is only shown where a review actually captured one."
-        readingGuide="Read left to right: which platform the complaint came from, what it was actually about, and — where known — which product. A thicker band means more posts took that path."
+        methodNote="Aspects come from a transparent multilingual keyword lexicon (src/utils/aspects.js), not a trained classifier. See 'Keyword lexicon (heuristic)'. Product is only shown where a review actually captured one."
+        readingGuide="Read left to right: which platform the complaint came from, what it was actually about, and, where known, which product. A thicker band means more posts took that path."
         height="lg"
         ariaLabel="Sankey diagram from platform through complaint aspect to product for the focused crisis episode"
         status={evidenceRowsAsync.status}
@@ -666,7 +666,7 @@ function CrisisDetectionContent() {
         error={evidenceRowsAsync.error}
         reload={evidenceRowsAsync.reload}
         emptyWhen={(rows) => !focusEpisode || !buildRootCauseSankey(rows, focusEpisode)}
-        emptyMessage="No negative posts in this episode's window — nothing to trace a root cause from."
+        emptyMessage="No negative posts in this episode's window, nothing to trace a root cause from."
       >
         {(rows) => {
           const sankeyData = buildRootCauseSankey(rows, focusEpisode)
@@ -696,14 +696,14 @@ function CrisisDetectionContent() {
                 >
                   <Tooltip
                     content={
-                      <ChartTooltip formatter={(value, name) => `${value} post(s) — ${name}`} />
+                      <ChartTooltip formatter={(value, name) => `${value} post(s), ${name}`} />
                     }
                   />
                 </Sankey>
               </ResponsiveContainer>
               <p className="mt-2 text-xs text-glow-text/40">
                 {sankeyData.productAttributedCount} of {sankeyData.totalNegativePosts} negative
-                posts had a product captured (review-template rows only) — the rest flow straight
+                posts had a product captured (review-template rows only), the rest flow straight
                 from platform to aspect.
               </p>
             </>
@@ -761,8 +761,8 @@ function CrisisDetectionContent() {
                     <p className="text-sm font-medium text-glow-text">{stage.label}</p>
                     <p className="text-xs text-glow-text/50">
                       {stage.date ?? 'not reached in the loaded range'}
-                      {stage.signalId && ` — ${SIGNAL_LABELS[stage.signalId] ?? stage.signalId}`}
-                      {stage.riskScore != null && ` — risk score ${stage.riskScore}/100`}
+                      {stage.signalId && `, ${SIGNAL_LABELS[stage.signalId] ?? stage.signalId}`}
+                      {stage.riskScore != null && `, risk score ${stage.riskScore}/100`}
                     </p>
                   </div>
                 </li>
@@ -770,7 +770,7 @@ function CrisisDetectionContent() {
             </ol>
           )}
           <p className="mt-4 text-xs italic text-glow-text/40">
-            No precision/recall is shown — this project has no ground-truth crisis label to score
+            No precision/recall is shown, this project has no ground-truth crisis label to score
             against, so accuracy can't honestly be measured, only the detection itself demonstrated.
           </p>
         </GlowSection>
@@ -778,7 +778,7 @@ function CrisisDetectionContent() {
 
       <GlowSection
         title="Crisis Replay"
-        description="Step day-by-day through the focused episode — every section above follows along"
+        description="Step day-by-day through the focused episode, every section above follows along"
       >
         {replayDates.length === 0 ? (
           <EmptyState message="No focused episode to replay." />
@@ -795,7 +795,7 @@ function CrisisDetectionContent() {
         {logAsync.status === 'loading' ? (
           <p className="text-sm text-glow-text/60">Loading…</p>
         ) : (logAsync.data ?? []).length === 0 ? (
-          <EmptyState message='No detections logged yet — click "Log to history" above to record the current result.' />
+          <EmptyState message='No detections logged yet. Click "Log to history" above to record the current result.' />
         ) : (
           <Table
             columns={[

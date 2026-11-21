@@ -103,7 +103,7 @@ export default function BusinessFinancialHealthSection({ values = {} }) {
       <div>
         <h2 className="text-base font-semibold text-glow-text">Financial Planning &amp; Business Health</h2>
         <p className="mt-1 text-xs text-glow-text/50">
-          Calculated directly from your registered price, cost, and expense assumptions — not a prediction, and
+          Calculated directly from your registered price, cost, and expense assumptions, not a prediction, and
           not based on sales history you don't have yet.
         </p>
       </div>
@@ -117,15 +117,15 @@ export default function BusinessFinancialHealthSection({ values = {} }) {
         method="scenario"
         methodNote={
           isIllustrative
-            ? 'Illustrative example figures — not your own data yet. Add your cost fields via Onboarding or Settings.'
-            : 'Calculated directly from the cost fields you entered — nothing here is estimated or invented.'
+            ? 'Illustrative example figures, not your own data yet. Add your cost fields via Onboarding or Settings.'
+            : 'Calculated directly from the cost fields you entered, nothing here is estimated or invented.'
         }
         surface="glow"
         ariaLabel="Monthly expense breakdown bar chart, ranked by amount"
         status="success"
         data={expenseRows}
         emptyWhen={(rows) => rows.length === 0}
-        emptyMessage="No expense fields filled in yet — add them via Onboarding or Settings."
+        emptyMessage="No expense fields filled in yet. Add them via Onboarding or Settings."
       >
         {(rows) => (
           <ResponsiveContainer width="100%" height={CHART_HEIGHTS.md}>
@@ -153,7 +153,7 @@ export default function BusinessFinancialHealthSection({ values = {} }) {
         method="scenario"
         methodNote={
           isIllustrative
-            ? 'Illustrative example figures — not your own data yet.'
+            ? 'Illustrative example figures, not your own data yet.'
             : 'Variable = cost per unit × expected monthly units. Fixed/Operating = the sum of your recorded monthly cost fields.'
         }
         surface="glow"
@@ -189,8 +189,8 @@ export default function BusinessFinancialHealthSection({ values = {} }) {
         method="scenario"
         methodNote={
           isIllustrative
-            ? 'Illustrative example figures — not your own data yet. Add your price, cost, and expenses via Onboarding or Settings.'
-            : 'A calculated projection from your real price/cost/operating-cost assumptions, not historical sales data — a planning tool, not a forecast.'
+            ? 'Illustrative example figures, not your own data yet. Add your price, cost, and expenses via Onboarding or Settings.'
+            : 'A calculated projection from your real price/cost/operating-cost assumptions, not historical sales data, a planning tool, not a forecast.'
         }
         surface="glow"
         ariaLabel="Break-even chart showing revenue and cost lines crossing at the break-even point"
@@ -230,7 +230,7 @@ export default function BusinessFinancialHealthSection({ values = {} }) {
             <p className="text-xs leading-relaxed text-glow-text/70">{pricingInsight}</p>
           </div>
           <p className="mt-3 text-[11px] text-glow-text/40">
-            Margin alone doesn't show which product earns the most total profit — that also needs sales
+            Margin alone doesn't show which product earns the most total profit, that also needs sales
             quantities. Register more products and record sales to compare profitability across your catalogue.
           </p>
         </GlowSection>

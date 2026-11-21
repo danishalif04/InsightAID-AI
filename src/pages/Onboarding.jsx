@@ -242,7 +242,7 @@ export default function Onboarding() {
         navigate(PATHS.dashboard)
       }
     } catch {
-      notify('Could not save your profile — please try again.', 'error')
+      notify('Could not save your profile, please try again.', 'error')
     } finally {
       setSaving(false)
     }
@@ -267,7 +267,7 @@ export default function Onboarding() {
             What kind of business is this?
           </h1>
           <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-            Both share the same models — this just changes which inputs and outputs are shown first.
+            Both share the same models, this just changes which inputs and outputs are shown first.
           </p>
         </Card>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -295,7 +295,7 @@ export default function Onboarding() {
         </div>
         <div className="text-center">
           <Button variant="ghost" size="sm" onClick={() => setStep('choice')}>
-            Skip — keep current ({MODES[mode]?.label ?? 'Malaysian Local Shop'})
+            Skip, keep current ({MODES[mode]?.label ?? 'Malaysian Local Shop'})
           </Button>
         </div>
       </div>
@@ -310,7 +310,7 @@ export default function Onboarding() {
             Let&apos;s set up your business
           </h1>
           <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-            This helps InsightAid tailor the dashboard to your business — whether you already have data or are just
+            This helps InsightAid tailor the dashboard to your business, whether you already have data or are just
             getting started.
           </p>
         </Card>
@@ -339,7 +339,7 @@ export default function Onboarding() {
       <div className="mx-auto max-w-2xl space-y-6">
         <Card
           title="Tell us about your business"
-          description="Answer what you can — AI fills in the rest of your business plan from your description below. Fields based on a guess, not what you typed, are always labeled 'AI extracted' so you know which numbers to double-check."
+          description="Answer what you can, AI fills in the rest of your business plan from your description below. Fields based on a guess, not what you typed, are always labeled 'AI extracted' so you know which numbers to double-check."
         >
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
@@ -377,7 +377,7 @@ export default function Onboarding() {
           />
           <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-between">
             <Button variant="ghost" size="sm" onClick={handleSkipDescription}>
-              Skip — I&apos;ll fill this in myself
+              Skip, I&apos;ll fill this in myself
             </Button>
             <Button icon={Sparkles} loading={extracting} disabled={!description.trim()} onClick={handleExtract}>
               Generate My Business Plan

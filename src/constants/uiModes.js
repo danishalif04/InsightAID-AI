@@ -21,7 +21,7 @@ export const UI_MODES = {
     label: 'Low-Sensory',
     icon: Accessibility,
     description:
-      'Low-Sensory mode: no motion, muted colours, literal plain-language text, fewer elements at once — informed by general sensory-friendly design guidance (W3C COGA), not a claim that any single interface suits every autistic person (see docs/ACCESSIBILITY_MODES.md).',
+      'Low-Sensory mode: no motion, muted colours, literal plain-language text, fewer elements at once, informed by general sensory-friendly design guidance (W3C COGA), not a claim that any single interface suits every autistic person (see docs/ACCESSIBILITY_MODES.md).',
     htmlClass: 'ui-low-sensory',
   },
   senior: {

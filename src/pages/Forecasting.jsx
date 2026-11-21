@@ -128,7 +128,7 @@ export default function Forecasting() {
         highlight="Forecasting"
         description={
           runId
-            ? `Latest run generated ${generatedAt ? new Date(generatedAt).toLocaleString() : '—'}.`
+            ? `Latest run generated ${generatedAt ? new Date(generatedAt).toLocaleString() : 'N/A'}.`
             : 'See where your revenue is headed next, computed straight from your own sales history.'
         }
         actions={
@@ -148,23 +148,23 @@ export default function Forecasting() {
       ) : !runId ? (
         <EmptyState
           icon={TrendingUp}
-          message="No forecast yet — click Run Forecasting above for an instant estimate from your own sales history, no setup required."
+          message="No forecast yet. Click Run Forecasting above for an instant estimate from your own sales history, no setup required."
           actionLabel="Run Forecasting"
           onAction={handleRunForecast}
         />
       ) : (
         <>
           <ChartCard
-            title={`Model Forecast — ${best ? modelDisplayName(best) : 'unknown'}`}
-            subtitle="Shaded band = model's own uncertainty interval. This model was picked because it had the lowest MAPE among everything evaluated — see the comparison table below."
+            title={`Model Forecast, ${best ? modelDisplayName(best) : 'unknown'}`}
+            subtitle="Shaded band = model's own uncertainty interval. This model was picked because it had the lowest MAPE among everything evaluated. See the comparison table below."
             method={isBaseline ? 'baseline' : 'real'}
             methodNote={
               isBaseline
-                ? 'Baseline model (moving average) — the wide uncertainty band is mathematically correct, not a display bug: it reflects a real MAPE above the 15% target. A tighter, day-by-day interval needs a model with real predictive variance (Prophet/ARIMA), not this flat-RMSE baseline applied evenly across the whole horizon.'
+                ? 'Baseline model (moving average), the wide uncertainty band is mathematically correct, not a display bug: it reflects a real MAPE above the 15% target. A tighter, day-by-day interval needs a model with real predictive variance (Prophet/ARIMA), not this flat-RMSE baseline applied evenly across the whole horizon.'
                 : "This model's own confidence interval, as computed by the forecasting run."
             }
             height="lg"
-            readingGuide="The solid line up to 'today' is your real recorded revenue. After that, the line is predicted, and the shaded band is how much the prediction could realistically be off by — a wider band means less certainty, not an error."
+            readingGuide="The solid line up to 'today' is your real recorded revenue. After that, the line is predicted, and the shaded band is how much the prediction could realistically be off by, a wider band means less certainty, not an error."
             ariaLabel={`Revenue forecast chart: ${dailySales.length} days of historical actuals followed by a ${best?.forecast_points?.length ?? 0}-day ${modelDisplayName(best ?? { model_type: 'unknown', variant: 'sales_only' })} forecast`}
             status={loading ? 'loading' : 'success'}
             data={chartSeries}
@@ -210,7 +210,7 @@ export default function Forecasting() {
                   <Tooltip
                     content={
                       <ChartTooltip
-                        formatter={(value) => (value != null ? formatCurrencyMYR(value) : '—')}
+                        formatter={(value) => (value != null ? formatCurrencyMYR(value) : 'N/A')}
                       />
                     }
                   />
@@ -281,7 +281,7 @@ export default function Forecasting() {
                 </p>
                 <div className="mt-1.5 flex items-baseline gap-2">
                   <p className="text-3xl font-semibold tabular-nums text-glow-text">
-                    {best.mape != null ? `${best.mape}%` : '—'}
+                    {best.mape != null ? `${best.mape}%` : 'N/A'}
                   </p>
                   {best.mape != null &&
                     (best.mape < MAPE_TARGET ? (
@@ -304,7 +304,7 @@ export default function Forecasting() {
             <div className="rounded-3xl border border-glow-border bg-glow-surface-elevated p-5 lg:col-span-2">
               <h2 className="text-sm font-semibold text-glow-text">Model Comparison</h2>
               <p className="mt-0.5 text-xs text-glow-text/60">
-                Every candidate evaluated on the same time periods — nothing here is hardcoded.
+                Every candidate evaluated on the same time periods, nothing here is hardcoded.
               </p>
               <div className="mt-4 overflow-x-auto">
                 <table className="w-full text-left text-sm">
@@ -323,14 +323,14 @@ export default function Forecasting() {
                         <td className="py-2 pr-4 text-glow-text/90">{modelDisplayName(row)}</td>
                         <td className="py-2 pr-4 text-glow-text/70">{formatCurrencyMYR(row.mae)}</td>
                         <td className="py-2 pr-4 text-glow-text/70">{formatCurrencyMYR(row.rmse)}</td>
-                        <td className="py-2 pr-4 text-glow-text/70">{row.mape != null ? `${row.mape}%` : '—'}</td>
+                        <td className="py-2 pr-4 text-glow-text/70">{row.mape != null ? `${row.mape}%` : 'N/A'}</td>
                         <td className="py-2">
                           {row.is_best ? (
                             <span className="rounded-full bg-glow-brand/15 px-2 py-0.5 text-xs font-medium text-glow-brand">
                               Best
                             </span>
                           ) : (
-                            <span className="text-xs text-glow-text/40">—</span>
+                            <span className="text-xs text-glow-text/40">N/A</span>
                           )}
                         </td>
                       </tr>
@@ -342,7 +342,7 @@ export default function Forecasting() {
             <div className="rounded-3xl border border-glow-border bg-glow-surface-elevated p-5">
               <h2 className="text-sm font-semibold text-glow-text">How this is decided</h2>
               <p className="mt-2 text-sm text-glow-text/60">
-                Every model is tested the same way — trained on your past data, then checked against
+                Every model is tested the same way, trained on your past data, then checked against
                 days it hasn&apos;t seen yet. The one that predicted closest to what actually happened
                 wins. Never a fixed choice.
               </p>

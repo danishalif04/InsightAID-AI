@@ -45,7 +45,7 @@ export default function SeniorModePanel({ recommendations = [], sentimentScore =
 
       {recommendations.length === 0 ? (
         <p className="text-base text-slate-600 dark:text-slate-300">
-          Tiada cadangan buat masa ini — semuanya nampak baik.
+          Tiada cadangan buat masa ini, semuanya nampak baik.
         </p>
       ) : (
         <ol className="space-y-3">

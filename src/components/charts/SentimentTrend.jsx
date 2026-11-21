@@ -71,7 +71,7 @@ export default function SentimentTrend({ data = [], crisisEpisodes = [], height 
             <XAxis dataKey="date" tick={AXIS_TICK_DEFAULTS} {...AXIS_LINE_DEFAULTS} />
             <YAxis tick={AXIS_TICK_DEFAULTS} {...AXIS_LINE_DEFAULTS} unit="%" domain={[0, 100]} />
             <Tooltip
-              content={<ChartTooltip formatter={(value) => (value != null ? `${value}%` : '—')} />}
+              content={<ChartTooltip formatter={(value) => (value != null ? `${value}%` : 'N/A')} />}
             />
             <Legend iconType="circle" wrapperStyle={{ fontSize: 12 }} />
             {renderCrisisBands(crisisEpisodes)}
@@ -112,7 +112,7 @@ export default function SentimentTrend({ data = [], crisisEpisodes = [], height 
             <XAxis dataKey="date" tick={AXIS_TICK_DEFAULTS} {...AXIS_LINE_DEFAULTS} />
             <YAxis tick={AXIS_TICK_DEFAULTS} {...AXIS_LINE_DEFAULTS} unit="%" />
             <Tooltip
-              content={<ChartTooltip formatter={(value) => (value != null ? `${value}%` : '—')} />}
+              content={<ChartTooltip formatter={(value) => (value != null ? `${value}%` : 'N/A')} />}
             />
             <Legend iconType="circle" wrapperStyle={{ fontSize: 12 }} />
             {renderCrisisBands(crisisEpisodes)}

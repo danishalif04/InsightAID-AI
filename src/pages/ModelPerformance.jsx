@@ -34,7 +34,7 @@ function MetricStat({ label, value }) {
   return (
     <div>
       <p className="text-xs text-glow-text/50">{label}</p>
-      <p className="mt-0.5 text-lg font-semibold text-glow-text">{value ?? '—'}</p>
+      <p className="mt-0.5 text-lg font-semibold text-glow-text">{value ?? 'N/A'}</p>
     </div>
   )
 }
@@ -60,7 +60,7 @@ function SentimentModelCard({ row }) {
             Confusion Matrix (rows = true, cols = predicted)
             <InfoPopover
               label="About the confusion matrix"
-              guide="Each row is what a review's REAL label was (negative/neutral/positive, in that order); each column is what the model PREDICTED. Numbers on the diagonal (top-left to bottom-right) are correct predictions — the higher those are relative to the rest of their row, the better the model is at that class."
+              guide="Each row is what a review's REAL label was (negative/neutral/positive, in that order); each column is what the model PREDICTED. Numbers on the diagonal (top-left to bottom-right) are correct predictions, the higher those are relative to the rest of their row, the better the model is at that class."
             />
           </p>
           <div className="mt-1.5 overflow-x-auto">
@@ -114,7 +114,7 @@ export default function ModelPerformance() {
         eyebrow="Model Scorecard"
         title="Model Performance"
         highlight="Performance"
-        description="Real metrics only, straight from model_versions and forecast_results — never fabricated or rounded up."
+        description="Real metrics only, straight from model_versions and forecast_results, never fabricated or rounded up."
       />
 
       <AsyncSection status={status} data={data} error={error} reload={reload}>
@@ -133,7 +133,7 @@ export default function ModelPerformance() {
                 {sentimentModels.length === 0 ? (
                   <EmptyState
                     icon={Gauge}
-                    message="Not yet evaluated — no sentiment model training run has produced results yet. See ml/sentiment/README.md and docs/SENTIMENT_MODEL.md."
+                    message="Not yet evaluated, no sentiment model training run has produced results yet. See ml/sentiment/README.md and docs/SENTIMENT_MODEL.md."
                   />
                 ) : (
                   <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -146,12 +146,12 @@ export default function ModelPerformance() {
 
               <GlowSection
                 title="Forecast Models"
-                description="Baseline (sales-only) vs. sentiment-enhanced Prophet — MAE, RMSE, MAPE, improvement"
-                guide="MAE/RMSE: average forecast error in real currency units (RMSE penalizes big misses more). MAPE: average error as a percentage of actual revenue — this project's target is under 15%. Improvement compares the sentiment-enhanced model against the sales-only baseline; a real result here can be negative (sentiment-enhancement doesn't always help) and is reported either way, never hidden."
+                description="Baseline (sales-only) vs. sentiment-enhanced Prophet, MAE, RMSE, MAPE, improvement"
+                guide="MAE/RMSE: average forecast error in real currency units (RMSE penalizes big misses more). MAPE: average error as a percentage of actual revenue, this project's target is under 15%. Improvement compares the sentiment-enhanced model against the sales-only baseline; a real result here can be negative (sentiment-enhancement doesn't always help) and is reported either way, never hidden."
               >
                 {!forecastComparison ? (
                   <NotYetEvaluated>
-                    Not yet evaluated — no forecasting run has produced a Prophet result yet. See ml/forecasting/README.md.
+                    Not yet evaluated, no forecasting run has produced a Prophet result yet. See ml/forecasting/README.md.
                   </NotYetEvaluated>
                 ) : (
                   <div className="overflow-x-auto">
@@ -174,7 +174,7 @@ export default function ModelPerformance() {
                             <td className="py-2 pr-4 text-glow-text/80">{row.label}</td>
                             <td className="py-2 pr-4 text-glow-text/60">{row.baseline ?? 'Not yet evaluated'}</td>
                             <td className="py-2 pr-4 text-glow-text/60">{row.enhanced ?? 'Not yet evaluated'}</td>
-                            <td className="py-2 text-glow-text/60">{row.improvement != null ? `${row.improvement}%` : '—'}</td>
+                            <td className="py-2 text-glow-text/60">{row.improvement != null ? `${row.improvement}%` : 'N/A'}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -191,7 +191,7 @@ export default function ModelPerformance() {
                 </div>
                 <p className="mt-4 text-sm italic text-glow-text/50">
                   Validated Alerts and Detection Performance (precision/recall against known outcomes) are
-                  unavailable — no manually-labelled crisis ground-truth dataset exists in this project. The counts
+                  unavailable, no manually-labelled crisis ground-truth dataset exists in this project. The counts
                   above are real (from logged detections in Crisis Detection), not validated correctness figures.
                 </p>
               </GlowSection>

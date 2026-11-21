@@ -33,7 +33,7 @@ export default function StatTile({ label, value, prefix = '', unit = '', decimal
   }, [value, motionAllowed])
 
   const formatted =
-    typeof display === 'number' && Number.isFinite(display) ? display.toFixed(decimals) : '—'
+    typeof display === 'number' && Number.isFinite(display) ? display.toFixed(decimals) : 'N/A'
 
   return (
     <div
@@ -45,9 +45,9 @@ export default function StatTile({ label, value, prefix = '', unit = '', decimal
         {guide && <InfoPopover guide={guide} label={`About ${label}`} />}
       </p>
       <p className="mt-1.5 text-4xl font-bold tracking-tight tabular-nums text-glow-text">
-        {formatted !== '—' && prefix}
+        {formatted !== 'N/A' && prefix}
         {formatted}
-        {formatted !== '—' && unit}
+        {formatted !== 'N/A' && unit}
       </p>
       {delta != null && (
         <span

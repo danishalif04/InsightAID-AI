@@ -78,19 +78,19 @@ export default function AgentOrchestrator() {
   return (
     <div className="space-y-6">
       <PageHero
-        eyebrow="Agentic BI — Demo"
+        eyebrow="Agentic BI, Demo"
         title="Ask the Agent Orchestrator"
         highlight="Orchestrator"
-        description="A compact demo of question routing — ask a business question and see which specialist agent handles it."
+        description="A compact demo of question routing, ask a business question and see which specialist agent handles it."
       />
 
       <GlowSection>
         <p className="text-xs text-glow-text/50">
           This is a simplified demo of the planned full agent architecture (Manager Agent + specialist
-          agents, a controlled tool registry, investigation logging) — see{' '}
+          agents, a controlled tool registry, investigation logging). See{' '}
           <code className="rounded bg-white/5 px-1 py-0.5">docs/AUDIT_v3_agentic_direction.md</code> for what's
           real today vs. planned. Here, routing is simple keyword matching and the answer is phrased from
-          real data already computed elsewhere in this app — nothing is fabricated, but it is not yet the
+          real data already computed elsewhere in this app, nothing is fabricated, but it is not yet the
           multi-step, tool-calling agent described in the full plan.
         </p>
       </GlowSection>
@@ -150,15 +150,15 @@ export default function AgentOrchestrator() {
       )}
 
       <div className="pt-2">
-        <h2 className="text-base font-semibold text-glow-text">Agent Foundation — real Manager Agent</h2>
+        <h2 className="text-base font-semibold text-glow-text">Agent Foundation, real Manager Agent</h2>
         <p className="mt-1 text-xs text-glow-text/50">
           Everything below is a different, newer piece: a real Manager Agent that decides whether a controlled
-          tool is relevant, calls it at most once, and persists every step to an inspectable investigation log —
+          tool is relevant, calls it at most once, and persists every step to an inspectable investigation log,
           not just keyword routing. Still a minimal foundation, not the full multi-agent architecture.
         </p>
       </div>
 
-      <GlowSection title="Controlled tool registry" description="The Manager Agent may only call tools listed here — nothing else exists for it to use">
+      <GlowSection title="Controlled tool registry" description="The Manager Agent may only call tools listed here, nothing else exists for it to use">
         <ul className="space-y-2">
           {Object.values(TOOL_REGISTRY).map((tool) => (
             <li key={tool.name} className="flex items-start gap-2 rounded-xl border border-glow-border p-3 text-xs">
@@ -213,7 +213,7 @@ export default function AgentOrchestrator() {
 
       <GlowSection title="Investigation history" description="Every past investigation for this account, persisted and inspectable">
         {historyStatus === 'success' && (!history || history.length === 0) && (
-          <EmptyState message="No investigations yet — ask the Manager Agent a question above." />
+          <EmptyState message="No investigations yet, ask the Manager Agent a question above." />
         )}
         {history && history.length > 0 && (
           <ul className="space-y-3">

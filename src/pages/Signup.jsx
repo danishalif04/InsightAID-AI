@@ -95,7 +95,7 @@ export default function Signup() {
               picture.
             </h1>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-glow-text/60">
-              Bring your sales and customer feedback — or none at all — and get recommendations you can
+              Bring your sales and customer feedback, or none at all, and get recommendations you can
               trace back to the evidence behind them.
             </p>
           </div>
@@ -122,7 +122,7 @@ export default function Signup() {
                   <span className="font-medium text-glow-text">{email}</span>.
                 </p>
                 <p className="text-xs leading-relaxed text-glow-text/40">
-                  It can take a few minutes — check your spam folder too. If nothing arrives, send it again below.
+                  It can take a few minutes. Check your spam folder too. If nothing arrives, send it again below.
                 </p>
 
                 {resendState === 'sent' ? (

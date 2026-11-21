@@ -78,9 +78,9 @@ export const DEMO_SHOP = {
   revenueTarget: 9000,
   description:
     'I run a small grocery shop in Malaysia, open to walk-in customers and ' +
-    'taking cash or e-wallet. I stock about 28 everyday items — rice, ' +
+    'taking cash or e-wallet. I stock about 28 everyday items, rice, ' +
     'cooking oil, sugar, flour, eggs, milk, instant noodles, drinks, ' +
-    'biscuits and household goods like detergent and soap — plus bread, ' +
+    'biscuits and household goods like detergent and soap, plus bread, ' +
     'coffee and mineral water that sell every day. My customers are ' +
     'households and workers from the surrounding neighbourhood. I do not ' +
     'keep daily sales records yet, so I want to know what I need to sell ' +

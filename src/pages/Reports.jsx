@@ -151,7 +151,7 @@ export default function Reports() {
           {!active.geminiAvailable && (
             <div className="mb-3 flex items-center gap-2 rounded-2xl border border-glow-border bg-white/[0.02] p-3 text-xs text-glow-text/50">
               <Download className="size-3.5 shrink-0" aria-hidden="true" />
-              Gemini narrative explanations are unavailable right now — every section below still shows its real
+              Gemini narrative explanations are unavailable right now, every section below still shows its real
               data.
             </div>
           )}

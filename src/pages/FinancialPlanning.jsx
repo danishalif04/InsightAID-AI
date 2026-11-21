@@ -84,14 +84,14 @@ export default function FinancialPlanning() {
         eyebrow="Decision Support"
         title="Financial Planning"
         highlight="Planning"
-        description="Break-even, expenses, and product margins — calculated directly from your business assumptions and sales data, never guessed."
+        description="Break-even, expenses, and product margins, calculated directly from your business assumptions and sales data, never guessed."
       />
 
       {status === 'success' && !hasAssumptions && (
         <GlowSection>
           <EmptyState
             icon={PiggyBank}
-            message="No business assumptions on file yet — fill in your pricing and costs via Onboarding or Settings to see real break-even and expense numbers here."
+            message="No business assumptions on file yet. Fill in your pricing and costs via Onboarding or Settings to see real break-even and expense numbers here."
           />
         </GlowSection>
       )}
@@ -110,7 +110,7 @@ export default function FinancialPlanning() {
               value={expected.operatingCosts ?? undefined}
               prefix="RM "
               decimals={2}
-              guide="Sum of every operating-cost field you've filled in (marketing, platform fees, shipping, labour, fixed costs, other) — fields left blank are excluded, never treated as zero."
+              guide="Sum of every operating-cost field you've filled in (marketing, platform fees, shipping, labour, fixed costs, other), fields left blank are excluded, never treated as zero."
             />
             <StatTile
               label="Break-even Units"
@@ -129,9 +129,9 @@ export default function FinancialPlanning() {
           <ChartCard
             title="Expense Breakdown"
             subtitle="Your monthly operating costs, ranked highest to lowest"
-            readingGuide="Each bar is one cost category you've entered. Longer bars are a bigger share of your total monthly costs — the top one is where cost-cutting would have the biggest impact."
+            readingGuide="Each bar is one cost category you've entered. Longer bars are a bigger share of your total monthly costs, the top one is where cost-cutting would have the biggest impact."
             method="scenario"
-            methodNote="Calculated directly from the cost fields you entered in Onboarding/Settings — nothing here is estimated or invented."
+            methodNote="Calculated directly from the cost fields you entered in Onboarding/Settings, nothing here is estimated or invented."
             surface="glow"
             ariaLabel="Expense breakdown bar chart, ranked by amount"
             status={status}
@@ -163,9 +163,9 @@ export default function FinancialPlanning() {
           <ChartCard
             title="Break-even Analysis"
             subtitle="Revenue vs. total cost as units sold increases"
-            readingGuide="Two lines: your revenue if you sold that many units, and your total cost at that volume (fixed + variable). Where they cross is your break-even point — sell more than that and you're profitable."
+            readingGuide="Two lines: your revenue if you sold that many units, and your total cost at that volume (fixed + variable). Where they cross is your break-even point, sell more than that and you're profitable."
             method="scenario"
-            methodNote="A calculated projection from your real price/cost/operating-cost assumptions, not historical sales data — treat it as a planning tool, not a forecast."
+            methodNote="A calculated projection from your real price/cost/operating-cost assumptions, not historical sales data, treat it as a planning tool, not a forecast."
             surface="glow"
             ariaLabel="Break-even chart showing revenue and cost lines crossing at the break-even point"
             status={status}
@@ -194,12 +194,12 @@ export default function FinancialPlanning() {
 
           <GlowSection
             title="Product Margin Analysis"
-            description="From your real uploaded sales data — not shown for accounts with no sales history yet"
+            description="From your real uploaded sales data, not shown for accounts with no sales history yet"
           >
             {productBreakdown.length === 0 ? (
               <EmptyState
                 icon={Calculator}
-                message="No product-level sales data yet — this section needs an uploaded sales dataset, not just your business assumptions."
+                message="No product-level sales data yet, this section needs an uploaded sales dataset, not just your business assumptions."
               />
             ) : (
               <ul className="space-y-3">
@@ -208,7 +208,7 @@ export default function FinancialPlanning() {
                     <span className="min-w-0 flex-1 truncate font-medium text-glow-text/80">{item.product}</span>
                     <span className="shrink-0 text-glow-text/50">{formatCurrencyMYR(item.revenue)} revenue</span>
                     <span className="shrink-0 font-semibold text-glow-brand">
-                      {item.grossMarginPercent != null ? `${item.grossMarginPercent}% margin` : '— margin (no cost data)'}
+                      {item.grossMarginPercent != null ? `${item.grossMarginPercent}% margin` : 'Margin unavailable (no cost data)'}
                     </span>
                   </li>
                 ))}

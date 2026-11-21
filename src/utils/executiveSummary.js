@@ -30,7 +30,7 @@ export function composeExecutiveSummary({ sentimentScores = null, crisis = null,
   if (crisis?.dataSufficient) {
     parts.push(`Crisis risk is ${crisis.riskLevel} (score ${crisis.riskScore}/100).`)
   } else if (crisis) {
-    parts.push('Crisis risk could not be fully assessed yet — not enough history.')
+    parts.push('Crisis risk could not be fully assessed yet, not enough history.')
   }
 
   if (bestForecastRow) {
@@ -41,7 +41,7 @@ export function composeExecutiveSummary({ sentimentScores = null, crisis = null,
   }
 
   if (parts.length === 0) {
-    return 'Not enough data yet to generate an executive summary — upload sales, review, or social data to get started.'
+    return 'Not enough data yet to generate an executive summary. Upload sales, review, or social data to get started.'
   }
   return parts.join(' ')
 }

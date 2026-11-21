@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Sparkles } from 'lucide-react'
+import { BookOpen, Info, Sparkles } from 'lucide-react'
 import brandMark from '@/assets/insightaid-mark.png'
 import brandLockup from '@/assets/insightaid-lockup.png'
 import Button from '@/components/ui/Button'
@@ -113,7 +113,7 @@ export default function Login() {
               .
             </h1>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-glow-text/60">
-              Multilingual sentiment, sales forecasting, and crisis detection for early-stage businesses —
+              Multilingual sentiment, sales forecasting, and crisis detection for early-stage businesses,
               every number traceable back to your own data.
             </p>
           </div>
@@ -170,15 +170,6 @@ export default function Login() {
                 Sign up
               </Link>
             </p>
-            <p className="mt-2 text-center text-xs text-glow-text/40">
-              <Link to={PATHS.welcome} className="hover:underline hover:text-glow-text/60">
-                Learn more about InsightAid AI
-              </Link>
-              {' · '}
-              <Link to={`${PATHS.welcome}#guide`} className="hover:underline hover:text-glow-text/60">
-                How to use the app
-              </Link>
-            </p>
 
             {DEMO_ACCOUNTS.length > 0 && (
               <div className="mt-6 space-y-2 rounded-2xl border border-dashed border-glow-border bg-white/[0.02] p-3">
@@ -205,6 +196,23 @@ export default function Login() {
                 ))}
               </div>
             )}
+
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              <Link
+                to={PATHS.welcome}
+                className="flex items-center justify-center gap-1.5 rounded-xl border border-glow-border bg-white/[0.03] px-3 py-2.5 text-xs font-medium text-glow-text/80 transition-colors hover:border-glow-brand/40 hover:text-glow-text"
+              >
+                <Info className="size-3.5 shrink-0 text-glow-brand" aria-hidden="true" />
+                Learn more
+              </Link>
+              <Link
+                to={`${PATHS.welcome}#guide`}
+                className="flex items-center justify-center gap-1.5 rounded-xl border border-glow-brand/40 bg-glow-brand/10 px-3 py-2.5 text-xs font-medium text-glow-brand transition-colors hover:bg-glow-brand/20"
+              >
+                <BookOpen className="size-3.5 shrink-0" aria-hidden="true" />
+                User guide
+              </Link>
+            </div>
           </div>
         </div>
       </div>

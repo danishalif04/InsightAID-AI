@@ -53,7 +53,7 @@ export default function AppShell() {
       {/* max-w-6xl (1152px) left most of a modern laptop or desktop screen
           empty, with the content stranded in a narrow column. Stepping up
           to screen-2xl lets charts and tables use the width they have,
-          while still capping line length on very wide monitors — an
+          while still capping line length on very wide monitors, an
           uncapped container would stretch body text past comfortable
           reading width. */}
       <main className="relative mx-auto w-full max-w-screen-2xl px-4 pb-24 pt-10 sm:px-6 lg:px-8 2xl:px-12">

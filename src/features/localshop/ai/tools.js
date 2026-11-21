@@ -56,7 +56,7 @@ export const TOOLS = {
   },
 
   calculate_break_even: {
-    description: 'Monthly break-even sales revenue, units and daily target. No input — uses recorded fixed costs and product margins.',
+    description: 'Monthly break-even sales revenue, units and daily target. No input, uses recorded fixed costs and product margins.',
     params: {},
     run: (shop) => {
       const fixed = fixedCostsOf(shop)

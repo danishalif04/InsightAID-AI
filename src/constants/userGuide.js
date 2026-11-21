@@ -98,7 +98,7 @@ export const USER_GUIDE = [
       {
         title: 'Catch problems early',
         where: 'Insights → Crisis Detection',
-        body: 'A 0–100 risk score built from seven signals compared with your own recent history. Each signal shows its evidence, for example "Negative sentiment ratio is 50% of today\'s mentions". Use the timeline, signal matrix and replay to see how an episode developed.',
+        body: 'A 0 to 100 risk score built from seven signals compared with your own recent history. Each signal shows its evidence, for example "Negative sentiment ratio is 50% of today\'s mentions". Use the timeline, signal matrix and replay to see how an episode developed.',
         image: '/guide/bs-5-crisis.jpg',
       },
       {

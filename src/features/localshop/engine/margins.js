@@ -28,7 +28,7 @@ export function marginTable(products) {
   return ok({
     rows: rows.sort((a, b) => b.marginPct - a.marginPct),
     skipped,
-    note: 'Margin alone does not show which product earns the most total profit — that also needs sales quantities.',
+    note: 'Margin alone does not show which product earns the most total profit, that also needs sales quantities.',
   })
 }
 

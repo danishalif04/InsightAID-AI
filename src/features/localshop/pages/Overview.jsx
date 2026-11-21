@@ -91,7 +91,7 @@ export default function Overview() {
           value={bep.ok ? bep.avgMarginPct : null}
           suffix="%"
           provenance="Calculated"
-          hint="Unweighted — equal sales mix assumed"
+          hint="Unweighted, equal sales mix assumed"
           needs={['product price + unit cost']}
         />
         <KpiTile

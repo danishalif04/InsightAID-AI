@@ -168,7 +168,7 @@ function validateProduct(raw, index, seenIds, errors, warnings) {
     return null
   }
   if (price <= cost) {
-    errors.push(`${where}.price (${price}) must be greater than cost (${cost}) — a non-positive margin is not a usable scenario.`)
+    errors.push(`${where}.price (${price}) must be greater than cost (${cost}), a non-positive margin is not a usable scenario.`)
     return null
   }
   if (price > LIMITS.maxAmount) {
@@ -307,7 +307,7 @@ export function validateShopScenario(raw, profile = {}) {
   // fixed total, and a scenario with none would render a break-even of zero
   // — a figure that looks computed but actually means "no data".
   if (expenses.length > 0 && !expenses.some((e) => e.kind === 'fixed')) {
-    errors.push('expenses must include at least one fixed cost — break-even is computed against the fixed total.')
+    errors.push('expenses must include at least one fixed cost, break-even is computed against the fixed total.')
   }
 
   const startupItems = validateStartupItems(root.startupItems, errors, warnings)

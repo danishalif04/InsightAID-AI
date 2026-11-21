@@ -89,7 +89,7 @@ export function validateDataset(templateId, records) {
         `Columns: ${presentColumns.join(', ') || '(none)'}.`,
       ],
       warnings: [
-        "Didn't match a known template (Sales/Reviews/Social/Product/Expenses) — stored as-is. " +
+        "Didn't match a known template (Sales/Reviews/Social/Product/Expenses), stored as-is. " +
           'Sentiment/crisis/forecast analysis only run on recognized columns, so this import is kept for review/export but not deeply analyzed.',
       ],
       readyForProcessing: true,

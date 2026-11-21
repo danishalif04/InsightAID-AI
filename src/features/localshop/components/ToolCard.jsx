@@ -52,7 +52,7 @@ export default function ToolCard({ title, description, status = 'ready', tags = 
 
       {locked ? (
         <p className="mt-3 text-[11px] text-glow-text/40">
-          {t('readiness.needs')}: {needs.join(', ') || '—'}
+          {t('readiness.needs')}: {needs.join(', ') || 'N/A'}
         </p>
       ) : (
         onAskAi && (

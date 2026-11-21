@@ -14,7 +14,7 @@ const NEXT_STEP = {
   scenario_modelling: 'Add product prices and fixed costs to test pricing scenarios.',
   startup_capital: 'List your one-off setup costs to estimate the capital you need.',
   sales_trend: 'You have registered your products and estimated expenses. The next useful step is to identify your best-selling products by recording daily sales.',
-  forecasting: 'Keep recording daily sales — about three months unlocks forecasting.',
+  forecasting: 'Keep recording daily sales, about three months unlocks forecasting.',
   sentiment: 'Start collecting customer feedback to unlock sentiment analysis.',
 }
 

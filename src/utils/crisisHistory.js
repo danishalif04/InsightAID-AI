@@ -205,7 +205,7 @@ export function buildEpisodeStages(episode, history = []) {
     id: 'back_to_normal',
     label: backToNormalPoint
       ? 'Back to Normal'
-      : 'Still active — no later Normal day in the loaded range',
+      : 'Still active, no later Normal day in the loaded range',
     date: backToNormalPoint?.date ?? null,
     daysSinceStart: backToNormalPoint ? daysBetween(episode.start, backToNormalPoint.date) : null,
   })

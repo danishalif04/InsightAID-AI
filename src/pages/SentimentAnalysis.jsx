@@ -21,7 +21,7 @@ import { getSentimentAnalysisData } from '@/services/sentimentAnalysisService'
 import { computeConfidenceDistribution, computeLanguageSentiment } from '@/utils/postBreakdowns'
 import { SENTIMENT_COLORS } from '@/config/colorTokens'
 
-const LANGUAGE_LABELS = { en: 'EN', ms: 'MY', zh: 'ZH', 'ms-en': 'MY/EN', unknown: '—' }
+const LANGUAGE_LABELS = { en: 'EN', ms: 'MY', zh: 'ZH', 'ms-en': 'MY/EN', unknown: 'N/A' }
 // Spelled out for the Language Breakdown panel, where a two-letter code
 // beside a percentage bar is not self-explanatory.
 const LANGUAGE_FULL_LABELS = {
@@ -112,7 +112,7 @@ export default function SentimentAnalysis() {
         eyebrow="Customer Voice"
         title="Sentiment Analysis"
         highlight="Analysis"
-        description="What customers are actually saying, by day, language, and platform — in their own words."
+        description="What customers are actually saying, by day, language, and platform, in their own words."
         actions={
           <Button variant="secondary" icon={Download} onClick={handleExport}>
             Export CSV
@@ -148,7 +148,7 @@ export default function SentimentAnalysis() {
         </GlowSection>
       ) : scoresSeries.length === 0 ? (
         <GlowSection>
-          <EmptyState icon={MessageSquare} message="No sentiment data yet — upload reviews or social data via Dataset Management." />
+          <EmptyState icon={MessageSquare} message="No sentiment data yet. Upload reviews or social data via Dataset Management." />
         </GlowSection>
       ) : (
         <>
@@ -172,7 +172,7 @@ export default function SentimentAnalysis() {
 
           {activeDay?.cards == null ? (
             <GlowSection>
-              <EmptyState icon={MessageSquare} message={`No sentiment data for ${activeDay?.label} — no rated posts that day.`} />
+              <EmptyState icon={MessageSquare} message={`No sentiment data for ${activeDay?.label}, no rated posts that day.`} />
             </GlowSection>
           ) : (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -223,7 +223,7 @@ export default function SentimentAnalysis() {
                     <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid} vertical={false} />
                     <XAxis dataKey="label" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
                     <YAxis tick={{ fontSize: 12 }} axisLine={false} tickLine={false} unit="%" />
-                    <Tooltip content={<ChartTooltip formatter={(value) => (value != null ? `${value}%` : '—')} />} />
+                    <Tooltip content={<ChartTooltip formatter={(value) => (value != null ? `${value}%` : 'N/A')} />} />
                     {!isMonthly && activeDay && !isLatestDay && (
                       <ReferenceLine x={activeDay.label} stroke={CHART_COLORS.forecast} strokeDasharray="4 4" label={{ value: 'Viewing', position: 'top', fontSize: 11, fill: CHART_COLORS.forecast }} />
                     )}
@@ -240,7 +240,7 @@ export default function SentimentAnalysis() {
                 show anything: this project classifies 3-class sentiment only
                 and no emotion classifier exists. Confidence is something the
                 system genuinely records, and it answers a more useful
-                question for Objective O1 — where is the model unsure? */}
+                question for Objective O1, where is the model unsure? */}
             <GlowSection
               title="Classifier Confidence"
               description="How sure the model was about these posts. Low confidence is where a human should look first."
@@ -287,7 +287,7 @@ export default function SentimentAnalysis() {
                   </ul>
                   {confidence.missing > 0 && (
                     <p className="text-xs text-glow-text/40">
-                      {confidence.missing} post{confidence.missing === 1 ? '' : 's'} carry no confidence score and are excluded — a missing score is not a low one.
+                      {confidence.missing} post{confidence.missing === 1 ? '' : 's'} carry no confidence score and are excluded, a missing score is not a low one.
                     </p>
                   )}
                 </div>
@@ -295,7 +295,7 @@ export default function SentimentAnalysis() {
             </GlowSection>
           </div>
 
-          <GlowSection title="Trending Hashtags" description={`From real captured posts — ${activeDay?.label ?? 'selected day'}${isLatestDay ? ' (Today)' : ''}`}>
+          <GlowSection title="Trending Hashtags" description={`From real captured posts, ${activeDay?.label ?? 'selected day'}${isLatestDay ? ' (Today)' : ''}`}>
             {activeHashtags.length === 0 ? (
               <EmptyState icon={MessageSquare} message={`No hashtags captured on ${activeDay?.label ?? 'this day'}.`} />
             ) : (
@@ -346,7 +346,7 @@ export default function SentimentAnalysis() {
                 more load-bearing view of the same dataset. */}
             <GlowSection
               title="Language Breakdown"
-              description="Sentiment split per detected language — the per-language view Objective O1 is graded on"
+              description="Sentiment split per detected language, the per-language view Objective O1 is graded on"
             >
               {languageRows.length === 0 ? (
                 <EmptyState icon={MessageSquare} message="No posts match the current filters." />

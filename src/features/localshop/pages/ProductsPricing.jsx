@@ -130,7 +130,7 @@ export default function ProductsPricing() {
                       />
                     </td>
                     <td className="py-1.5 pr-3 text-right font-medium text-glow-text">
-                      {row ? `${row.marginPct}%` : <span className="text-glow-text/30">—</span>}
+                      {row ? `${row.marginPct}%` : <span className="text-glow-text/30">N/A</span>}
                     </td>
                   </tr>
                 )

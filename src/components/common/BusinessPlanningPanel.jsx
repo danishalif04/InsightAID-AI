@@ -28,7 +28,7 @@ const SCENARIO_META = {
 }
 
 function money(value) {
-  return value === null || value === undefined ? '—' : `RM ${value.toLocaleString('en-MY', { maximumFractionDigits: 2 })}`
+  return value === null || value === undefined ? 'N/A' : `RM ${value.toLocaleString('en-MY', { maximumFractionDigits: 2 })}`
 }
 
 function ScenarioCard({ scenario }) {
@@ -45,7 +45,7 @@ function ScenarioCard({ scenario }) {
       <dl className="mt-3 space-y-1.5 text-sm">
         <div className="flex items-center justify-between">
           <dt className="text-xs text-slate-500 dark:text-slate-400">Monthly Units</dt>
-          <dd className="font-medium text-slate-800 dark:text-slate-100">{scenario.units ?? '—'}</dd>
+          <dd className="font-medium text-slate-800 dark:text-slate-100">{scenario.units ?? 'N/A'}</dd>
         </div>
         <div className="flex items-center justify-between">
           <dt className="text-xs text-slate-500 dark:text-slate-400">Revenue</dt>
@@ -135,7 +135,7 @@ export default function BusinessPlanningPanel({ values, provenance, dataAvailabi
       notify('Assumptions saved and scenarios updated.')
       onSaved?.()
     } catch {
-      notify('Could not save your assumptions — please try again.', 'error')
+      notify('Could not save your assumptions, please try again.', 'error')
     } finally {
       setSaving(false)
     }
@@ -147,7 +147,7 @@ export default function BusinessPlanningPanel({ values, provenance, dataAvailabi
         <div className="flex items-start gap-2">
           <Info className="mt-0.5 size-4 shrink-0 text-info" aria-hidden="true" />
           <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-300">
-            <span className="font-semibold">Scenario Projection — not a historical forecast.</span> Every number below
+            <span className="font-semibold">Scenario Projection, not a historical forecast.</span> Every number below
             is calculated from your own assumptions using fixed formulas, not machine learning, and not a prediction
             based on past data.
           </p>
@@ -168,7 +168,7 @@ export default function BusinessPlanningPanel({ values, provenance, dataAvailabi
 
       <Card
         title="Your Assumptions"
-        description="Edit any figure and recalculate — no assumption is ranked as objectively best."
+        description="Edit any figure and recalculate, no assumption is ranked as objectively best."
         actions={
           <Button variant="secondary" size="sm" icon={RefreshCw} onClick={handleRecalculate}>
             Recalculate
@@ -198,7 +198,7 @@ export default function BusinessPlanningPanel({ values, provenance, dataAvailabi
         </div>
         {isIllustrative && (
           <p className="mb-3 text-xs text-slate-500 dark:text-slate-400">
-            Sample values are standing in for your {describeAssumedFields(assumedFields)} — everything else is your
+            Sample values are standing in for your {describeAssumedFields(assumedFields)}, everything else is your
             own data. Fill those in below and save to replace them.
           </p>
         )}

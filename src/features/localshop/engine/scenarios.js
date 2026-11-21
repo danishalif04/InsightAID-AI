@@ -61,5 +61,5 @@ export function scenarioSet(base, overrides = {}) {
     }
   })
 
-  return ok({ scenarios, assumptionNote: 'Assumption — not a predicted outcome.' })
+  return ok({ scenarios, assumptionNote: 'Assumption, not a predicted outcome.' })
 }

@@ -174,11 +174,11 @@ export default function DatasetManagement() {
         recordImportResult({ file: file.name, size: file.size, templateId, result })
 
         if (templateId === 'custom') {
-          notify(`${file.name}: columns didn't match a known template — stored as-is (${result.rawCount} row(s)), not deeply analyzed.`, 'info')
+          notify(`${file.name}: columns didn't match a known template, stored as-is (${result.rawCount} row(s)), not deeply analyzed.`, 'info')
         } else if (result.validation.readyForProcessing) {
-          notify(`${file.name} imported as "${templateId}" — ${result.rawCount} row(s), ${result.validation.warnings.length} warning(s).`)
+          notify(`${file.name} imported as "${templateId}", ${result.rawCount} row(s), ${result.validation.warnings.length} warning(s).`)
         } else {
-          notify(`${file.name} could not be fully processed — see the validation report.`, 'error')
+          notify(`${file.name} could not be fully processed. See the validation report.`, 'error')
         }
       } catch (error) {
         notify(error.message ?? `Could not read ${file.name}.`, 'error')
@@ -212,11 +212,11 @@ export default function DatasetManagement() {
     try {
       const rows = await fetchRows()
       if (rows.length === 0) {
-        notify('No matching data yet — upload or sync data first.', 'info')
+        notify('No matching data yet. Upload or sync data first.', 'info')
         return
       }
       downloadCsv(filename, rows)
-      notify(`Exported ${rows.length} row(s) to ${filename} — matches ${schemaLabel}.`)
+      notify(`Exported ${rows.length} row(s) to ${filename}, matches ${schemaLabel}.`)
     } catch (error) {
       notify(error.message ?? `Could not export ${filename}.`, 'error')
     } finally {
@@ -232,7 +232,7 @@ export default function DatasetManagement() {
       recordImportResult({ file: 'sample_social.csv', size: 0, templateId: 'social', result: social })
       notify('Sample dataset loaded through the real pipeline (validation, preprocessing, feature engineering).')
     } catch {
-      notify('Could not load the sample dataset — please try again.', 'error')
+      notify('Could not load the sample dataset, please try again.', 'error')
     } finally {
       setSeeding(false)
       refreshSources()
@@ -246,12 +246,12 @@ export default function DatasetManagement() {
         eyebrow="Pipeline"
         title="Dataset Management"
         highlight="Dataset"
-        description="Upload, sync, and export the real data every other page reads from — nothing here is simulated."
+        description="Upload, sync, and export the real data every other page reads from, nothing here is simulated."
       />
 
       <GlowSection
         title="Upload Dataset"
-        description="CSV, JSON, or Excel — up to 100 MB per file. Matches a known template (Sales, Reviews, Social, Product, Expenses) automatically where possible, including common column-name variants; anything that doesn't match is still stored, just not deeply analyzed."
+        description="CSV, JSON, or Excel, up to 100 MB per file. Matches a known template (Sales, Reviews, Social, Product, Expenses) automatically where possible, including common column-name variants; anything that doesn't match is still stored, just not deeply analyzed."
       >
         <div
           onDragOver={(event) => {
@@ -286,7 +286,7 @@ export default function DatasetManagement() {
         </div>
       </GlowSection>
 
-      <GlowSection title="Data Source Status" description="Every source is checked independently — one failing never affects the others">
+      <GlowSection title="Data Source Status" description="Every source is checked independently, one failing never affects the others">
         {loadingSources ? (
           <p className="text-sm text-glow-text/60">Checking source status…</p>
         ) : (
@@ -329,7 +329,7 @@ export default function DatasetManagement() {
       <GlowSection title="Storage & Language Mix" description="Storage quota, plus the detected language mix across everything ingested so far">
         <div className="flex items-center gap-2 text-sm italic text-glow-text/50">
           <HardDrive className="size-4 text-glow-text/40" aria-hidden="true" />
-          Unavailable — storage quota is Supabase project infrastructure, not something this app's client-side
+          Unavailable, storage quota is Supabase project infrastructure, not something this app's client-side
           credentials can query.
         </div>
 
@@ -366,7 +366,7 @@ export default function DatasetManagement() {
 
       <GlowSection
         title="ML Training Data Export"
-        description="Real rows from processed_data/daily_aggregates, shaped to match the offline training pipelines in ml/sentiment and ml/forecasting. Nothing is trained here — this only exports what's already been ingested."
+        description="Real rows from processed_data/daily_aggregates, shaped to match the offline training pipelines in ml/sentiment and ml/forecasting. Nothing is trained here, this only exports what's already been ingested."
       >
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <Button
@@ -410,7 +410,7 @@ export default function DatasetManagement() {
         <Table
           columns={[
             { key: 'file', label: 'File' },
-            { key: 'size', label: 'Size', align: 'right', render: (row) => (row.size ? formatBytes(row.size) : '—') },
+            { key: 'size', label: 'Size', align: 'right', render: (row) => (row.size ? formatBytes(row.size) : 'N/A') },
             { key: 'records', label: 'Rows', align: 'right', render: (row) => row.records.toLocaleString() },
             { key: 'quality', label: 'Quality', align: 'right', render: (row) => `${row.quality}%` },
             {
@@ -441,11 +441,11 @@ export default function DatasetManagement() {
           ]}
           data={imports}
           getRowKey={(row) => row.id}
-          emptyMessage="No datasets imported yet this session — upload a file or load the sample dataset above."
+          emptyMessage="No datasets imported yet this session. Upload a file or load the sample dataset above."
         />
       </GlowSection>
 
-      <Dialog open={Boolean(reportDialog)} onClose={() => setReportDialog(null)} title={`Validation report — ${reportDialog?.file ?? ''}`}>
+      <Dialog open={Boolean(reportDialog)} onClose={() => setReportDialog(null)} title={`Validation report, ${reportDialog?.file ?? ''}`}>
         {reportDialog && (
           <div className="space-y-3 text-sm">
             <p className="text-xs text-slate-500 dark:text-slate-400">

@@ -44,7 +44,7 @@ export default function StartupCapital() {
     <div className="space-y-5">
       <Section
         title={t('nav.capital')}
-        description="What you need before opening. Every figure below is a sum of what you entered — nothing is estimated for you."
+        description="What you need before opening. Every figure below is a sum of what you entered, nothing is estimated for you."
         provenance="Your input"
       >
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -116,8 +116,8 @@ export default function StartupCapital() {
                   <p className="text-sm text-glow-text/80">
                     You have {money0(capital.availableCapital)} against an estimated {money0(capital.cashNeeded)} needed
                     {capital.shortfall
-                      ? ` — a shortfall of ${money0(capital.gap)}.`
-                      : ` — a surplus of ${money0(Math.abs(capital.gap))}.`}
+                      ? `, a shortfall of ${money0(capital.gap)}.`
+                      : `, a surplus of ${money0(Math.abs(capital.gap))}.`}
                   </p>
                   <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-white/5">
                     <div

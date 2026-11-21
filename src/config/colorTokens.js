@@ -72,14 +72,14 @@ export const SENTIMENT_COLORS = {
  * series) — documented here so the choice isn't mistaken for an attempt
  * at brand-accurate colors. */
 export const PLATFORM_COLORS = {
-  shopee: '#db7509', // was #f59e0b (2.01:1 on light) — same amber, deepened
-  tiktok: '#0e96e9', // was #0ea5e9 (2.60:1 on light) — same sky blue, deepened
+  shopee: '#db7509', // was #f59e0b (2.01:1 on light), same amber, deepened
+  tiktok: '#0e96e9', // was #0ea5e9 (2.60:1 on light), same sky blue, deepened
   // Phase 6 chart audit: was indigo-500 (#6366f1) — simulated-CVD check
   // (src/config/colorblindSimulation.js) found this only 30.1 units from
   // `tiktok` under protanopia, the weakest pair in this palette. Rose-700
   // widens that to 73.5/107.8/79.1 across protanopia/deuteranopia/
   // tritanopia with no new collision introduced (verified in colorTokens.test.js).
-  x: '#c3103b', // was #be123c (2.90:1 on dark) — 5.5 RGB units, hue unchanged
+  x: '#c3103b', // was #be123c (2.90:1 on dark), 5.5 RGB units, hue unchanged
   threads: '#a855f7', // purple-500
 }
 
@@ -95,15 +95,15 @@ export const CRISIS_COLORS = {
   // critical becoming hard to tell apart is the worst possible place for
   // that to happen). Yellow-600 widens that to 47.6/32.1/40.0, verified
   // in colorTokens.test.js.
-  warning: '#cf7b0f', // was #ca8a04 (2.75:1 on light) — amber, 7 degrees warmer
-  critical: '#dc2626', // matches existing --color-danger — the ONE unified red
+  warning: '#cf7b0f', // was #ca8a04 (2.75:1 on light), amber, 7 degrees warmer
+  critical: '#dc2626', // matches existing --color-danger, the ONE unified red
 }
 
 /** Forecast chart series — distinct from every category above.
  * `actual` reuses the existing dark-pine brand-900 token: it's desaturated
  * enough to read as "neutral historical data," not a second brand accent. */
 export const FORECAST_COLORS = {
-  actual: '#217044', // was #1e2f29 (1.30:1 on dark — worst in the palette)
+  actual: '#217044', // was #1e2f29 (1.30:1 on dark, worst in the palette)
   forecast: '#7c3aed', // violet-600
   baseline: '#0d9488', // teal-600
   scenario: '#db2777', // pink-600

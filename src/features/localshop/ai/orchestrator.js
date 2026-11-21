@@ -52,7 +52,7 @@ Business digest (counts and totals only): ${JSON.stringify(digest)}
 
 Owner's question: "${question}"
 
-Reply with ONLY a JSON object: {"tools":[{"name":"<tool>","args":{}}]}. Choose at most ${MAX_TOOL_CALLS}. Choose none (empty array) if no tool fits — never invent a tool name.`
+Reply with ONLY a JSON object: {"tools":[{"name":"<tool>","args":{}}]}. Choose at most ${MAX_TOOL_CALLS}. Choose none (empty array) if no tool fits, never invent a tool name.`
 
   try {
     const { data, error } = await supabase.functions.invoke('agent-orchestrator', {
@@ -180,7 +180,7 @@ export async function runInvestigation({ question, shop, mode = AI_MODE, onStep 
     answerSource === 'ai'
       ? 'AI explanation verified against tool results'
       : answerSource === 'template_after_guard'
-        ? 'AI answer failed verification — replaced with the calculated summary'
+        ? 'AI answer failed verification, replaced with the calculated summary'
         : 'Calculated summary (no AI explanation)'
   )
 

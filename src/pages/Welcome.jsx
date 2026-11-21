@@ -24,19 +24,19 @@ const FEATURES = [
     icon: MessageSquareText,
     title: 'Multilingual Sentiment',
     description:
-      'Reads customer opinion in English, Bahasa Melayu, and Mandarin — including code-mixed text — via a fine-tuned XLM-RoBERTa model (84.1% real, measured accuracy).',
+      'Reads customer opinion in English, Bahasa Melayu, and Mandarin, including code-mixed text, via a fine-tuned XLM-RoBERTa model (84.1% real, measured accuracy).',
   },
   {
     icon: LineChart,
     title: 'Sales Forecasting',
     description:
-      'Prophet-based forecasting over your real sales history, with rolling-origin evaluation reported honestly — including when it does not beat a simpler baseline.',
+      'Prophet-based forecasting over your real sales history, with rolling-origin evaluation reported honestly, including when it does not beat a simpler baseline.',
   },
   {
     icon: AlertTriangle,
     title: 'Crisis Detection',
     description:
-      'Rule-based signals compared against your own business’s recent baseline, not a generic threshold — flags a real, explainable risk level, not a black box.',
+      'Rule-based signals compared against your own business’s recent baseline, not a generic threshold, flags a real, explainable risk level, not a black box.',
   },
   {
     icon: Lightbulb,
@@ -50,32 +50,32 @@ const FAQS = [
   {
     question: 'What data sources does this support?',
     answer:
-      'Sales records, customer reviews, and social posts (TikTok, X, Shopee, Google) — uploaded as CSV/Excel via Dataset Management, or a documented synthetic dataset for demo purposes. Every template and column mapping is documented in-app.',
+      'Sales records, customer reviews, and social posts (TikTok, X, Shopee, Google), uploaded as CSV/Excel via Dataset Management, or a documented synthetic dataset for demo purposes. Every template and column mapping is documented in-app.',
   },
   {
     question: 'Is this using a real trained AI model, or just rules?',
     answer:
-      'Both, and the split is intentional. Sentiment classification is a real, trained XLM-RoBERTa model (84.1% overall accuracy on a held-out test set, meeting this project’s own pre-registered target). Crisis detection and recommendations are rule-based and fully explainable — every recommendation shows the exact evidence that triggered it. An optional LLM layer (provider-agnostic — currently Groq) only rewords an already-decided recommendation into plain language; it never decides what to recommend or supplies a number.',
+      'Both, and the split is intentional. Sentiment classification is a real, trained XLM-RoBERTa model (84.1% overall accuracy on a held-out test set, meeting this project’s own pre-registered target). Crisis detection and recommendations are rule-based and fully explainable, every recommendation shows the exact evidence that triggered it. An optional LLM layer (provider-agnostic, currently Groq) only rewords an already-decided recommendation into plain language; it never decides what to recommend or supplies a number.',
   },
   {
     question: 'Can I try it with demo data?',
     answer:
-      'Yes — the Login page lists demo accounts you can sign in with directly, each backed by either real uploaded sales/review data or a documented synthetic dataset, so you can explore every feature without uploading anything yourself.',
+      'Yes, the Login page lists demo accounts you can sign in with directly, each backed by either real uploaded sales/review data or a documented synthetic dataset, so you can explore every feature without uploading anything yourself.',
   },
   {
     question: 'What languages does it support?',
     answer:
-      'Sentiment analysis covers English, Bahasa Melayu, and Mandarin (including code-mixed text). The rest of the interface is currently English-only — full multilingual UI translation is a known, disclosed gap, not something this project claims to have finished.',
+      'Sentiment analysis covers English, Bahasa Melayu, and Mandarin (including code-mixed text). The rest of the interface is currently English-only, full multilingual UI translation is a known, disclosed gap, not something this project claims to have finished.',
   },
   {
     question: 'Is my data private?',
     answer:
-      'Yes. Each account’s data is isolated via Supabase Row Level Security — no user can read another user’s rows, including the demo accounts. Scraped social data never stores personal identifiers (usernames are hashed or dropped at ingestion).',
+      'Yes. Each account’s data is isolated via Supabase Row Level Security, no user can read another user’s rows, including the demo accounts. Scraped social data never stores personal identifiers (usernames are hashed or dropped at ingestion).',
   },
   {
     question: 'Is this a finished commercial product?',
     answer:
-      'No — this is a Final Year Project research artefact (a Design Science Research build-and-evaluate project), not a live, billed product. The Pricing section below describes a proposed future model only; there is no payment integration anywhere in this system.',
+      'No, this is a Final Year Project research artefact (a Design Science Research build-and-evaluate project), not a live, billed product. The Pricing section below describes a proposed future model only; there is no payment integration anywhere in this system.',
   },
 ]
 
@@ -175,7 +175,7 @@ export default function Welcome() {
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-sm leading-relaxed text-glow-text/60 sm:text-base">
             An intelligent decision support system for data-driven business analytics in early-stage
-            startups — multilingual sentiment, sales forecasting, crisis detection, and explainable
+            startups, multilingual sentiment, sales forecasting, crisis detection, and explainable
             recommendations, built around Malaysian SMEs and every number traceable back to real data.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
@@ -232,7 +232,7 @@ export default function Welcome() {
                 <h2 className="text-xl font-semibold text-glow-text">Pricing</h2>
                 <p className="mt-1.5 max-w-2xl text-sm text-glow-text/60">A proposed future pricing model.</p>
               </div>
-              <Badge tone="warning">Proposed pricing — no billing integration exists yet</Badge>
+              <Badge tone="warning">Proposed pricing, no billing integration exists yet</Badge>
             </div>
 
             <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -273,14 +273,14 @@ export default function Welcome() {
         {/* Deploy to Cloudflare */}
         <GlowSection
           title="Deploy your own copy"
-          description="This project is open source. Deploy your own instance to Cloudflare Workers in a few clicks — you'll need your own Supabase project's URL and anon key (see .env.example in the repo)."
+          description="This project is open source. Deploy your own instance to Cloudflare Workers in a few clicks, you'll need your own Supabase project's URL and anon key (see .env.example in the repo)."
         >
           <a href={CLOUDFLARE_DEPLOY_URL} target="_blank" rel="noreferrer">
             <img src="https://deploy.workers.cloudflare.com/button" alt="Deploy to Cloudflare" className="h-auto" />
           </a>
           <p className="mt-4 flex items-center gap-1.5 text-xs text-glow-text/40">
             <Cloud className="size-3.5 shrink-0" aria-hidden="true" />
-            Deploys your own fork — never touches this project's data or credentials.
+            Deploys your own fork, never touches this project's data or credentials.
           </p>
         </GlowSection>
 

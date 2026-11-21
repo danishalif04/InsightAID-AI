@@ -9,7 +9,7 @@ import { sendChatMessage } from '@/services/chatAssistantService'
 const GREETING = {
   role: 'assistant',
   content:
-    "Hi! I can help explain how InsightAid AI works — what a feature or metric means, which page to use, and so on. I can't see your account's real data (sentiment scores, sales, crisis status), so for questions about your own numbers, I'll point you to the right page instead of guessing.",
+    "Hi! I can help explain how InsightAid AI works, what a feature or metric means, which page to use, and so on. I can't see your account's real data (sentiment scores, sales, crisis status), so for questions about your own numbers, I'll point you to the right page instead of guessing.",
 }
 
 /**
@@ -93,7 +93,7 @@ export default function ChatAssistant() {
               <div className="flex items-center justify-between border-b border-glow-border px-4 py-3">
                 <div>
                   <p className="text-sm font-semibold text-glow-text">Ask InsightAid AI</p>
-                  <p className="text-xs text-glow-text/50">General app help — not your live data</p>
+                  <p className="text-xs text-glow-text/50">General app help, not your live data</p>
                 </div>
                 <button
                   type="button"

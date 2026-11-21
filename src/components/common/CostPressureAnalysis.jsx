@@ -81,12 +81,12 @@ export default function CostPressureAnalysis({ values = {} }) {
   return (
     <GlowSection
       title="Cost Pressure Analysis"
-      description="See how a change to one of your own recorded costs affects your margin — based on your own data only."
+      description="See how a change to one of your own recorded costs affects your margin, based on your own data only."
     >
       <div className="flex items-start gap-2 rounded-2xl border border-glow-border bg-glow-brand/5 p-3">
         <Info className="mt-0.5 size-3.5 shrink-0 text-glow-brand" aria-hidden="true" />
         <p className="text-[11px] leading-relaxed text-glow-text/60">
-          This uses only your own recorded costs — it does not pull from Malaysia's national CPI or supplier price
+          This uses only your own recorded costs, it does not pull from Malaysia's national CPI or supplier price
           data (that integration needs a verified, licensed data source and isn't built yet). It never claims
           national inflation caused a specific cost change.
         </p>
@@ -151,7 +151,7 @@ export default function CostPressureAnalysis({ values = {} }) {
 
           <div className="mt-4">
             <p className="mb-2 text-[11px] font-medium uppercase tracking-wide text-glow-text/40">
-              {COST_OPTIONS.find((o) => o.id === activeCostId)?.label} — now vs. under cost pressure
+              {COST_OPTIONS.find((o) => o.id === activeCostId)?.label}, now vs. under cost pressure
             </p>
             <ResponsiveContainer width="100%" height={CHART_HEIGHTS.sm}>
               <BarChart data={comparisonRows} margin={{ left: -10, right: 8 }}>

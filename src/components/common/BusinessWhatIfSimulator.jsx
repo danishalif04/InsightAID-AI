@@ -93,10 +93,10 @@ export default function BusinessWhatIfSimulator({ values = {} }) {
   return (
     <GlowSection
       title="What-If Business Simulator"
-      description="Change the assumptions below to see the calculated results — a simulation, not a forecast."
+      description="Change the assumptions below to see the calculated results, a simulation, not a forecast."
     >
       <AssumedFiguresNotice assumedFields={assumedFields} className="mb-4">
-        Edit any field below to try your own numbers — nothing here is saved.
+        Edit any field below to try your own numbers, nothing here is saved.
       </AssumedFiguresNotice>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
         <Input label="Selling Price (RM)" type="number" value={sellingPrice} onChange={(e) => setSellingPrice(Number.parseFloat(e.target.value) || 0)} />
@@ -112,11 +112,11 @@ export default function BusinessWhatIfSimulator({ values = {} }) {
         </div>
         <div className="rounded-2xl border border-glow-border p-3">
           <p className="text-[11px] text-glow-text/50">Gross margin</p>
-          <p className="mt-1 text-lg font-semibold text-glow-text">{grossMarginPercent === null ? '—' : `${grossMarginPercent}%`}</p>
+          <p className="mt-1 text-lg font-semibold text-glow-text">{grossMarginPercent === null ? 'N/A' : `${grossMarginPercent}%`}</p>
         </div>
         <div className="rounded-2xl border border-glow-border p-3">
           <p className="text-[11px] text-glow-text/50">Break-even units</p>
-          <p className="mt-1 text-lg font-semibold text-glow-text">{breakEven.insufficient ? '—' : breakEven.units}</p>
+          <p className="mt-1 text-lg font-semibold text-glow-text">{breakEven.insufficient ? 'N/A' : breakEven.units}</p>
         </div>
         <div className="rounded-2xl border border-glow-border p-3">
           <p className="text-[11px] text-glow-text/50">Estimated operating result</p>

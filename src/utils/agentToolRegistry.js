@@ -19,8 +19,8 @@ export const TOOL_REGISTRY = {
     name: 'financial_summary',
     label: 'Financial Summary',
     description:
-      "Reads the user's own saved business assumptions (price, cost per unit, operating costs) and computes break-even units/revenue and gross margin percent. Read-only — no input parameters, no write access, no consequential action, so no approval gate is required before it runs.",
-    inputSchema: {}, // no parameters — operates only on the caller's own business_assumptions row
+      "Reads the user's own saved business assumptions (price, cost per unit, operating costs) and computes break-even units/revenue and gross margin percent. Read-only, no input parameters, no write access, no consequential action, so no approval gate is required before it runs.",
+    inputSchema: {}, // no parameters, operates only on the caller's own business_assumptions row
     readOnly: true,
   },
   startup_capital_summary: {
@@ -35,7 +35,7 @@ export const TOOL_REGISTRY = {
     name: 'simulate_price_change',
     label: 'Simulate Price Change',
     description:
-      "Recalculates gross margin and break-even using a hypothetical selling price instead of the saved one, with every other saved assumption unchanged. Read-only — the saved price is never modified, so no approval gate is required.",
+      "Recalculates gross margin and break-even using a hypothetical selling price instead of the saved one, with every other saved assumption unchanged. Read-only, the saved price is never modified, so no approval gate is required.",
     inputSchema: { new_selling_price: 'number' },
     readOnly: true,
   },

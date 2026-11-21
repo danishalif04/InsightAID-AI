@@ -34,7 +34,7 @@ import { PATHS } from '@/routes/paths'
 
 const ABOUT_INFO = {
   version: '0.1.0',
-  fullTitle: 'InsightAid AI — An Intelligent Decision Support System for Data-Driven Business Analytics in Early-Stage Startups',
+  fullTitle: 'InsightAid AI, An Intelligent Decision Support System for Data-Driven Business Analytics in Early-Stage Startups',
   student: 'Muhammad Danish Alif Bin Azrul (22006390)',
   supervisor: 'See project documentation',
   institution: 'Universiti Teknologi PETRONAS',
@@ -256,7 +256,7 @@ function ApiKeysSection() {
   return (
     <GlowSection title="API Keys">
       <p className="text-sm italic text-glow-text/50">
-        Unavailable — external integration credentials (TikTok, X, Threads, and the AI provider configured for
+        Unavailable, external integration credentials (TikTok, X, Threads, and the AI provider configured for
         recommendations/reports) are stored as Supabase Edge
         Function secrets, never exposed to the frontend (same pattern as every Edge Function in this project). There
         is no safe way to display or regenerate them from this page.
@@ -314,7 +314,7 @@ function SecuritySection() {
       <div className="mt-6 border-t border-glow-border pt-4">
         <p className="text-sm font-medium text-glow-text">Two-Factor Authentication</p>
         <p className="mt-1 text-sm italic text-glow-text/50">
-          Unavailable — MFA enrollment is not implemented yet.
+          Unavailable, MFA enrollment is not implemented yet.
         </p>
       </div>
     </GlowSection>
@@ -346,7 +346,7 @@ function ModelConfigSection() {
   return (
     <GlowSection title="Model & Detection">
       <p className="text-sm text-glow-text/70">
-        No trained sentiment model is deployed yet — sentiment for reviews with a star rating comes from a
+        No trained sentiment model is deployed yet, sentiment for reviews with a star rating comes from a
         documented heuristic (<code>rating_heuristic_v1</code>), never a real model claim. See{' '}
         <code>docs/SENTIMENT_MODEL.md</code> for current status.
       </p>
@@ -438,7 +438,7 @@ function DatabaseSection() {
     <>
       <GlowSection title="Database">
         <p className="text-sm italic text-glow-text/50">
-          This app uses one shared Supabase project with row-level security — there is no per-user connection string
+          This app uses one shared Supabase project with row-level security, there is no per-user connection string
           to show.
         </p>
         {backupFrequency !== null && (
@@ -449,7 +449,7 @@ function DatabaseSection() {
           </Select>
         )}
         <p className="mt-4 text-sm italic text-glow-text/50">
-          Unavailable — on-demand backups are a Supabase project-admin operation, not something this app's
+          Unavailable, on-demand backups are a Supabase project-admin operation, not something this app's
           client-side credentials can trigger.
         </p>
         <Button className="mt-6" variant="glowSecondary" icon={RefreshCw} onClick={handleRefresh}>
@@ -462,7 +462,7 @@ function DatabaseSection() {
         <p className="mt-1 text-sm text-glow-text/60">
           Full fresh start: permanently deletes every dataset you've uploaded (sales, reviews, social), everything
           visually derived from it (forecast results, Crisis Detection's logged history, saved AI Recommendations),
-          and your Business Profile — then signs you out. The next sign-in starts from the onboarding "Do you have
+          and your Business Profile, then signs you out. The next sign-in starts from the onboarding "Do you have
           data?" question again, exactly like a brand-new account.
         </p>
         <Button className="mt-4" variant="danger" onClick={() => setConfirmOpen(true)}>

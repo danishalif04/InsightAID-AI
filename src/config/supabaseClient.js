@@ -7,7 +7,7 @@ if (!isConfigured) {
   // createClient() throws synchronously when these are missing, which would
   // otherwise crash the whole app at import time (before any page can render).
   console.error(
-    'Supabase is not configured — VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY are missing. ' +
+    'Supabase is not configured, VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY are missing. ' +
       'Copy .env.example to .env and fill in real project values. Auth will not work until this is set.'
   )
 }

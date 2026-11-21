@@ -21,7 +21,7 @@ const FIXTURE_REVIEW_POSTS = [
 const FIXTURE_SOCIAL_POSTS = [
   { platform: 'tiktok', text: 'This dashboard literally caught our sentiment dip before I even noticed complaints coming in.', likes: 24800, shares: 3600 },
   { platform: 'x', text: 'Refund processed in under an hour after I flagged it. Customer service actually reads the feed apparently.', likes: 9100, shares: 1400 },
-  { platform: 'tiktok', text: 'Unboxing the new packaging — still think the price is a bit steep for students but quality is solid.', likes: 15600, shares: 2100 },
+  { platform: 'tiktok', text: 'Unboxing the new packaging, still think the price is a bit steep for students but quality is solid.', likes: 15600, shares: 2100 },
   { platform: 'x', text: 'Delivery delay again this week. Third time this month, need a real fix not just an apology tweet.', likes: 4200, shares: 2800 },
 ]
 

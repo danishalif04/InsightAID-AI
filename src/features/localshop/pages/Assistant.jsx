@@ -153,8 +153,8 @@ export default function Assistant() {
                 <span className="text-xs text-glow-text/60">
                   {decision === 'accepted'
                     ? lang === 'ms'
-                      ? 'Diterima — ditambah ke Pusat Tindakan.'
-                      : 'Accepted — added to the Action Centre.'
+                      ? 'Diterima, ditambah ke Pusat Tindakan.'
+                      : 'Accepted, added to the Action Centre.'
                     : lang === 'ms'
                       ? 'Ditolak.'
                       : 'Rejected.'}
@@ -207,7 +207,7 @@ export default function Assistant() {
             </p>
           )}
           <p className="mt-2 text-[10px] leading-relaxed text-glow-text/30">
-            One orchestrator calling approved tools — not multiple AI agents. Every figure is computed by the app.
+            One orchestrator calling approved tools, not multiple AI agents. Every figure is computed by the app.
           </p>
         </Section>
 

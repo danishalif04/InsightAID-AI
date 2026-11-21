@@ -43,7 +43,7 @@ export const shopeeAdapter = {
       message:
         status.status === SOURCE_STATUS.CONNECTED
           ? `${status.recordCount} Shopee row(s) on record.`
-          : 'No Shopee dataset uploaded yet — this is dataset mode, not a live API (see docs/API_INTEGRATION.md).',
+          : 'No Shopee dataset uploaded yet, this is dataset mode, not a live API (see docs/API_INTEGRATION.md).',
     }
   },
 }

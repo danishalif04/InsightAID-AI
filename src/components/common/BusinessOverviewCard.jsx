@@ -23,7 +23,7 @@ import { resolveDisplayAssumptions } from '@/utils/illustrativeExample'
 function buildNextStepInsight(readiness) {
   const unmet = readiness.checklist.find((item) => !item.met)
   if (!unmet) {
-    return 'Your business profile, costs, and historical data are all on file — explore Forecasting and Sentiment Analysis for deeper insight.'
+    return 'Your business profile, costs, and historical data are all on file, explore Forecasting and Sentiment Analysis for deeper insight.'
   }
   const metLabels = readiness.checklist.filter((item) => item.met).map((item) => item.label)
   const haveLine = metLabels.length > 0 ? `You have ${metLabels.join(', ').toLowerCase()} on file. ` : ''
@@ -32,7 +32,7 @@ function buildNextStepInsight(readiness) {
     sales: 'The next useful step is to identify your best-selling products by recording daily sales.',
     reviews: 'The next useful step is to start collecting customer reviews or feedback.',
     social: 'The next useful step is to connect a social or marketplace data source.',
-    historical: 'Keep recording data — at least 3 months of history unlocks trend and forecasting analysis.',
+    historical: 'Keep recording data, at least 3 months of history unlocks trend and forecasting analysis.',
   }
   return `${haveLine}${NEXT_STEP_COPY[unmet.id] ?? 'Keep adding business data to unlock more analysis.'}`
 }
@@ -91,7 +91,7 @@ export default function BusinessOverviewCard({ values = {} }) {
           value={money(expected.operatingCosts)}
           prefix="RM "
           decimals={2}
-          guide="Sum of every operating-cost field you've entered — rent, salaries, utilities, and other recurring monthly costs."
+          guide="Sum of every operating-cost field you've entered, rent, salaries, utilities, and other recurring monthly costs."
         />
         <StatTile
           label="Average Product Margin"
