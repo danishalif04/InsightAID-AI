@@ -25,6 +25,7 @@
 // fabricating them would be inventing research data.
 
 import { AIMalformedResponseError, AIProviderNotConfiguredError, AIUpstreamError, callAIChat } from '../_shared/aiClient.ts'
+import { requireUser } from '../_shared/auth.ts'
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -127,6 +128,7 @@ HARD RULES — a response breaking any of these is unusable:
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS_HEADERS })
   if (req.method !== 'POST') return jsonResponse({ error: 'Method not allowed.' }, 405)
+  if (!(await requireUser(req))) return jsonResponse({ error: 'AUTH_REQUIRED', message: 'Sign in to use this feature.' }, 401)
 
   let body: { sector?: unknown; revenueTarget?: unknown; description?: unknown }
   try {
