@@ -2,6 +2,8 @@
 
 **Decisions, backed by evidence.**
 
+**Live demo: [insightaid-ai.vercel.app](https://insightaid-ai.vercel.app)** · demo accounts are listed on the login page.
+
 InsightAid AI is a decision-support system for Malaysian small businesses. It reads what customers say about a business in **English, Bahasa Melayu and Mandarin**, puts that next to the business's **sales**, and turns both into **recommendations you can act on**. Each recommendation shows the evidence and the rule that produced it.
 
 Final Year Project, Bachelor of Computer Science (Hons), Universiti Teknologi PETRONAS.
