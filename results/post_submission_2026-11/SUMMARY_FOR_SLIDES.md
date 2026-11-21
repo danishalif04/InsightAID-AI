@@ -11,7 +11,7 @@ Run date **2026-11-19** · protocol pre-registered `c87a7a9` · change committed
 | **End-to-end page time < 3 s** | Not measured ("2.70 ms computation; end-to-end not measured") | **Now measured, and missed.** 5 runs, production build. Medians: Dashboard **7079**, Crisis **4387**, Recommendations **4039**, Forecasting **4079**, Sentiment **1583** ms. Worst single observation **7633 ms** | ❌ **MEASURED — NOT MET** | RESULTS.md §Task 2 |
 | **Trained sentiment model deployed** | Not deployed — dashboard uses `rating_heuristic_v1` | **Still not deployed.** Recovery attempted 2026-11-19 and failed: the checkpoint was written to Colab's ephemeral disk, not Drive, and was destroyed with the runtime | ⛔ **UNCHANGED — permanently blocked** | RESULTS.md §Task 3 |
 | **Code-mixed accuracy** | Not evaluated | **Still not evaluated** — same lost checkpoint | ⛔ **UNCHANGED — permanently blocked** | RESULTS.md §Task 4 |
-| **Sentiment variant beats sales-only** | Worse in 6 of 8 DM tests; none significant | **Not re-tested** — awaiting confirmation, and blocked by the same checkpoint | ⏸ **NOT STARTED** | RESULTS.md §Task 5 |
+| **Sentiment variant beats sales-only** | Worse in 6 of 8 DM tests; none significant | **Not re-tested.** It needs the trained XLM-R model's sentiment, and that checkpoint was confirmed lost on 2026-11-19 | ⛔ **UNCHANGED — permanently blocked** | RESULTS.md §Task 5 |
 
 **Two of five targets moved: one was fixed, one was measured for the first time and failed.** Of the remaining three, all are blocked by the loss of the trained checkpoint, which was confirmed unrecoverable on 2026-11-19.
 
