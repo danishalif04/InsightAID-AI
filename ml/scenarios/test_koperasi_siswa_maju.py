@@ -40,3 +40,9 @@ def test_reviews_cover_all_languages_and_stale_incident_names_the_item():
     incident = [r for r in reviews if r["date"] == INCIDENT_DAY.isoformat() and r["sentiment_label"] == "negative"]
     assert incident and all(r["item"] == INCIDENT_ITEM for r in incident)
     assert not any("username" in r for r in reviews)
+
+
+def test_second_incident_names_karipap_and_is_recent():
+    reviews = generate_reviews(Config())
+    stale = [r for r in reviews if r["date"] == "2026-11-21" and r["sentiment_label"] == "negative"]
+    assert stale and all(r["item"] == "Karipap" for r in stale)

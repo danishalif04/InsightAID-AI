@@ -16,9 +16,10 @@ What is modelled (each documented assumption, none measured from a real shop):
     reused, not re-implemented): the koperasi is closed, so those days are
     genuinely absent, never filled with a guess
   - rain days (a random factor on cafe items)
-  - one scripted "stale food" incident: a batch of nasi lemak is reported
-    stale, negative reviews name the item, and demand for it dips afterwards.
-    This is the test case for the Prep & Stock Planner's review flagging.
+  - two scripted "stale food" incidents (nasi lemak on 6 Oct, karipap on
+    21 Nov): negative reviews name the item and demand for it dips
+    afterwards. These are the test cases for the Prep & Stock Planner's
+    review flagging; the second is recent enough to be live on the plan date.
   - Gaussian demand noise
 
 Same seed gives the same files (reproducible). Labels in reviews.csv are the
@@ -46,6 +47,10 @@ BREAK_START, BREAK_END = date(2026, 9, 12), date(2026, 9, 20)
 EXAM_START, EXAM_END = date(2026, 11, 9), date(2026, 11, 20)
 INCIDENT_DAY = date(2026, 10, 6)  # stale nasi lemak batch
 INCIDENT_ITEM = "Nasi Lemak"
+# A second batch reported stale three days before the data ends, so the
+# planner's review flag is live on the plan date (added 25 Nov 2026 for the
+# SPARK demo; documented in DATA_CARD.md section 7).
+INCIDENTS = [(INCIDENT_DAY, INCIDENT_ITEM), (date(2026, 11, 21), "Karipap")]
 
 # name, name_zh, section, price RM, unit cost RM, shelf life days, base daily units
 ITEMS = [
@@ -115,9 +120,8 @@ def _daily_units(rng: random.Random, day: date, item: tuple, rainy: bool) -> int
         factor *= 1.35
     if rainy and section == "cafe":
         factor *= 0.85 if name != "Kopi O Ais" else 0.7
-    if name == INCIDENT_ITEM:
-        days_after = (day - INCIDENT_DAY).days
-        if 0 <= days_after <= 4:
+    for incident_day, incident_item in INCIDENTS:
+        if name == incident_item and 0 <= (day - incident_day).days <= 4:
             factor *= 0.8
     noise = 1 + rng.gauss(0, 0.1)
     return max(0, round(base * factor * noise))
@@ -158,12 +162,12 @@ def generate_reviews(cfg: Config) -> list[dict]:
     while day <= END:
         if day.weekday() != 6 and day not in closed:
             n = rng.choice([2, 3, 3, 4])
-            incident_window = INCIDENT_DAY <= day <= INCIDENT_DAY + timedelta(days=2)
+            incident_item = next((it for d0, it in INCIDENTS if d0 <= day <= d0 + timedelta(days=2)), None)
             for k in range(n):
                 lang = _pick_language(rng)
                 item = rng.choice(ITEMS)[0]
-                if incident_window and k < 2:
-                    item, bucket, label, rating = INCIDENT_ITEM, STALE_NEG, "negative", rng.choice([1, 1, 2])
+                if incident_item and k < 2:
+                    item, bucket, label, rating = incident_item, STALE_NEG, "negative", rng.choice([1, 1, 2])
                 else:
                     roll = rng.random()
                     if roll < 0.62:
