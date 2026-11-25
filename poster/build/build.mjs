@@ -20,6 +20,16 @@ const QRCode = createRequire(process.env.QRTOOL + '/package.json')('qrcode')
 
 const P = path.join(ROOT, 'poster')
 
+// Which poster: `node poster/build/build.mjs` builds AIMIX (unchanged);
+// `node poster/build/build.mjs spark` builds the SPARK 2026 poster.
+const EVENT = process.argv[2] ?? 'aimix'
+const EVENTS = {
+  aimix: { template: 'build/template.html', html: 'index.html', pdf: 'insightaid_poster.pdf', png: 'insightaid_poster_preview.png' },
+  spark: { template: 'build/template.spark.html', html: 'spark2026.html', pdf: 'insightaid_spark2026_poster.pdf', png: 'insightaid_spark2026_poster_preview.png' },
+}
+const OUT = EVENTS[EVENT]
+if (!OUT) throw new Error('unknown event: ' + EVENT)
+
 // ------------------------------------------------------------- real numbers
 const scorecard = fs.readFileSync(path.join(ROOT, 'ml/sentiment/results/O1_SCORECARD.md'), 'utf8')
 const sent = {}
@@ -101,12 +111,20 @@ async function qr(url, label) {
   const svg = await QRCode.toString(url, { type: 'svg', margin: 2, errorCorrectionLevel: 'M', color: { dark: '#052E16', light: '#FFFFFF' } })
   return `<div class="qr">${svg}</div><div class="qr-label">${label}</div>`
 }
-const qrVideo = await qr(links.video, 'Watch the demo video')
+const qrVideo = EVENT === 'spark' ? await qr(links.spark_video, 'Watch the SPARK video') : await qr(links.video, 'Watch the demo video')
 const qrGithub = await qr(links.github, 'Source code · GitHub')
-const qrApp = links.app ? await qr(links.app, 'Try the live app') : ''
+const qrApp = EVENT === 'spark'
+  ? await qr(links.app ? links.app + '/welcome' : '', 'Try the demo, no sign up')
+  : links.app ? await qr(links.app, 'Try the live app') : ''
+
+// SPARK only: the waste replay, read from metrics/spark2026.json (built by
+// node scripts/build-spark-metrics.mjs from the synthetic Koperasi data).
+const spark = JSON.parse(fs.readFileSync(path.join(ROOT, 'metrics/spark2026.json'), 'utf8'))
+const w = spark.waste
+if (EVENT === 'spark' && !w.synthetic) throw new Error('waste replay must come from the labelled synthetic dataset')
 
 // ------------------------------------------------------------- fill template
-let html = fs.readFileSync(path.join(P, 'build/template.html'), 'utf8')
+let html = fs.readFileSync(path.join(P, OUT.template), 'utf8')
 const fill = {
   CHART_MODELS: chartModels,
   CHART_LANG: chartLang,
@@ -120,17 +138,26 @@ const fill = {
   RUN,
   DM_WINS: String(dmSignificantWins),
   N_DM: String(dm.length),
+  WASTE_BEFORE: f2(w.lastWeekHabit.wasteRM),
+  WASTE_AFTER: f2(w.forecastHabit.wasteRM),
+  WASTE_PCT: w.savingPct.toFixed(1),
+  SHORT_BEFORE: String(w.lastWeekHabit.stockoutUnits),
+  SHORT_AFTER: String(w.forecastHabit.stockoutUnits),
+  WASTE_DAYS: String(w.settings.replayDays),
+  WASTE_BUFFER: String(w.settings.bufferPct),
+  RT_PASS: String(spark.o3.responseTime.passing),
+  RT_PAGES: String(spark.o3.responseTime.pageCount),
 }
 for (const [k, v] of Object.entries(fill)) html = html.replaceAll(`{{${k}}}`, v)
 const left = html.match(/\{\{[A-Z_]+\}\}/g)
 if (left) throw new Error('unfilled placeholders: ' + left.join(', '))
-fs.writeFileSync(path.join(P, 'index.html'), html)
+fs.writeFileSync(path.join(P, OUT.html), html)
 console.log('sentiment', sent.xlmr, '| MAPE best', best.map((b) => `${b.key}=${f2(b.mape)} (${b.model})`).join(', '), '| DM sig. wins', dmSignificantWins, '/', dm.length)
 
 // ------------------------------------------------------------- render
 const browser = await chromium.launch()
 const page = await browser.newPage({ viewport: { width: 2245, height: 3179 }, deviceScaleFactor: 2480 / 2245 })
-await page.goto('file:///' + path.join(P, 'index.html').replace(/\\/g, '/'))
+await page.goto('file:///' + path.join(P, OUT.html).replace(/\\/g, '/'))
 await page.waitForLoadState('networkidle')
 await page.evaluate(() => document.fonts.ready)
 // Fit: scale the whole layout so its natural height fills the frame exactly.
@@ -162,8 +189,8 @@ const over = await page.evaluate(() => {
   return { content: document.querySelector('.content').scrollHeight, frame: document.querySelector('.content').clientHeight, out }
 })
 console.log('layout', JSON.stringify(over))
-await page.screenshot({ path: path.join(P, 'insightaid_poster_preview.png'), clip: { x: 0, y: 0, width: 2245, height: 3179 } })
-await page.pdf({ path: path.join(P, 'insightaid_poster.pdf'), width: '594mm', height: '841mm', printBackground: true, pageRanges: '1' })
+await page.screenshot({ path: path.join(P, OUT.png), clip: { x: 0, y: 0, width: 2245, height: 3179 } })
+await page.pdf({ path: path.join(P, OUT.pdf), width: '594mm', height: '841mm', printBackground: true, pageRanges: '1' })
 await browser.close()
 const mb = (f) => (fs.statSync(path.join(P, f)).size / 1048576).toFixed(2) + ' MB'
-console.log('wrote insightaid_poster.pdf', mb('insightaid_poster.pdf'), '| preview', mb('insightaid_poster_preview.png'))
+console.log('wrote', OUT.pdf, mb(OUT.pdf), '| preview', mb(OUT.png))

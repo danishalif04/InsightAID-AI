@@ -115,8 +115,14 @@ Cut: public F&B dataset backtest, SUS and feedback forms, Phase 3, BM/EN i18n, p
 | 2 | Prep & Stock Planner | Done. Page `/prep-planner` (Intelligence menu). Logic `src/utils/prepPlanner.js` (15 Vitest tests), read path `src/services/prepPlannerService.js`. Runs on the account's own per-item sales and comments, or on the synthetic sample (labelled) | `a9186b1` |
 | 3 | `metrics/spark2026.json` + Model & Evidence page | Done. Builder `src/utils/sparkMetrics.js`, script `node scripts/build-spark-metrics.mjs`, page `/model-evidence` (Intelligence menu). A Vitest test fails if the committed JSON drifts from the source result files. Verdicts are computed against the fixed targets | `799d70e` |
 | 4 | Before vs After impact card (Dashboard) | Done. `src/components/common/ImpactCard.jsx`, logic `src/utils/impactSummary.js` (4 Vitest tests). Computed inside `getDashboardData` from rows the Dashboard already fetches, so no extra request. Assumptions in a collapsible list on the card. Shows only the account's own data; when that cannot support the replay it shows a link to the planner's sample instead of borrowing figures | `f1fed70` |
-| 5 | Anonymous "Try demo" | **Code done, not yet verified end to end.** Button on Welcome (hero and final call to action) and Login. `src/services/demoService.js` signs in anonymously, then seeds through the real `ingestRows` pipeline; seed builder `src/utils/demoSeed.js` (6 Vitest tests); banner inside the app for anonymous users. Browser check on 25 Nov: Supabase returned 422 because anonymous sign-ins are switched off; the button showed the friendly message. **Owner action: enable Authentication > Sign In / Providers > Allow anonymous sign-ins**, then re-run the check | see git log |
-| 6 to 7 | | Not started | |
+| 5 | Anonymous "Try demo" | **Code done, not yet verified end to end.** Button on Welcome (hero and final call to action) and Login. `src/services/demoService.js` signs in anonymously, then seeds through the real `ingestRows` pipeline; seed builder `src/utils/demoSeed.js` (6 Vitest tests); banner inside the app for anonymous users. Browser check on 25 Nov: Supabase returned 422 because anonymous sign-ins are switched off; the button showed the friendly message. **Owner action: enable Authentication > Sign In / Providers > Allow anonymous sign-ins**, then re-run the check | `6952674` |
+| 6 | SPARK A1 poster | Done, two items pending. `node poster/build/build.mjs spark` → `poster/insightaid_spark2026_poster.pdf` and preview PNG. Same build as AIMIX (AIMIX output verified unchanged). Waste and response-time figures read from `metrics/spark2026.json`. Fact-check list in `poster/README.md`. **Pending:** SPARK video link (`poster/links.json` → `spark_video`, prints LINK PENDING until set); demo QR works only after anonymous sign-in is enabled | see git log |
+| 7 | Optional: stored AI wording on Recommendations | Not started | |
+
+### Item 6 notes
+
+- The Welcome page still says "This project is open source" (Deploy your own copy section), which conflicts with the "All rights reserved" licence decision. Owner to decide the wording.
+- The Planner and Model & Evidence pages were checked visually on 25 Nov (production build, usertest1): no errors, layout correct.
 
 ### Item 5 notes
 

@@ -54,3 +54,37 @@ QRTOOL=<path> node poster/build/build.mjs
 | All screenshots | Captured from the production build (usertest1 / usertest2 demo accounts) | Genuine |
 | Video QR | `links.json` → `video`: https://youtu.be/c6Kktg031_E | Done; link checked as publicly reachable, 21 Nov 2026 |
 | Live app QR | `links.json` → `app`: https://insightaid-ai.vercel.app | Done; site and deep links return 200 |
+
+---
+
+# SPARK 2026 poster
+
+A1 portrait, one page. Built by the same script with an event switch; the AIMIX poster above is unchanged.
+
+```bash
+QRTOOL=<path> node poster/build/build.mjs spark
+```
+
+| Output | What it is |
+|---|---|
+| `insightaid_spark2026_poster.pdf` | Print-ready, one page |
+| `insightaid_spark2026_poster_preview.png` | 2480 × 3508 preview |
+| `spark2026.html` | Generated page; edit `build/template.spark.html` instead |
+
+**Changes from AIMIX:** event header (SPARK 2026, Category B, 22 to 23 Dec 2026, UMK City Campus, Hybrid), solo entry, AIMIX Silver Award under Recognition, Encik Hafiz persona (labelled illustrative), Prep & Stock Planner with the waste replay, Business Model with the app's own proposed pricing, Try It QR to the no sign up demo, SDG 12 (responsible consumption) in place of SDG 10, "no" instead of dashes in the comparison table, "All rights reserved" in the footer.
+
+## SPARK fact-check list
+
+| Claim on poster | Source | Status |
+|---|---|---|
+| Waste RM 936.00 vs RM 495.95, 47.0% less; units short 458 vs 648; 28 days; 10% buffer | `metrics/spark2026.json` → `waste` (read by build; build refuses if not marked synthetic) | Simulation on synthetic data, labelled so on the poster |
+| 4 of 5 pages under 3 s | `metrics/spark2026.json` → `o3.responseTime` (from `results/spark_2026-11-25/summary.txt`) | Read by build |
+| XLM-R, MAPE, DM figures | Same sources as the AIMIX poster | Read by build |
+| UAT 4.07 / 5, n = 15 | Dissertation (raw responses not in repo) | Typed in the template, as on the AIMIX poster. **Confirm n = 15.** Not shown in the app for this reason |
+| AIMIX: IID 2026 Silver Award, Category B, 21 Nov 2026 | Certificate (owner confirmed 25 Nov 2026) | Verified by owner |
+| Pricing Free / RM 49 / Contact us | `src/pages/Welcome.jsx` `PRICING_TIERS` | Labelled proposed; no billing exists |
+| Planner screenshot | Production build, usertest1, "Sample: Koperasi Siswa Maju", 25 Nov 2026 | Genuine app screen |
+| Encik Hafiz | Persona | Labelled illustrative |
+| Industry statistics | Same as AIMIX | **Needs review**, as before |
+| SPARK video QR | `links.json` → `spark_video` | **Empty, prints LINK PENDING.** Add the link after recording, then rebuild |
+| Demo QR | `links.json` → `app` + `/welcome` | Works only once anonymous sign-in is enabled in Supabase |
