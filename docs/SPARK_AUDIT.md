@@ -93,6 +93,20 @@ Index migration `0018` applied to the live database on 25 Nov with the owner's a
 | P2-5 | A local build run from a lowercase `c:\` path renders a blank page (two React copies); build from `C:\`. Vercel is not affected |
 | P2-6 | Owner action: remove the Groq key line from the local `.env`, rotate the key and update the Supabase secret |
 
+## Phase 1 plan (agreed 25 Nov: cut list for the remaining budget)
+
+Build in this order, one commit per item on `spark-2026`:
+
+1. Koperasi Siswa Maju synthetic dataset (fictional café + mini-mart, per-item daily sales, prices, costs, shelf life; BM/EN/中文 reviews) with a `DATA_CARD.md` entry, labelled synthetic
+2. Prep & Stock Planner: forecast to prep/order quantities with an adjustable safety buffer; simulated waste (units, RM) for last-week ordering vs forecast ordering; items named in negative reviews ("basi", "stale") flagged and reduced
+3. `metrics/spark2026.json` + Model & Evidence page, reusing the existing O1/O2 results; only the waste simulation is new
+4. Before vs After impact card on the Dashboard, with its assumptions shown
+5. Anonymous "Try demo" (Supabase anonymous sign-in) that seeds the koperasi for each visitor
+6. SPARK A1 poster, reusing the AIMIX build (event line: 22 to 23 December 2026, UMK City Campus, Hybrid; AIMIX Silver Award in Recognition)
+7. Optional: reuse stored AI wording on AI Recommendations to bring it under 3 s
+
+Cut: public F&B dataset backtest, SUS and feedback forms, Phase 3, BM/EN i18n, presentation mode, MyIPO pack, fixing the 28 e2e tests. At most one of Board Report PDF, WhatsApp share, pilot pricing tier. Danish records the video and the on-camera introduction.
+
 ## Corrections to the brief's assumptions
 
 - Model results already exist: XLM-RoBERTa 84.12% overall (EN 78.28%, BM 86.88%, ZH 94.37%) in `ml/sentiment/results/O1_SCORECARD.md`, and the forecasting protocol results in `ml/forecasting/results/`. No code-mixed accuracy exists because the evaluation set has no code-mixed labels.
