@@ -61,7 +61,7 @@ Numbers in ⟨ ⟩ are filled from `metrics/spark2026.json` at build time. Curre
 | 25 | 5:05 | Commercialisation | Medal: AIMIX IID 2026 Silver Award; roadmap 2026 → 2028 | "INSIGHTAID AI won a Silver Award at AIMIX IID 2026, and this is only the start." |
 | 26 | 5:18 | **Publication** | Card | Only if a publication exists by then; otherwise this chapter is skipped (the organiser says "if available"). |
 | 27 | 5:22 | **Copyright** | Card: © 2026 Muhammad Danish Alif Bin Azrul. All rights reserved. | "The software is the author's own work, all rights reserved." No registration number is claimed unless one is issued. |
-| 28 | 5:30 | Close | Danish on camera, closer framing | "A koperasi manager doesn't need a data scientist. He needs to know what to cook tomorrow, and why. That's what INSIGHTAID AI does." |
+| 28 | 5:30 | Close | Voice-over (no camera): the planner's Karipap row and the Before vs After card float in, then slowly pull back | "A koperasi manager doesn't need a data scientist. He needs to know what to cook tomorrow, and why. That's what INSIGHTAID AI does." |
 | 29 | 5:42 | Close | End card: app cards fold into the QR code and URL | "Scan the code and try it yourself. No sign-up needed." |
 | 30 | 5:52 | Close | Fade out | Small text: Koperasi Siswa Maju is fictional; its data is synthetic. Stock footage: Pexels and Pixabay. |
 
@@ -78,7 +78,7 @@ Numbers in ⟨ ⟩ are filled from `metrics/spark2026.json` at build time. Curre
 
 | Claude | Danish |
 |---|---|
-| Reference study: frames and `STYLE_NOTES.md` (shown to Danish first) | Scene 1 and 28 on camera |
+| Reference study: frames and `STYLE_NOTES.md` (shown to Danish first) | Scene 1 on camera (the only face shot) |
 | Scripted 1080p screen recordings of every app scene | Voice-over recording |
 | Motion graphics in the app's colours, recorded to MP4 | Final edit and upload (Unlisted) |
 | Footage shortlist (links and licences) for approval before download | Approve the footage shortlist |
