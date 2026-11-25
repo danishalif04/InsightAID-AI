@@ -102,7 +102,7 @@ Build in this order, one commit per item on `spark-2026`:
 3. `metrics/spark2026.json` + Model & Evidence page, reusing the existing O1/O2 results; only the waste simulation is new
 4. Before vs After impact card on the Dashboard, with its assumptions shown
 5. Anonymous "Try demo" (Supabase anonymous sign-in) that seeds the koperasi for each visitor
-6. SPARK A1 poster, reusing the AIMIX build (event line: 22 to 23 December 2026, UMK City Campus, Hybrid; AIMIX Silver Award in Recognition)
+6. SPARK A1 poster on the official template (`C:\Users\User\Downloads\ISPARK_2026_Poster_Template_A1_Editable.pptx`), delivered as PDF and JPG. Subtheme 5 (confirmed). No Project ID has been issued, so that field stays empty. Event line: 22 to 23 December 2026, UMK City Campus, Hybrid; AIMIX Silver Award in Recognition
 7. Optional: reuse stored AI wording on AI Recommendations to bring it under 3 s
 
 Cut: public F&B dataset backtest, SUS and feedback forms, Phase 3, BM/EN i18n, presentation mode, MyIPO pack, fixing the 28 e2e tests. At most one of Board Report PDF, WhatsApp share, pilot pricing tier. Danish records the video and the on-camera introduction.
