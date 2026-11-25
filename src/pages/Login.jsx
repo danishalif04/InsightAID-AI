@@ -4,6 +4,7 @@ import { BookOpen, Info, Sparkles } from 'lucide-react'
 import brandMark from '@/assets/insightaid-mark.png'
 import brandLockup from '@/assets/insightaid-lockup.png'
 import Button from '@/components/ui/Button'
+import TryDemoButton from '@/components/common/TryDemoButton'
 import { Input } from '@/components/ui/Input'
 import { useAuth } from '@/hooks/useAuth'
 import { PATHS } from '@/routes/paths'
@@ -170,6 +171,8 @@ export default function Login() {
                 Sign up
               </Link>
             </p>
+
+            <TryDemoButton className="mt-6" />
 
             {DEMO_ACCOUNTS.length > 0 && (
               <div className="mt-6 space-y-2 rounded-2xl border border-dashed border-glow-border bg-white/[0.02] p-3">

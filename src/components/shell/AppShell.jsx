@@ -1,6 +1,7 @@
 import { Suspense, useState } from 'react'
 import { Outlet } from 'react-router-dom'
 import { useTheme } from '@/hooks/useTheme'
+import { useAuth } from '@/hooks/useAuth'
 import { useMode } from '@/hooks/useMode'
 import { useNotifications } from '@/hooks/useNotifications'
 import { MODES } from '@/constants/modes'
@@ -20,6 +21,7 @@ export default function AppShell() {
   const { isDark, toggleTheme } = useTheme()
   const { mode, setMode } = useMode()
   const { notify } = useNotifications()
+  const { user } = useAuth()
   const [mobileSheetOpen, setMobileSheetOpen] = useState(false)
 
   const handleModeChange = (nextMode) => {
@@ -57,6 +59,11 @@ export default function AppShell() {
           uncapped container would stretch body text past comfortable
           reading width. */}
       <main className="relative mx-auto w-full max-w-screen-2xl px-4 pb-24 pt-10 sm:px-6 lg:px-8 2xl:px-12">
+        {user?.is_anonymous && (
+          <p className="mb-6 rounded-2xl border border-amber-400/30 bg-amber-400/10 px-4 py-2.5 text-sm text-glow-text/80" role="note">
+            Demo account: Koperasi Siswa Maju is a fictional cooperative and all of its data is synthetic. Signing out ends this demo.
+          </p>
+        )}
         <Suspense fallback={<PageLoader />}>
           <Outlet />
         </Suspense>
