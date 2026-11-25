@@ -27,19 +27,12 @@ async function countRows(templateId) {
 }
 
 async function countHistoricalMonths() {
-  const { data, error } = await supabase
-    .from('processed_data')
-    .select('published_at, collected_at')
-    .order('collected_at', { ascending: true })
-    .limit(1)
+  // Earliest and latest rows are independent reads; run them together.
+  const dateRow = (ascending) =>
+    supabase.from('processed_data').select('published_at, collected_at').order('collected_at', { ascending }).limit(1)
+  const [{ data, error }, { data: latest, error: latestError }] = await Promise.all([dateRow(true), dateRow(false)])
   if (error) throw error
   if (!data?.length) return 0
-
-  const { data: latest, error: latestError } = await supabase
-    .from('processed_data')
-    .select('published_at, collected_at')
-    .order('collected_at', { ascending: false })
-    .limit(1)
   if (latestError) throw latestError
 
   const earliest = new Date(data[0].published_at ?? data[0].collected_at)

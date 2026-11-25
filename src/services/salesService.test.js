@@ -41,6 +41,32 @@ describe('fetchRawSalesPayloads', () => {
     expect(call).toBe(2)
   })
 
+  it('with a row count, fetches the remaining pages in parallel and keeps row order', async () => {
+    const { fetchRawSalesPayloads } = await import('./salesService')
+    const total = 2500
+    const requested = []
+    supabase.from.mockImplementation(() => {
+      const chain = {
+        select: () => chain,
+        eq: () => chain,
+        order: () => chain,
+        range: (from, to) => {
+          requested.push(from)
+          const rows = Array.from({ length: Math.max(0, Math.min(to, total - 1) - from + 1) }, (_, i) => ({ payload: { row: from + i } }))
+          // Later pages resolve first, to prove order does not depend on timing.
+          const delay = from === 0 ? 0 : (total - from) / 100
+          return new Promise((resolve) => setTimeout(() => resolve({ data: rows, error: null, count: total }), delay))
+        },
+      }
+      return chain
+    })
+
+    const payloads = await fetchRawSalesPayloads()
+    expect(payloads).toHaveLength(total)
+    expect(payloads.map((p) => p.row)).toEqual(Array.from({ length: total }, (_, i) => i))
+    expect(requested.sort((a, b) => a - b)).toEqual([0, 1000, 2000])
+  })
+
   it('stops after one page when there are fewer than 1000 rows', async () => {
     const { fetchRawSalesPayloads } = await import('./salesService')
     const rows = [{ payload: { date: 'only-one' } }]

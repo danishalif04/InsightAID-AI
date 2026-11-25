@@ -20,17 +20,42 @@ export async function fetchRawSalesPayloads() {
   // (by row_index), freezing the "historical actuals" portion of any
   // chart built from this at a stale ~17-month-old cutoff. Paginated with
   // .range() the same way, so this read path can't regress to the same bug.
-  const payloads = []
-  for (let from = 0; ; from += PAGE_SIZE) {
-    const { data, error } = await supabase
+  //
+  // The first page also asks for the exact row count, so the remaining
+  // pages are requested in parallel instead of one after another (five
+  // sequential pages cost about 2.7 s on the Dashboard; SPARK_AUDIT.md P0-1).
+  // Pages are concatenated in row_index order, so the result is identical.
+  const page = (from, withCount = false) =>
+    supabase
       .from('raw_data')
-      .select('payload')
+      .select('payload', withCount ? { count: 'exact' } : undefined)
       .eq('template_id', 'sales')
       .order('row_index', { ascending: true })
       .range(from, from + PAGE_SIZE - 1)
+
+  const first = await page(0, true)
+  if (first.error) throw first.error
+  const firstRows = first.data ?? []
+  const payloads = firstRows.map((row) => row.payload)
+  if (firstRows.length < PAGE_SIZE) return payloads
+
+  // If the count is unavailable, fall back to reading one page at a time.
+  if (typeof first.count !== 'number') {
+    for (let from = PAGE_SIZE; ; from += PAGE_SIZE) {
+      const { data, error } = await page(from)
+      if (error) throw error
+      payloads.push(...(data ?? []).map((row) => row.payload))
+      if (!data || data.length < PAGE_SIZE) break
+    }
+    return payloads
+  }
+
+  const starts = []
+  for (let from = PAGE_SIZE; from < first.count; from += PAGE_SIZE) starts.push(from)
+  const rest = await Promise.all(starts.map((from) => page(from)))
+  for (const { data, error } of rest) {
     if (error) throw error
     payloads.push(...(data ?? []).map((row) => row.payload))
-    if (!data || data.length < PAGE_SIZE) break
   }
   return payloads
 }

@@ -1,4 +1,5 @@
 import { supabase } from '@/config/supabaseClient'
+import { shareInFlight } from '@/utils/shareInFlight'
 
 /**
  * Real Settings-page reads/writes against companies/user_preferences/api_keys
@@ -17,11 +18,13 @@ export async function saveCompany(fields) {
   if (error) throw error
 }
 
-export async function getPreferences() {
+// ModeProvider and UIModeProvider both read preferences on mount; share
+// the request instead of sending it twice.
+export const getPreferences = shareInFlight(async () => {
   const { data, error } = await supabase.from('user_preferences').select('*').maybeSingle()
   if (error) throw error
   return data
-}
+})
 
 export async function savePreferences(fields) {
   const { error } = await supabase

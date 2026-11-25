@@ -130,7 +130,7 @@ function RecommendationCard({ recommendation }) {
 
 export default function AiRecommendations() {
   const { notify } = useNotifications()
-  const { mode } = useMode()
+  const { mode, modeReady } = useMode()
   const [category, setCategory] = useState('All')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -153,9 +153,12 @@ export default function AiRecommendations() {
   }
 
   useEffect(() => {
+    // Wait for the saved mode, otherwise a first visit runs the whole load
+    // (including the AI rewording call) twice. SPARK_AUDIT.md P0-2.
+    if (!modeReady) return
     load()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode])
+  }, [mode, modeReady])
 
   const handleSave = async () => {
     setSaving(true)
