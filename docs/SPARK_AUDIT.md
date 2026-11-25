@@ -112,8 +112,19 @@ Cut: public F&B dataset backtest, SUS and feedback forms, Phase 3, BM/EN i18n, p
 | # | Item | Status | Commit |
 |---|---|---|---|
 | 1 | Koperasi Siswa Maju synthetic dataset | Done. Generator `ml/scenarios/koperasi_siswa_maju.py` (seed 2026), data in `ml/scenarios/koperasi_siswa_maju/data/`, app copy `src/data/koperasiSiswaMaju.json` (same rows). 6 pytest tests. `DATA_CARD.md` section 7 | `05b59f1` |
-| 2 | Prep & Stock Planner | Done. Page `/prep-planner` (Intelligence menu). Logic `src/utils/prepPlanner.js` (15 Vitest tests), read path `src/services/prepPlannerService.js`. Runs on the account's own per-item sales and comments, or on the synthetic sample (labelled) | see git log |
-| 3 to 7 | | Not started | |
+| 2 | Prep & Stock Planner | Done. Page `/prep-planner` (Intelligence menu). Logic `src/utils/prepPlanner.js` (15 Vitest tests), read path `src/services/prepPlannerService.js`. Runs on the account's own per-item sales and comments, or on the synthetic sample (labelled) | `a9186b1` |
+| 3 | `metrics/spark2026.json` + Model & Evidence page | Done. Builder `src/utils/sparkMetrics.js`, script `node scripts/build-spark-metrics.mjs`, page `/model-evidence` (Intelligence menu). A Vitest test fails if the committed JSON drifts from the source result files. Verdicts are computed against the fixed targets | see git log |
+| 4 to 7 | | Not started | |
+
+### Item 3: sources and one discrepancy
+
+Sources: O1 `ml/sentiment/results/model_versions_v20261020-171546.json`; O2 `ml/forecasting/results/protocol_summary_a8b3bb637d28.json`; O3 timing `results/spark_2026-11-25/summary.txt`; crisis `ml/crisis/results/ablation_raw.json`; waste replay recomputed from `src/data/koperasiSiswaMaju.json`.
+
+Computed verdicts: O1 MET (XLM-R 84.12%); O2 MAPE PARTIAL (1 of 3: 21.41, 15.17, 13.28); O2 sentiment NOT MET; O3 response time PARTIAL (4 of 5 pages); UAT has no value shown because the raw responses are not in the repo.
+
+**Discrepancy found (needs the owner's decision on wording):** README, `SUMMARY_FOR_SLIDES.md` and the viva blueprint say the sentiment-enhanced forecast was "worse in 6 of 8 Diebold-Mariano tests, none significant". The result file those p-values come from (`a8b3bb637d28`, p 0.137 to 0.781) gives **5 of 8** with higher MAPE (also 5 by MAE and MASE; 4 by RMSE or DM sign). The other run (`a1bf3708ed4a`) gives 6 of 8 by MAE but has one significant test (p = 0.014), so it does not match "none significant" either. The verdict is unchanged (no significant improvement, NOT MET). The app now shows the computed "5 of 8". The frozen dissertation documents were not edited.
+
+- **Open**: Model & Evidence page not yet checked visually in a browser (same for the planner).
 
 ### Item 2: how the planner works and what the replay shows
 

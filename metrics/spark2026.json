@@ -1,0 +1,568 @@
+{
+  "schema": "insightaid.spark2026.v1",
+  "howToRebuild": "node scripts/build-spark-metrics.mjs",
+  "sources": {
+    "sentiment": "ml/sentiment/results/model_versions_v20261020-171546.json",
+    "forecasting": "ml/forecasting/results/protocol_summary_a8b3bb637d28.json",
+    "crisis": "ml/crisis/results/ablation_raw.json",
+    "timing": "results/spark_2026-11-25/summary.txt",
+    "koperasi": "src/data/koperasiSiswaMaju.json"
+  },
+  "o1": {
+    "target": "Accuracy >= 80% overall and >= 75% per language",
+    "mainModel": {
+      "model": "xlmr",
+      "evalPath": "original_language",
+      "accuracy": 0.8412,
+      "f1": 0.8066,
+      "testSamples": 10769,
+      "perLanguage": {
+        "en": {
+          "accuracy": 0.7828,
+          "f1": 0.7797,
+          "n": 5549
+        },
+        "ms": {
+          "accuracy": 0.8688,
+          "f1": 0.7168,
+          "n": 2820
+        },
+        "zh": {
+          "accuracy": 0.9437,
+          "f1": 0.6292,
+          "n": 2400
+        }
+      },
+      "targetMet": true
+    },
+    "verdict": "MET",
+    "models": [
+      {
+        "model": "tfidf_lr",
+        "evalPath": "original_language",
+        "accuracy": 0.7434,
+        "f1": 0.7273,
+        "testSamples": 10769,
+        "perLanguage": {
+          "en": {
+            "accuracy": 0.7196,
+            "f1": 0.7216,
+            "n": 5549
+          },
+          "ms": {
+            "accuracy": 0.8298,
+            "f1": 0.663,
+            "n": 2820
+          },
+          "zh": {
+            "accuracy": 0.6971,
+            "f1": 0.4499,
+            "n": 2400
+          }
+        },
+        "targetMet": false
+      },
+      {
+        "model": "tfidf_lr",
+        "evalPath": "translate_to_english",
+        "accuracy": 0.6456,
+        "f1": 0.63,
+        "testSamples": 10769,
+        "perLanguage": {
+          "en": {
+            "accuracy": 0.7196,
+            "f1": 0.7216,
+            "n": 5549
+          },
+          "ms": {
+            "accuracy": 0.561,
+            "f1": 0.4367,
+            "n": 2820
+          },
+          "zh": {
+            "accuracy": 0.5742,
+            "f1": 0.4616,
+            "n": 2400
+          }
+        },
+        "targetMet": false
+      },
+      {
+        "model": "xlmr",
+        "evalPath": "original_language",
+        "accuracy": 0.8412,
+        "f1": 0.8066,
+        "testSamples": 10769,
+        "perLanguage": {
+          "en": {
+            "accuracy": 0.7828,
+            "f1": 0.7797,
+            "n": 5549
+          },
+          "ms": {
+            "accuracy": 0.8688,
+            "f1": 0.7168,
+            "n": 2820
+          },
+          "zh": {
+            "accuracy": 0.9437,
+            "f1": 0.6292,
+            "n": 2400
+          }
+        },
+        "targetMet": true
+      },
+      {
+        "model": "xlmr",
+        "evalPath": "translate_to_english",
+        "accuracy": 0.7188,
+        "f1": 0.6888,
+        "testSamples": 10769,
+        "perLanguage": {
+          "en": {
+            "accuracy": 0.7828,
+            "f1": 0.7797,
+            "n": 5549
+          },
+          "ms": {
+            "accuracy": 0.5954,
+            "f1": 0.4766,
+            "n": 2820
+          },
+          "zh": {
+            "accuracy": 0.7158,
+            "f1": 0.5424,
+            "n": 2400
+          }
+        },
+        "targetMet": false
+      },
+      {
+        "model": "mbert",
+        "evalPath": "original_language",
+        "accuracy": 0.8248,
+        "f1": 0.7906,
+        "testSamples": 10769,
+        "perLanguage": {
+          "en": {
+            "accuracy": 0.7681,
+            "f1": 0.7658,
+            "n": 5549
+          },
+          "ms": {
+            "accuracy": 0.8454,
+            "f1": 0.6799,
+            "n": 2820
+          },
+          "zh": {
+            "accuracy": 0.9317,
+            "f1": 0.6211,
+            "n": 2400
+          }
+        },
+        "targetMet": true
+      },
+      {
+        "model": "mbert",
+        "evalPath": "translate_to_english",
+        "accuracy": 0.7065,
+        "f1": 0.6769,
+        "testSamples": 10769,
+        "perLanguage": {
+          "en": {
+            "accuracy": 0.7681,
+            "f1": 0.7658,
+            "n": 5549
+          },
+          "ms": {
+            "accuracy": 0.5798,
+            "f1": 0.4509,
+            "n": 2820
+          },
+          "zh": {
+            "accuracy": 0.7129,
+            "f1": 0.5382,
+            "n": 2400
+          }
+        },
+        "targetMet": false
+      }
+    ],
+    "notEvaluated": [
+      "Code-mixed (BM-English) accuracy: the evaluation set has no code-mixed labels.",
+      "Cohen's kappa on 200 double-labelled comments: not done."
+    ],
+    "liveAppNote": "The live app scores sentiment with a rating heuristic. XLM-RoBERTa was evaluated offline; its trained weights were lost (see results/post_submission_2026-11/RESULTS.md).",
+    "f1Note": "F1 as recorded by the training run."
+  },
+  "o2": {
+    "runId": "a8b3bb637d28",
+    "datasetVersion": "olist_v1_trimmed_20261112",
+    "mape": {
+      "target": "MAPE < 15% (rolling origin)",
+      "metCount": 1,
+      "protocolCount": 3,
+      "verdict": "PARTIAL",
+      "protocols": [
+        {
+          "name": "daily_h30",
+          "horizon": 30,
+          "note": "Original protocol: daily series, 30-day horizon.",
+          "rows": [
+            {
+              "model": "moving_average",
+              "variant": "sales_only",
+              "mape": 26.0504,
+              "mase": 1.1688
+            },
+            {
+              "model": "arima",
+              "variant": "sales_only",
+              "mape": 25.5125,
+              "mase": 1.1389
+            },
+            {
+              "model": "prophet",
+              "variant": "sales_only",
+              "mape": 25.461,
+              "mase": 1.0117
+            },
+            {
+              "model": "prophet",
+              "variant": "sentiment_enhanced",
+              "mape": 26.3679,
+              "mase": 1.0497
+            },
+            {
+              "model": "xgboost",
+              "variant": "sales_only",
+              "mape": 21.4087,
+              "mase": 0.9497
+            }
+          ],
+          "best": {
+            "model": "xgboost",
+            "variant": "sales_only",
+            "mape": 21.4087,
+            "mase": 0.9497
+          },
+          "prophet": {
+            "model": "prophet",
+            "variant": "sales_only",
+            "mape": 25.461,
+            "mase": 1.0117
+          },
+          "met": false
+        },
+        {
+          "name": "daily_h7",
+          "horizon": 7,
+          "note": "Daily series, 7-day horizon - matches the in-app forecast.",
+          "rows": [
+            {
+              "model": "moving_average",
+              "variant": "sales_only",
+              "mape": 18.5427,
+              "mase": 0.8824
+            },
+            {
+              "model": "arima",
+              "variant": "sales_only",
+              "mape": 16.8605,
+              "mase": 0.8425
+            },
+            {
+              "model": "prophet",
+              "variant": "sales_only",
+              "mape": 15.1712,
+              "mase": 0.713
+            },
+            {
+              "model": "prophet",
+              "variant": "sentiment_enhanced",
+              "mape": 15.7862,
+              "mase": 0.7384
+            },
+            {
+              "model": "xgboost",
+              "variant": "sales_only",
+              "mape": 17.4122,
+              "mase": 0.8386
+            }
+          ],
+          "best": {
+            "model": "prophet",
+            "variant": "sales_only",
+            "mape": 15.1712,
+            "mase": 0.713
+          },
+          "prophet": {
+            "model": "prophet",
+            "variant": "sales_only",
+            "mape": 15.1712,
+            "mase": 0.713
+          },
+          "met": false
+        },
+        {
+          "name": "weekly_h4",
+          "horizon": 4,
+          "note": "Weekly totals, 4-week horizon - removes day-of-week noise.",
+          "rows": [
+            {
+              "model": "moving_average",
+              "variant": "sales_only",
+              "mape": 14.5693,
+              "mase": 0.7518
+            },
+            {
+              "model": "arima",
+              "variant": "sales_only",
+              "mape": 13.281,
+              "mase": 0.6908
+            },
+            {
+              "model": "prophet",
+              "variant": "sales_only",
+              "mape": 17.6421,
+              "mase": 0.8285
+            },
+            {
+              "model": "prophet",
+              "variant": "sentiment_enhanced",
+              "mape": 22.1435,
+              "mase": 1.0522
+            },
+            {
+              "model": "xgboost",
+              "variant": "sales_only",
+              "mape": 16.5381,
+              "mase": 0.8253
+            }
+          ],
+          "best": {
+            "model": "arima",
+            "variant": "sales_only",
+            "mape": 13.281,
+            "mase": 0.6908
+          },
+          "prophet": {
+            "model": "prophet",
+            "variant": "sales_only",
+            "mape": 17.6421,
+            "mase": 0.8285
+          },
+          "met": true
+        }
+      ]
+    },
+    "sentiment": {
+      "target": "Sentiment-enhanced Prophet beats sales-only, Diebold-Mariano p < 0.05",
+      "comparisons": 8,
+      "sentimentHigherMape": 5,
+      "significant": 0,
+      "significantImprovements": 0,
+      "pMin": 0.137429,
+      "pMax": 0.780818,
+      "verdict": "NOT MET",
+      "detail": [
+        {
+          "protocol": "daily_h30",
+          "series": "total",
+          "mapeSalesOnly": 25.4616,
+          "mapeSentiment": 26.0821,
+          "sentimentHigherMape": true,
+          "dm": -1.491155,
+          "p": 0.137429,
+          "significant": false
+        },
+        {
+          "protocol": "daily_h7",
+          "series": "total",
+          "mapeSalesOnly": 15.6314,
+          "mapeSentiment": 15.8776,
+          "sentimentHigherMape": true,
+          "dm": -0.914566,
+          "p": 0.363605,
+          "significant": false
+        },
+        {
+          "protocol": "weekly_h4",
+          "series": "total",
+          "mapeSalesOnly": 21.335,
+          "mapeSentiment": 20.1549,
+          "sentimentHigherMape": false,
+          "dm": 0.280683,
+          "p": 0.780818,
+          "significant": false
+        },
+        {
+          "protocol": "daily_h7_per_category",
+          "series": "olist_cat_beleza_saude",
+          "mapeSalesOnly": 57.5888,
+          "mapeSentiment": 54.3017,
+          "sentimentHigherMape": false,
+          "dm": -0.69716,
+          "p": 0.488045,
+          "significant": false
+        },
+        {
+          "protocol": "daily_h7_per_category",
+          "series": "olist_cat_cama_mesa_banho",
+          "mapeSalesOnly": 30.1409,
+          "mapeSentiment": 30.1938,
+          "sentimentHigherMape": true,
+          "dm": 0.341214,
+          "p": 0.733979,
+          "significant": false
+        },
+        {
+          "protocol": "daily_h7_per_category",
+          "series": "olist_cat_esporte_lazer",
+          "mapeSalesOnly": 29.5562,
+          "mapeSentiment": 29.3768,
+          "sentimentHigherMape": false,
+          "dm": 1.321542,
+          "p": 0.190686,
+          "significant": false
+        },
+        {
+          "protocol": "daily_h7_per_category",
+          "series": "olist_cat_informatica_acessorios",
+          "mapeSalesOnly": 41.4752,
+          "mapeSentiment": 43.1914,
+          "sentimentHigherMape": true,
+          "dm": 0.571321,
+          "p": 0.569638,
+          "significant": false
+        },
+        {
+          "protocol": "daily_h7_per_category",
+          "series": "olist_cat_moveis_decoracao",
+          "mapeSalesOnly": 83.3597,
+          "mapeSentiment": 84.2833,
+          "sentimentHigherMape": true,
+          "dm": -1.461075,
+          "p": 0.148534,
+          "significant": false
+        }
+      ],
+      "caveat": "The sentiment input was a star-rating proxy, not the XLM-RoBERTa model. Few folds give the test little power: \"not demonstrated\", not \"disproved\"."
+    },
+    "dataNote": "Olist Brazilian e-commerce data (CC BY-NC-SA 4.0). No Malaysian sales data was used for these results."
+  },
+  "o3": {
+    "responseTime": {
+      "target": "Every analysis page < 3000 ms on every run",
+      "measured": "25 Nov 2026, production build, 5 runs after a discarded warm-up",
+      "passing": 4,
+      "pageCount": 5,
+      "verdict": "PARTIAL",
+      "pages": [
+        {
+          "page": "Dashboard",
+          "runs": 5,
+          "minMs": 1157,
+          "medianMs": 1227,
+          "maxMs": 1334,
+          "met": true
+        },
+        {
+          "page": "Sentiment Analysis",
+          "runs": 5,
+          "minMs": 1190,
+          "medianMs": 1213,
+          "maxMs": 1325,
+          "met": true
+        },
+        {
+          "page": "Forecasting",
+          "runs": 5,
+          "minMs": 1251,
+          "medianMs": 1313,
+          "maxMs": 1331,
+          "met": true
+        },
+        {
+          "page": "Crisis Detection",
+          "runs": 5,
+          "minMs": 1434,
+          "medianMs": 1548,
+          "maxMs": 1860,
+          "met": true
+        },
+        {
+          "page": "Recommendations",
+          "runs": 5,
+          "minMs": 2699,
+          "medianMs": 3429,
+          "maxMs": 3739,
+          "met": false
+        }
+      ]
+    },
+    "crisis": {
+      "note": "Synthetic injected scenarios and ordinary volume spikes (seeded). Negative lead time means the alert came after the sales drop began.",
+      "schemes": {
+        "scheme_a": {
+          "precision": 0.5,
+          "recall": 1,
+          "f1": 0.6667,
+          "falseAlarmRate": 1,
+          "meanLeadTimeDays": 2.87,
+          "scenarios": 30,
+          "controls": 30
+        },
+        "scheme_b_raw": {
+          "precision": 1,
+          "recall": 1,
+          "f1": 1,
+          "falseAlarmRate": 0,
+          "meanLeadTimeDays": -0.73,
+          "scenarios": 30,
+          "controls": 30
+        },
+        "scheme_b_classified": {
+          "precision": 1,
+          "recall": 1,
+          "f1": 1,
+          "falseAlarmRate": 0,
+          "meanLeadTimeDays": -0.73,
+          "scenarios": 30,
+          "controls": 30
+        }
+      }
+    },
+    "uat": {
+      "target": "Satisfaction >= 4 / 5",
+      "value": null,
+      "recomputed": false,
+      "source": "Reported in the submitted dissertation (Table 4.9). The raw responses are not in this repository, so no value is shown here."
+    }
+  },
+  "waste": {
+    "label": "SIMULATION ON SYNTHETIC DATA",
+    "dataset": "Koperasi Siswa Maju (SYNTHETIC)",
+    "synthetic": true,
+    "settings": {
+      "bufferPct": 10,
+      "flagReductionPct": 20,
+      "replayDays": 28
+    },
+    "from": "2026-10-28",
+    "to": "2026-11-24",
+    "lastWeekHabit": {
+      "wasteUnits": 797,
+      "wasteRM": 936,
+      "stockoutUnits": 458
+    },
+    "forecastHabit": {
+      "wasteUnits": 429,
+      "wasteRM": 495.95,
+      "stockoutUnits": 648
+    },
+    "savingRM": 440.05,
+    "savingPct": 47,
+    "tradeOff": "The forecast habit is short of stock more often than the last week habit."
+  }
+}

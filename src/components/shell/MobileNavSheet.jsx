@@ -32,6 +32,7 @@ const SECTIONS = [
       { label: 'Financial Planning', path: PATHS.financialPlanning },
       { label: 'AI Recommendations', path: PATHS.recommendations },
       { label: 'Model Performance', path: PATHS.modelPerformance },
+      { label: 'Model & Evidence', path: PATHS.modelEvidence },
       { label: 'Agent Orchestrator', path: PATHS.agentOrchestrator },
     ],
   },
