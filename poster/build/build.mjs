@@ -123,6 +123,44 @@ const spark = JSON.parse(fs.readFileSync(path.join(ROOT, 'metrics/spark2026.json
 const w = spark.waste
 if (EVENT === 'spark' && !w.synthetic) throw new Error('waste replay must come from the labelled synthetic dataset')
 
+// ------------------------------------------------------------- SPARK light charts
+// Same numbers, drawn for the light ISPARK template.
+function lightBars({ rows, max, target, targetLabel, unit = '%', w = 760, rowH = 74, labelW = 210, valueFmt = (v) => f2(v) + unit }) {
+  const h = rows.length * rowH + 56
+  const x = (v) => labelW + (v / max) * (w - labelW - 190)
+  let s = `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" font-family="Inter, Arial, sans-serif">`
+  rows.forEach((r, i) => {
+    const y = i * rowH + 8
+    s += `<text x="${labelW - 16}" y="${y + rowH / 2}" fill="#1E2F42" font-size="32" font-weight="700" text-anchor="end" dominant-baseline="middle">${r.label}</text>`
+    s += `<rect x="${labelW}" y="${y + 10}" width="${w - labelW - 190}" height="${rowH - 24}" rx="12" fill="#E3ECF7"/>`
+    s += `<rect x="${labelW}" y="${y + 10}" width="${Math.max(4, x(r.value) - labelW)}" height="${rowH - 24}" rx="12" fill="${r.color}"/>`
+    s += `<text x="${x(r.value) + 12}" y="${y + rowH / 2}" fill="#1E2F42" font-size="34" font-weight="800" dominant-baseline="middle">${valueFmt(r.value)}</text>`
+  })
+  if (target != null) {
+    const tx = x(target)
+    s += `<line x1="${tx}" x2="${tx}" y1="2" y2="${rows.length * rowH + 10}" stroke="#B45309" stroke-width="3" stroke-dasharray="8 7"/>`
+    s += `<text x="${tx}" y="${rows.length * rowH + 44}" fill="#B45309" font-size="27" font-weight="700" text-anchor="middle">${targetLabel}</text>`
+  }
+  return s + '</svg>'
+}
+const sparkMeta = JSON.parse(fs.readFileSync(path.join(P, 'spark_meta.json'), 'utf8'))
+const chartLangLight = lightBars({
+  rows: [
+    { label: 'English', value: sent.xlmr.en, color: '#22C55E' },
+    { label: 'B. Melayu', value: sent.xlmr.ms, color: '#16A34A' },
+    { label: '中文', value: sent.xlmr.zh, color: '#15803D' },
+  ],
+  max: 100, target: 75, targetLabel: 'target ≥ 75% each',
+})
+const wasteMax = Math.ceil(w.lastWeekHabit.wasteRM / 100) * 100
+const chartWasteLight = lightBars({
+  rows: [
+    { label: 'Last week', value: w.lastWeekHabit.wasteRM, color: '#94A3B8' },
+    { label: 'Forecast', value: w.forecastHabit.wasteRM, color: '#22C55E' },
+  ],
+  max: wasteMax, valueFmt: (v) => 'RM ' + f2(v), labelW: 200,
+})
+
 // ------------------------------------------------------------- fill template
 let html = fs.readFileSync(path.join(P, OUT.template), 'utf8')
 const fill = {
@@ -147,6 +185,15 @@ const fill = {
   WASTE_BUFFER: String(w.settings.bufferPct),
   RT_PASS: String(spark.o3.responseTime.passing),
   RT_PAGES: String(spark.o3.responseTime.pageCount),
+  XLMR_EN: f2(sent.xlmr.en) + '%',
+  XLMR_MS: f2(sent.xlmr.ms) + '%',
+  XLMR_ZH: f2(sent.xlmr.zh) + '%',
+  CHART_LANG_LIGHT: chartLangLight,
+  CHART_WASTE_LIGHT: chartWasteLight,
+  SUBTHEME: sparkMeta.subtheme,
+  CATEGORY: sparkMeta.category,
+  INSTITUTION: sparkMeta.institution,
+  PROJECT_ID: sparkMeta.projectId ? sparkMeta.projectId : '<span class="pending">PENDING: from registration</span>',
 }
 for (const [k, v] of Object.entries(fill)) html = html.replaceAll(`{{${k}}}`, v)
 const left = html.match(/\{\{[A-Z_]+\}\}/g)

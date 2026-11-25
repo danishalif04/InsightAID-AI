@@ -140,6 +140,13 @@ Same protocol as 25 Nov (production build, `e2e/journey-existing-data.spec.js`, 
 
 **Overall: target < 3000 ms is MET (5 of 5 pages, every run).** Caveat, stated wherever this is shown: the discarded warm-up run is the one that stored the AI wording, and it took 4435 ms for Recommendations (in the raw file). A first visit after the data changes still waits for the AI. `metrics/spark2026.json`, the Model & Evidence page and the SPARK poster now read this result and carry the caveat.
 
+### Item 6 update (25 Nov, evening): poster v2 on the official template
+
+- Rebuilt on the organiser's ISPARK 2026 A1 template (structure, order, header, footer); details and fact-check list in `poster/README.md`.
+- Second scripted stale incident (karipap, 21 Nov) added to the synthetic data so the planner's review flag is live; simulated waste figures recomputed: RM 951.75 vs RM 499.10 (47.6% less), units short 455 vs 648.
+- Planner "Why" column now wraps instead of running off the card.
+- **Blocker found:** anonymous sign-in is enabled, but every anonymous sign-in fails with `unexpected_failure` because `handle_new_user()` copies `new.email` (null for anonymous users) into `profiles.email` (NOT NULL). Fix written as migration `0020_anonymous_profile_email.sql` (`coalesce(new.email, '')`, function body only). **Not applied: the permission check requires the owner's explicit approval.**
+
 ### Item 6 notes
 
 - The Welcome page still says "This project is open source" (Deploy your own copy section), which conflicts with the "All rights reserved" licence decision. Owner to decide the wording.

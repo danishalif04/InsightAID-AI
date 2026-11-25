@@ -124,7 +124,11 @@ export default function PrepPlanner() {
           <Badge tone="neutral">No complaints</Badge>
         ),
     },
-    { key: 'rule', label: 'Why', render: (r) => <span className="text-xs text-slate-500 dark:text-slate-400">{r.rule}</span> },
+    {
+      key: 'rule', label: 'Why',
+      // Wraps instead of widening the table, so the full reason stays visible without sideways scrolling.
+      render: (r) => <span className="block max-w-md whitespace-normal text-xs leading-relaxed text-slate-500 dark:text-slate-400">{r.rule}</span>,
+    },
   ]
 
   const replayColumns = [

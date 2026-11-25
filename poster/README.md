@@ -57,9 +57,9 @@ QRTOOL=<path> node poster/build/build.mjs
 
 ---
 
-# SPARK 2026 poster
+# SPARK 2026 poster (v2, official ISPARK template)
 
-A1 portrait, one page. Built by the same script with an event switch; the AIMIX poster above is unchanged.
+A1 portrait, one page, built on the organiser's **ISPARK 2026 A1 template** (`ISPARK_2026_Poster_Template_A1_Editable.pptx`): organiser logo strip, event lines, navy title band, Sub-theme / Category / Project ID / Institution lines, then the template's ten sections in its order (Abstract, Value Added, product visual, Usefulness, Objectives, Impact, supporting visual, Recognition, Authors and Affiliations, Acknowledgement) and the navy footer. Built by the same script with an event switch; the AIMIX poster above is unchanged.
 
 ```bash
 QRTOOL=<path> node poster/build/build.mjs spark
@@ -71,20 +71,24 @@ QRTOOL=<path> node poster/build/build.mjs spark
 | `insightaid_spark2026_poster_preview.png` | 2480 × 3508 preview |
 | `spark2026.html` | Generated page; edit `build/template.spark.html` instead |
 
-**Changes from AIMIX:** event header (SPARK 2026, Category B, 22 to 23 Dec 2026, UMK City Campus, Hybrid), solo entry, AIMIX Silver Award under Recognition, Encik Hafiz persona (labelled illustrative), Prep & Stock Planner with the waste replay, Business Model with the app's own proposed pricing, Try It QR to the no sign up demo, SDG 12 (responsible consumption) in place of SDG 10, "no" instead of dashes in the comparison table, "All rights reserved" in the footer.
+**Owner-filled values** live in `spark_meta.json` (Project ID, sub-theme, category, institution) and `links.json` (`spark_video`). An empty Project ID or video link prints an amber PENDING box, never a guess.
+
+**Template deviations, on purpose:** event line corrected to the official poster's "22 to 23 December 2026 · UMK City Campus · Hybrid" (the template still says 27 to 28 October, Kota Bharu); the organiser logos are cropped from the official event poster because the template's copy is about 50 dpi at A1. Sponsor logos on the event poster are not used.
 
 ## SPARK fact-check list
 
 | Claim on poster | Source | Status |
 |---|---|---|
-| Waste RM 936.00 vs RM 495.95, 47.0% less; units short 458 vs 648; 28 days; 10% buffer | `metrics/spark2026.json` → `waste` (read by build; build refuses if not marked synthetic) | Simulation on synthetic data, labelled so on the poster |
-| 4 of 5 pages under 3 s | `metrics/spark2026.json` → `o3.responseTime` (from `results/spark_2026-11-25/summary.txt`) | Read by build |
-| XLM-R, MAPE, DM figures | Same sources as the AIMIX poster | Read by build |
-| UAT 4.07 / 5, n = 15 | Dissertation (raw responses not in repo) | Typed in the template, as on the AIMIX poster. **Confirm n = 15.** Not shown in the app for this reason |
+| Waste RM 951.75 vs RM 499.10, 47.6% less; units short 455 vs 648; 28 days; 10% buffer | `metrics/spark2026.json` → `waste` (read by build; build refuses if not marked synthetic) | Simulation on synthetic data, labelled so |
+| 84.12%; EN 78.28 / BM 86.88 / ZH 94.37 | `ml/sentiment/results/O1_SCORECARD.md` | Read by build |
+| 5 of 5 pages under 3 s | `metrics/spark2026.json` → `o3.responseTime` (`results/spark_2026-11-25_item7/`) | Read by build; first visit after a data change still waits for the AI |
+| MAPE met 1 of 3; no significant sentiment gain | `protocol_summary_a8b3bb637d28.json` | Read by build |
+| 10,769 held-out comments | `model_versions_v20261020-171546.json` (`test_samples`) | Verified |
 | AIMIX: IID 2026 Silver Award, Category B, 21 Nov 2026 | Certificate (owner confirmed 25 Nov 2026) | Verified by owner |
-| Pricing Free / RM 49 / Contact us | `src/pages/Welcome.jsx` `PRICING_TIERS` | Labelled proposed; no billing exists |
-| Planner screenshot | Production build, usertest1, "Sample: Koperasi Siswa Maju", 25 Nov 2026 | Genuine app screen |
-| Encik Hafiz | Persona | Labelled illustrative |
-| Industry statistics | Same as AIMIX | **Needs review**, as before |
-| SPARK video QR | `links.json` → `spark_video` | **Empty, prints LINK PENDING.** Add the link after recording, then rebuild |
-| Demo QR | `links.json` → `app` + `/welcome` | Works only once anonymous sign-in is enabled in Supabase |
+| Pricing Free / RM 49 / multi-outlet | `src/pages/Welcome.jsx` `PRICING_TIERS` | Labelled proposed; no billing exists |
+| Planner screenshot with the Karipap freshness flag | Production build, usertest1, "Sample: Koperasi Siswa Maju", 25 Nov 2026 | Genuine app screen, synthetic data |
+| UAT 4.07 | Not on the v2 poster | Left out until n = 15 is confirmed |
+| Industry statistics | Not on the v2 poster | Left out (still unverified) |
+| Project ID | `spark_meta.json` | **PENDING** until registration |
+| SPARK video QR | `links.json` → `spark_video` | **PENDING** until upload |
+| Demo QR | `links.json` → `app` + `/welcome` | Works once anonymous sign-in succeeds (needs migration 0020) |
