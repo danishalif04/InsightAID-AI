@@ -21,6 +21,7 @@ export const router = createBrowserRouter([
           { index: true, element: <Pages.Dashboard /> },
           { path: child(PATHS.sentiment), element: <Pages.SentimentAnalysis /> },
           { path: child(PATHS.forecasting), element: <Pages.Forecasting /> },
+          { path: child(PATHS.prepPlanner), element: <Pages.PrepPlanner /> },
           { path: child(PATHS.crisis), element: <Pages.CrisisDetection /> },
           { path: child(PATHS.recommendations), element: <Pages.AiRecommendations /> },
           { path: child(PATHS.social), element: <Pages.SocialIntelligence /> },

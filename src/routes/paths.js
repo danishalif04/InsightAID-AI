@@ -6,6 +6,7 @@ export const PATHS = {
   dashboard: '/',
   sentiment: '/sentiment',
   forecasting: '/forecasting',
+  prepPlanner: '/prep-planner',
   crisis: '/crisis-detection',
   recommendations: '/recommendations',
   social: '/social-intelligence',

@@ -107,6 +107,22 @@ Build in this order, one commit per item on `spark-2026`:
 
 Cut: public F&B dataset backtest, SUS and feedback forms, Phase 3, BM/EN i18n, presentation mode, MyIPO pack, fixing the 28 e2e tests. At most one of Board Report PDF, WhatsApp share, pilot pricing tier. Danish records the video and the on-camera introduction.
 
+## Phase 1 progress
+
+| # | Item | Status | Commit |
+|---|---|---|---|
+| 1 | Koperasi Siswa Maju synthetic dataset | Done. Generator `ml/scenarios/koperasi_siswa_maju.py` (seed 2026), data in `ml/scenarios/koperasi_siswa_maju/data/`, app copy `src/data/koperasiSiswaMaju.json` (same rows). 6 pytest tests. `DATA_CARD.md` section 7 | `05b59f1` |
+| 2 | Prep & Stock Planner | Done. Page `/prep-planner` (Intelligence menu). Logic `src/utils/prepPlanner.js` (15 Vitest tests), read path `src/services/prepPlannerService.js`. Runs on the account's own per-item sales and comments, or on the synthetic sample (labelled) | see git log |
+| 3 to 7 | | Not started | |
+
+### Item 2: how the planner works and what the replay shows
+
+- **Plan**: expected sales = average of the same weekday over the last 4 weeks; quantity = expected x (1 + safety buffer), rounded up; items named in a negative review in the previous 7 days are cut by an adjustable percentage. Each row states its rule.
+- **Waste replay**: last 28 days, two habits with the same buffer: "last week" (order what sold the same weekday a week earlier) vs "forecast" (the plan above). Stock used oldest first, discarded at shelf life, valued at unit cost. Each day uses only earlier data.
+- **Result on the synthetic sample, 28 Oct to 24 Nov 2026** (computed by the module, not typed in): at a 10% buffer, waste RM 936.00 (last week habit) vs RM 495.95 (forecast), a simulated 47.0% reduction. **But the forecast is short more often: 648 units vs 458.** The page states this trade-off. At 0% buffer: RM 478.25 vs RM 217.65; at 20%: RM 1459.30 vs RM 859.40. These are simulations on synthetic data and must be labelled so.
+- **Limits**: units sold are treated as demand (stockouts under-counted for both habits); items without a shelf life or cost are left out of the replay, not guessed. The forecast is a weekday average, not the Prophet model of objective O2.
+- **Open**: the page has not been checked visually in a browser yet.
+
 ## Corrections to the brief's assumptions
 
 - Model results already exist: XLM-RoBERTa 84.12% overall (EN 78.28%, BM 86.88%, ZH 94.37%) in `ml/sentiment/results/O1_SCORECARD.md`, and the forecasting protocol results in `ml/forecasting/results/`. No code-mixed accuracy exists because the evaluation set has no code-mixed labels.

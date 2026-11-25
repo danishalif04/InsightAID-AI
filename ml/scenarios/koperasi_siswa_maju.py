@@ -29,6 +29,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import json
 import random
 import sys
 from dataclasses import dataclass
@@ -197,12 +198,27 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", default="ml/scenarios/koperasi_siswa_maju/data")
     parser.add_argument("--seed", type=int, default=2026)
+    parser.add_argument("--json", default="src/data/koperasiSiswaMaju.json")
     args = parser.parse_args()
     cfg, out = Config(seed=args.seed), Path(args.out)
     sales, reviews = generate_sales(cfg), generate_reviews(cfg)
     write_items(out / "items.csv")
     write_csv(out / "sales_daily.csv", ["date", "item", "units_sold", "unit_price_RM", "revenue_RM"], sales)
     write_csv(out / "reviews.csv", REVIEW_COLUMNS, reviews)
+    # Compact copy bundled into the web app (Prep & Stock Planner sample and
+    # the anonymous demo seed). Same rows as the CSVs, so the two cannot drift.
+    bundle = {
+        "name": SHOP_NAME,
+        "synthetic": True,
+        "seed": cfg.seed,
+        "generator": "ml/scenarios/koperasi_siswa_maju.py",
+        "items": [{"item": n, "itemZh": z, "section": s, "unitPrice": p, "unitCost": c, "shelfLifeDays": sl}
+                  for n, z, s, p, c, sl, _ in ITEMS],
+        "sales": [[r["date"], r["item"], r["units_sold"]] for r in sales],
+        "reviews": [[r["date"], r["language"], r["rating"], r["sentiment_label"], r["item"], r["text"]] for r in reviews],
+    }
+    Path(args.json).parent.mkdir(parents=True, exist_ok=True)
+    Path(args.json).write_text(json.dumps(bundle, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     print(f"Wrote {len(sales)} sales rows, {len(reviews)} reviews, {len(ITEMS)} items to {out} "
           f"(SYNTHETIC, seed {cfg.seed}) -- not real data.")
 
