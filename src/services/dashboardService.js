@@ -12,6 +12,7 @@ import {
 } from '@/utils/socialAnalytics'
 import { computeProductBreakdown, normalizeSalesRows } from '@/utils/salesSeries'
 import { composeExecutiveSummary } from '@/utils/executiveSummary'
+import { computeImpact } from '@/utils/impactSummary'
 
 const TOP_BOTTOM_COUNT = 5
 
@@ -83,5 +84,7 @@ export async function getDashboardData(mode, { granularity = 'day' } = {}) {
     bestForecastRow,
     recommendations: recommendations.slice(0, 3),
     executiveSummary: composeExecutiveSummary({ sentimentScores, crisis, bestForecastRow }),
+    // Before vs After card: computed from rows already fetched above, no extra request.
+    impact: computeImpact({ salesPayloads, processedRows }),
   }
 }

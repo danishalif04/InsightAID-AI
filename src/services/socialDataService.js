@@ -7,7 +7,7 @@ import { supabase } from '@/config/supabaseClient'
  */
 
 const PROCESSED_COLUMNS =
-  'id, platform, language, cleaned_text, raw_text, sentiment, sentiment_score, sentiment_confidence, engagement, rating, features, published_at, collected_at'
+  'id, platform, language, product, cleaned_text, raw_text, sentiment, sentiment_score, sentiment_confidence, engagement, rating, features, published_at, collected_at'
 
 /**
  * `from`/`to` (ISO date strings) are new, optional — added for the

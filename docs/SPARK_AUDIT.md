@@ -113,8 +113,14 @@ Cut: public F&B dataset backtest, SUS and feedback forms, Phase 3, BM/EN i18n, p
 |---|---|---|---|
 | 1 | Koperasi Siswa Maju synthetic dataset | Done. Generator `ml/scenarios/koperasi_siswa_maju.py` (seed 2026), data in `ml/scenarios/koperasi_siswa_maju/data/`, app copy `src/data/koperasiSiswaMaju.json` (same rows). 6 pytest tests. `DATA_CARD.md` section 7 | `05b59f1` |
 | 2 | Prep & Stock Planner | Done. Page `/prep-planner` (Intelligence menu). Logic `src/utils/prepPlanner.js` (15 Vitest tests), read path `src/services/prepPlannerService.js`. Runs on the account's own per-item sales and comments, or on the synthetic sample (labelled) | `a9186b1` |
-| 3 | `metrics/spark2026.json` + Model & Evidence page | Done. Builder `src/utils/sparkMetrics.js`, script `node scripts/build-spark-metrics.mjs`, page `/model-evidence` (Intelligence menu). A Vitest test fails if the committed JSON drifts from the source result files. Verdicts are computed against the fixed targets | see git log |
-| 4 to 7 | | Not started | |
+| 3 | `metrics/spark2026.json` + Model & Evidence page | Done. Builder `src/utils/sparkMetrics.js`, script `node scripts/build-spark-metrics.mjs`, page `/model-evidence` (Intelligence menu). A Vitest test fails if the committed JSON drifts from the source result files. Verdicts are computed against the fixed targets | `799d70e` |
+| 4 | Before vs After impact card (Dashboard) | Done. `src/components/common/ImpactCard.jsx`, logic `src/utils/impactSummary.js` (4 Vitest tests). Computed inside `getDashboardData` from rows the Dashboard already fetches, so no extra request. Assumptions in a collapsible list on the card. Shows only the account's own data; when that cannot support the replay it shows a link to the planner's sample instead of borrowing figures | see git log |
+| 5 to 7 | | Not started | |
+
+### Item 4 notes
+
+- The card needs per-item sales with `shelf_life_days` and `cost` in the sales payload. Existing accounts (Embun Botanica) have no shelf life, so they see the link, not numbers. **Item 5's koperasi seed must write `product`, `quantity_sold`, `unit_price`, `revenue`, `cost` (line total) and `shelf_life_days` into each sales payload** so the card and planner work for demo visitors.
+- `processed_data` reads on the Dashboard now also select `product`, so reviews match items exactly instead of by text only.
 
 ### Item 3: sources and one discrepancy
 
