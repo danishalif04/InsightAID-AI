@@ -16,7 +16,7 @@ describe('metrics/spark2026.json', () => {
     expect(m.o2.mape.protocols.map((p) => p.best.mape)).toEqual([21.4087, 15.1712, 13.281])
     expect(m.o2.mape.verdict).toBe('PARTIAL')
     expect(m.o2.sentiment.verdict).toBe('NOT MET')
-    expect(m.o3.responseTime.verdict).toBe('PARTIAL')
+    expect(m.o3.responseTime.verdict).toBe('MET')
     expect(m.waste.synthetic).toBe(true)
   })
 })

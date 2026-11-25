@@ -130,6 +130,7 @@ export default function ModelEvidence() {
         <p>
           {o3.responseTime.passing} of {o3.responseTime.pageCount} pages met the target on every run. Measured {o3.responseTime.measured}.
         </p>
+        {o3.responseTime.caveat && <Note>{o3.responseTime.caveat}</Note>}
         <Table columns={timingColumns} data={o3.responseTime.pages} getRowKey={(r) => r.page} />
       </Objective>
 

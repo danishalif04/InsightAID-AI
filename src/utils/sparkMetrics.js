@@ -24,7 +24,7 @@ export const SOURCES = Object.freeze({
   sentiment: 'ml/sentiment/results/model_versions_v20261020-171546.json',
   forecasting: 'ml/forecasting/results/protocol_summary_a8b3bb637d28.json',
   crisis: 'ml/crisis/results/ablation_raw.json',
-  timing: 'results/spark_2026-11-25/summary.txt',
+  timing: 'results/spark_2026-11-25_item7/summary.txt',
   koperasi: 'src/data/koperasiSiswaMaju.json',
 })
 
@@ -146,7 +146,8 @@ export function buildO3({ crisisAblation, timingText }) {
   return {
     responseTime: {
       target: `Every analysis page < ${TARGETS.o3ResponseMs} ms on every run`,
-      measured: '25 Nov 2026, production build, 5 runs after a discarded warm-up',
+      measured: '25 Nov 2026, production build, 5 runs after a discarded warm-up, with stored AI wording (migration 0019)',
+      caveat: 'The discarded warm-up run is the one that stored the AI wording. A first visit after the data changes still waits for the AI, so that visit can take longer than 3 s.',
       passing,
       pageCount: pages.length,
       verdict: verdict(pages.length > 0 && passing === pages.length, passing > 0),

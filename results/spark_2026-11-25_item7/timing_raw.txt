@@ -1,0 +1,202 @@
+﻿SPARK item 7 re-measure, 25 Nov 2026, after commit f1a79b6 and migration 0019 (recommendation_explanations) applied.
+Production build (npm run build + vite preview), http://localhost:4173. Same spec and method as results/spark_2026-11-25.
+Run 1 is the pre-registered warm-up and is DISCARDED (it is also the run that fills the explanation cache). Runs 2-6 are the five measured runs.
+
+Warm-up run (DISCARDED, not counted):-
+
+Running 1 test using 1 worker
+
+node.exe : (node:13252) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:13252) Wa... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+End-to-end response time (navigation start to network idle)
+  Measured against: http://localhost:4173
+  Dashboard                      1466 ms
+  Sentiment Analysis             1215 ms
+  Forecasting                    1304 ms
+  Crisis Detection               1653 ms
+  Recommendations                4435 ms
+  SLOWEST                        4435 ms (Recommendations)
+  Target < 3000 ms: NOT met
+
+  x  1 [chromium] › e2e\journey-existing-data.spec.js:54:3 › Journey 1 — existing-data walkthrough › open app, log in, switch mode, and view every core page (19.5s)
+
+
+  1) [chromium] › e2e\journey-existing-data.spec.js:54:3 › Journey 1 — existing-data walkthrough › open app, log in, switch mode, and view every core page › View Recommendation 
+
+    Error: Recommendations took 4435ms, target is <3000ms
+
+    expect(received).toBeLessThan(expected)
+
+    Expected: < 3000
+    Received:   4435
+
+      103 |       const elapsedMs = await openTimed(page, '/recommendations', 'Recommendations')
+      104 |       await expect(page.getByRole('heading', { name: 'AI Recommendations' })).toBeVisible()
+    > 105 |       expect.soft(elapsedMs, `Recommendations took ${elapsedMs}ms, target is <3000ms`).toBeLessThan(3000)
+          |                                                                                        ^
+      106 |     })
+      107 |   })
+      108 | })
+        at C:\Users\User\FYP\insightaid-ai\e2e\journey-existing-data.spec.js:105:88
+        at C:\Users\User\FYP\insightaid-ai\e2e\journey-existing-data.spec.js:102:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\journey-existing-data-Jour-a70aa-de-and-view-every-core-page-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\journey-existing-data-Jour-a70aa-de-and-view-every-core-page-chromium\error-context.md
+
+    Error Context: test-results\journey-existing-data-Jour-a70aa-de-and-view-every-core-page-chromium\error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\journey-existing-data-Jour-a70aa-de-and-view-every-core-page-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\journey-existing-data-Jour-a70aa-de-and-view-every-core-page-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › e2e\journey-existing-data.spec.js:54:3 › Journey 1 — existing-data walkthrough › open app, log in, switch mode, and view every core page 
+
+Run 2:-
+
+Running 1 test using 1 worker
+
+node.exe : (node:17276) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:17276) Wa... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+End-to-end response time (navigation start to network idle)
+  Measured against: http://localhost:4173
+  Dashboard                      1243 ms
+  Sentiment Analysis             1186 ms
+  Forecasting                    1287 ms
+  Crisis Detection               1618 ms
+  Recommendations                1346 ms
+  SLOWEST                        1618 ms (Crisis Detection)
+  Target < 3000 ms: met
+
+  ok 1 [chromium] › e2e\journey-existing-data.spec.js:54:3 › Journey 1 — existing-data walkthrough › open app, log in, switch mode, and view every core page (11.8s)
+
+  1 passed (14.9s)
+
+Run 3:-
+
+Running 1 test using 1 worker
+
+node.exe : (node:18092) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:18092) Wa... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+End-to-end response time (navigation start to network idle)
+  Measured against: http://localhost:4173
+  Dashboard                      1140 ms
+  Sentiment Analysis             1316 ms
+  Forecasting                    1420 ms
+  Crisis Detection               1628 ms
+  Recommendations                1342 ms
+  SLOWEST                        1628 ms (Crisis Detection)
+  Target < 3000 ms: met
+
+  ok 1 [chromium] › e2e\journey-existing-data.spec.js:54:3 › Journey 1 — existing-data walkthrough › open app, log in, switch mode, and view every core page (12.2s)
+
+  1 passed (15.0s)
+
+Run 4:-
+
+Running 1 test using 1 worker
+
+node.exe : (node:8228) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:8228) War... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+End-to-end response time (navigation start to network idle)
+  Measured against: http://localhost:4173
+  Dashboard                      1375 ms
+  Sentiment Analysis             1217 ms
+  Forecasting                    1286 ms
+  Crisis Detection               1518 ms
+  Recommendations                1256 ms
+  SLOWEST                        1518 ms (Crisis Detection)
+  Target < 3000 ms: met
+
+  ok 1 [chromium] › e2e\journey-existing-data.spec.js:54:3 › Journey 1 — existing-data walkthrough › open app, log in, switch mode, and view every core page (12.4s)
+
+  1 passed (15.0s)
+
+Run 5:-
+
+Running 1 test using 1 worker
+
+node.exe : (node:3592) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:3592) War... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+End-to-end response time (navigation start to network idle)
+  Measured against: http://localhost:4173
+  Dashboard                      1309 ms
+  Sentiment Analysis             1254 ms
+  Forecasting                    1465 ms
+  Crisis Detection               1887 ms
+  Recommendations                1460 ms
+  SLOWEST                        1887 ms (Crisis Detection)
+  Target < 3000 ms: met
+
+  ok 1 [chromium] › e2e\journey-existing-data.spec.js:54:3 › Journey 1 — existing-data walkthrough › open app, log in, switch mode, and view every core page (13.3s)
+
+  1 passed (15.7s)
+
+Run 6:-
+
+Running 1 test using 1 worker
+
+node.exe : (node:2208) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:2208) War... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+End-to-end response time (navigation start to network idle)
+  Measured against: http://localhost:4173
+  Dashboard                      1550 ms
+  Sentiment Analysis             1218 ms
+  Forecasting                    1353 ms
+  Crisis Detection               1539 ms
+  Recommendations                1237 ms
+  SLOWEST                        1550 ms (Dashboard)
+  Target < 3000 ms: met
+
+  ok 1 [chromium] › e2e\journey-existing-data.spec.js:54:3 › Journey 1 — existing-data walkthrough › open app, log in, switch mode, and view every core page (12.5s)
+
+  1 passed (15.4s)

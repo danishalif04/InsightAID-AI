@@ -117,12 +117,28 @@ Cut: public F&B dataset backtest, SUS and feedback forms, Phase 3, BM/EN i18n, p
 | 4 | Before vs After impact card (Dashboard) | Done. `src/components/common/ImpactCard.jsx`, logic `src/utils/impactSummary.js` (4 Vitest tests). Computed inside `getDashboardData` from rows the Dashboard already fetches, so no extra request. Assumptions in a collapsible list on the card. Shows only the account's own data; when that cannot support the replay it shows a link to the planner's sample instead of borrowing figures | `f1fed70` |
 | 5 | Anonymous "Try demo" | **Code done, not yet verified end to end.** Button on Welcome (hero and final call to action) and Login. `src/services/demoService.js` signs in anonymously, then seeds through the real `ingestRows` pipeline; seed builder `src/utils/demoSeed.js` (6 Vitest tests); banner inside the app for anonymous users. Browser check on 25 Nov: Supabase returned 422 because anonymous sign-ins are switched off; the button showed the friendly message. **Owner action: enable Authentication > Sign In / Providers > Allow anonymous sign-ins**, then re-run the check | `6952674` |
 | 6 | SPARK A1 poster | Done, two items pending. `node poster/build/build.mjs spark` → `poster/insightaid_spark2026_poster.pdf` and preview PNG. Same build as AIMIX (AIMIX output verified unchanged). Waste and response-time figures read from `metrics/spark2026.json`. Fact-check list in `poster/README.md`. **Pending:** SPARK video link (`poster/links.json` → `spark_video`, prints LINK PENDING until set); demo QR works only after anonymous sign-in is enabled | see git log |
-| 7 | Optional: stored AI wording on Recommendations | **Code done; migration not yet applied.** `src/utils/explanationCache.js` (5 Vitest tests) keys each explanation by SHA-256 of exactly what is sent to the AI (rule id, category, priority, title, evidence, business context, version tag). `recommendationService.fetchExplanations` reuses stored wording and calls the AI only for new or changed recommendations; 4 service tests. Migration `0019_recommendation_explanation_cache.sql` (one new table, RLS, additive). Without the table the app behaves exactly as before. **Owner action: approve applying 0019 to the live database**, then re-run the 5-run timing protocol | see git log |
+| 7 | Optional: stored AI wording on Recommendations | **Done and measured.** Migration 0019 applied to the live database on 25 Nov with the owner's approval (`supabase db query --remote -f`, not `db push`, because the live project has no recorded migration history). Protocol re-run: **5 of 5 pages under 3000 ms on every run; target MET** (see below). Original notes: `src/utils/explanationCache.js` (5 Vitest tests) keys each explanation by SHA-256 of exactly what is sent to the AI (rule id, category, priority, title, evidence, business context, version tag). `recommendationService.fetchExplanations` reuses stored wording and calls the AI only for new or changed recommendations; 4 service tests. Migration `0019_recommendation_explanation_cache.sql` (one new table, RLS, additive). Without the table the app behaves exactly as before. **Owner action: approve applying 0019 to the live database**, then re-run the 5-run timing protocol | see git log |
 
 ### Item 7 notes
 
 - Expected effect, to be measured, not assumed: a repeat visit with unchanged data skips the ~2.3 s AI call. The first visit after any data change still waits for the AI. The protocol discards its first (warm-up) run, which is the run that fills the cache; this must be stated next to the new result.
 - The AI still only rewords; the rule engine decides. Bumping `EXPLANATION_CACHE_VERSION` invalidates all stored wording (e.g. after a prompt change).
+- Applying 0019: the command reported "policy already exists" although the table had been missing a moment before. A read-only check afterwards showed the table exactly as the migration defines it (7 columns, RLS on, 1 policy, primary key and unique (user_id, cache_key), 0 rows), and the API returned 200. Read as the statement having run twice, not a partial apply.
+- Migration check (25 Nov): every table and added column from 0001 to 0018 was confirmed live through the API; 0019 was the only missing piece.
+
+### Item 7 result: protocol re-run after 0019
+
+Same protocol as 25 Nov (production build, `e2e/journey-existing-data.spec.js`, usertest1, one discarded warm-up, five measured runs). Raw: `results/spark_2026-11-25_item7/timing_raw.txt`; table by `node results/spark_2026-11-25_item7/summarise_timing.mjs` (`summary.txt`).
+
+| Page | Median before (25 Nov) | Median after | Max after | Verdict |
+|---|---|---|---|---|
+| Dashboard | 1227 ms | 1309 ms | 1550 ms | PASS |
+| Sentiment Analysis | 1213 ms | 1218 ms | 1316 ms | PASS |
+| Forecasting | 1313 ms | 1353 ms | 1465 ms | PASS |
+| Crisis Detection | 1548 ms | 1618 ms | 1887 ms | PASS |
+| AI Recommendations | 3429 ms | 1342 ms | 1460 ms | PASS |
+
+**Overall: target < 3000 ms is MET (5 of 5 pages, every run).** Caveat, stated wherever this is shown: the discarded warm-up run is the one that stored the AI wording, and it took 4435 ms for Recommendations (in the raw file). A first visit after the data changes still waits for the AI. `metrics/spark2026.json`, the Model & Evidence page and the SPARK poster now read this result and carry the caveat.
 
 ### Item 6 notes
 
