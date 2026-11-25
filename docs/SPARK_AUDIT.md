@@ -57,7 +57,21 @@ This agrees with the 19 Nov protocol result (`results/post_submission_2026-11/RE
 | Forecasting | 3779 ms | 2823 ms | met on this run |
 | Financial Planning | 3673 ms | 2856 ms | met on this run |
 
-Single runs, not the 5-run protocol; the protocol re-run is due after the index is applied. The Dashboard's remaining cost is one 2.0 s request (first sales page plus exact count), which is a full table scan without the index. On Recommendations, the AI rewording call itself takes about 2.3 s.
+Single runs, not the 5-run protocol.
+
+### Protocol re-run after the index was applied (25 Nov)
+
+Index migration `0018` applied to the live database on 25 Nov with the owner's approval. Then the 19 Nov protocol was repeated unchanged (production build, `e2e/journey-existing-data.spec.js`, one discarded warm-up, five measured runs). Raw output: `results/spark_2026-11-25/timing_raw.txt`; table produced by `node results/spark_2026-11-25/summarise_timing.mjs` (`summary.txt`).
+
+| Page | Median (19 Nov) | Median (25 Nov) | Max (25 Nov) | Verdict |
+|---|---|---|---|---|
+| Dashboard | 7079 ms | 1227 ms | 1334 ms | PASS |
+| Sentiment Analysis | see 19 Nov RESULTS.md | 1213 ms | 1325 ms | PASS |
+| Forecasting | see 19 Nov RESULTS.md | 1313 ms | 1331 ms | PASS |
+| Crisis Detection | 4387 ms | 1548 ms | 1860 ms | PASS |
+| AI Recommendations | see 19 Nov RESULTS.md | 3429 ms | 3739 ms | FAIL |
+
+**Overall: target < 3000 ms is still NOT MET**, because of AI Recommendations (4 of 5 runs over 3000 ms). That page's time is now mostly the AI rewording call (about 2.3 s), which runs after the rule engine. Possible next step: reuse a stored explanation when the recommendations and their evidence have not changed, so only changed recommendations wait for the AI. The Dashboard's remaining cost is one 2.0 s request (first sales page plus exact count), which is a full table scan without the index. On Recommendations, the AI rewording call itself takes about 2.3 s.
 
 ## P1: fix during Phase 1 if time allows
 

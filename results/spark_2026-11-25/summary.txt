@@ -1,0 +1,18 @@
+
+Task 2 — end-to-end page time, 5 measured runs (warm-up discarded)
+Target: < 3000 ms per analysis page
+
+| Page | n | Min | Median | Max | Verdict |
+|---|---|---|---|---|---|
+| Dashboard | 5 | 1157 | 1227 | 1334 | PASS |
+| Sentiment Analysis | 5 | 1190 | 1213 | 1325 | PASS |
+| Forecasting | 5 | 1251 | 1313 | 1331 | PASS |
+| Crisis Detection | 5 | 1434 | 1548 | 1860 | PASS |
+| Recommendations | 5 | 2699 | 3429 | 3739 | FAIL |
+
+Slowest page by median: Recommendations — 3429 ms
+Worst single observation: 3739 ms
+Pages meeting the target on every run: 4 of 5 (Dashboard, Sentiment Analysis, Forecasting, Crisis Detection)
+
+OVERALL: target < 3000 ms is NOT MET.
+
