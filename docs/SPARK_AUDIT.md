@@ -152,6 +152,13 @@ Same protocol as 25 Nov (production build, `e2e/journey-existing-data.spec.js`, 
 - The Welcome page still says "This project is open source" (Deploy your own copy section), which conflicts with the "All rights reserved" licence decision. Owner to decide the wording.
 - The Planner and Model & Evidence pages were checked visually on 25 Nov (production build, usertest1): no errors, layout correct.
 
+### Item 5 verified end to end (25 Nov, evening)
+
+- Migration `0020_anonymous_profile_email.sql` applied with the owner's approval (`supabase db query --remote -f`); read-only check confirms `handle_new_user()` now uses `coalesce(new.email, '')`.
+- Browser check on the production build: "Try the demo" reaches the Dashboard in 3452 ms with no console errors. The visitor sees the synthetic-data banner, store "Koperasi Siswa Maju (demo)", the Before vs After card with computed figures (RM 951.75 vs RM 499.10, 47.6% less; 193 more units short), product performance, and the sentiment trend (the 21 Nov karipap incident shows as a 100% negative day).
+- Known gap: Platform Distribution and Daily Mention Volume stay empty for demo visitors, because they count social posts (`mention_volume`) and the demo seeds reviews only. Owner decision pending on seeding synthetic social posts.
+- Two anonymous demo users were created by these checks (about 1,700 rows each); remove them with the other old anonymous users before the public demo.
+
 ### Item 5 notes
 
 - Each visitor gets a private account (RLS on `auth.uid()`), profile "Koperasi Siswa Maju (demo)", pathway Malaysian Local Shop, 1,342 sales rows and 366 reviews. Dates move forward by whole weeks so the data ends in the week before the visit (weekdays kept). Seeding is skipped if the account already has sales.
