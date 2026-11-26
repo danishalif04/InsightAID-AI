@@ -121,7 +121,7 @@ Cut: public F&B dataset backtest, SUS and feedback forms, Phase 3, BM/EN i18n, p
 
 ### SPARK video (26 Nov 2026)
 
-Rendered: `docs/spark/video/final/INSIGHTAID_AI_SPARK2026.mp4` (4:32, 1080p30, −14 LUFS; media git-ignored). Motion graphics only, no stock footage; original synthesised music; captions burned in and in `docs/spark/SPARK_VIDEO_CAPTIONS_EN.srt` (script wording). Details and pipeline in `docs/spark/STYLE_NOTES.md`, sources in `docs/spark/video_src/render/`. **Before publishing:** merge `spark-2026` to `main` (end-card QR opens the live demo). **After upload:** put the YouTube link in `poster/links.json` → `spark_video` and rebuild the poster.
+Rendered: `docs/spark/video/final/INSIGHTAID_AI_SPARK2026.mp4` (4:32, 1080p30, −14 LUFS; media git-ignored). Motion graphics only, no stock footage; original synthesised music; captions burned in and in `docs/spark/SPARK_VIDEO_CAPTIONS_EN.srt` (script wording). Details and pipeline in `docs/spark/STYLE_NOTES.md`, sources in `docs/spark/video_src/render/`. **Before publishing:** merge `spark-2026` to `main` (end-card QR opens the live demo). Uploaded 26 Nov: https://youtu.be/KYKYYMVlsx8 (in `poster/links.json` → `spark_video`, poster rebuilt).
 
 ### Item 7 notes
 
