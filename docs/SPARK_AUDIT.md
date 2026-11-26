@@ -123,6 +123,10 @@ Cut: public F&B dataset backtest, SUS and feedback forms, Phase 3, BM/EN i18n, p
 
 Rendered: `docs/spark/video/final/INSIGHTAID_AI_SPARK2026.mp4` (4:32, 1080p30, −14 LUFS; media git-ignored). Motion graphics only, no stock footage; original synthesised music; captions burned in and in `docs/spark/SPARK_VIDEO_CAPTIONS_EN.srt` (script wording). Details and pipeline in `docs/spark/STYLE_NOTES.md`, sources in `docs/spark/video_src/render/`. **Before publishing:** merge `spark-2026` to `main` (end-card QR opens the live demo). Uploaded 26 Nov: https://youtu.be/KYKYYMVlsx8 (in `poster/links.json` → `spark_video`, poster rebuilt).
 
+### Submission pack (26 Nov 2026)
+
+`docs/spark/submission/`: extended abstract in the organiser's template (`INSIGHTAID_AI_ISPARK2026_Extended_Abstract.docx` and `.pdf`, 1,499 words excluding references, Times New Roman 12 pt, 1.15 spacing, A4, 2.54 cm margins, 2 figures and 1 table; built by `src/build_abstract.cjs` from `metrics/spark2026.json`, which stops if a verdict changes) and `BRIEF_DESCRIPTION.txt` (132 words). Poster Project ID set to "-" on Danish's request until the ID is issued. UAT 4.07 left out of the abstract until n = 15 is confirmed.
+
 ### Item 7 notes
 
 - Expected effect, to be measured, not assumed: a repeat visit with unchanged data skips the ~2.3 s AI call. The first visit after any data change still waits for the AI. The protocol discards its first (warm-up) run, which is the run that fills the cache; this must be stated next to the new result.

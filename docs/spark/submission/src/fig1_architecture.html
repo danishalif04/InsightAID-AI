@@ -1,0 +1,42 @@
+<!doctype html>
+<html><head><meta charset="utf-8" />
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { width:1600px; background:#fff; font-family:Arial, Helvetica, sans-serif; color:#0f172a; }
+  .wrap { padding:28px 30px 24px; }
+  .row { display:grid; grid-template-columns:repeat(5, 1fr); gap:34px; position:relative; }
+  .col { border:2px solid #062D7B; border-radius:14px; overflow:hidden; background:#f8fafc; display:flex; flex-direction:column; }
+  .col h3 { background:#062D7B; color:#fff; font-size:21px; padding:12px 14px; line-height:1.15; }
+  .col h3 small { display:block; font-weight:400; font-size:15px; color:#bcd0f5; margin-top:3px; }
+  .col ul { list-style:none; padding:14px 14px 16px; display:flex; flex-direction:column; gap:9px; }
+  .col li { background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:9px 11px; font-size:17px; line-height:1.25; }
+  .col li.key { border:2px solid #16a34a; background:#f0fdf4; font-weight:700; }
+  .arrow { position:absolute; top:50%; width:34px; height:0; }
+  .arrow::after { content:''; position:absolute; left:4px; top:-11px; border-left:22px solid #16a34a; border-top:11px solid transparent; border-bottom:11px solid transparent; }
+  .note { margin-top:18px; display:flex; gap:16px; font-size:17px; }
+  .note div { flex:1; border-radius:10px; padding:11px 14px; line-height:1.35; }
+  .n1 { background:#f0fdf4; border:1px solid #86efac; }
+  .n2 { background:#fff7ed; border:1px solid #fdba74; }
+</style></head>
+<body><div class="wrap">
+  <div class="row">
+    <div class="col"><h3>1. Data collection<small>uploaded as CSV</small></h3><ul>
+      <li>POS sales records</li><li>Google and Shopee reviews</li><li>Social posts (TikTok, X)</li><li>Languages: BM, English, Mandarin, code-mixed</li></ul></div>
+    <div class="col"><h3>2. Data processing<small>same pipeline for every upload</small></h3><ul>
+      <li>Template validation and duplicate check</li><li>Text cleaning</li><li>Language detection</li><li>Feature extraction, daily and weekly aggregates</li></ul></div>
+    <div class="col"><h3>3. Storage<small>free tier</small></h3><ul>
+      <li>Supabase PostgreSQL</li><li>Row-level security: each business sees only its own data</li><li>Raw rows kept for audit</li></ul></div>
+    <div class="col"><h3>4. Analytics engine<small>explainable by design</small></h3><ul>
+      <li>Multilingual sentiment</li><li>Sales forecasting</li><li>Crisis detection (negative share and its rate of rise)</li><li>Rule-based recommendations</li><li class="key">Prep &amp; Stock Planner</li></ul></div>
+    <div class="col"><h3>5. Decision dashboard<small>web app, &lt; 3 s per page</small></h3><ul>
+      <li>Tomorrow's quantity per item, with the reason</li><li>Crisis alerts with evidence</li><li>Before vs After waste card</li><li>Model &amp; Evidence page (results vs fixed targets)</li></ul></div>
+    <div class="arrow" style="left:calc(20% - 30px)"></div>
+    <div class="arrow" style="left:calc(40% - 23px)"></div>
+    <div class="arrow" style="left:calc(60% - 16px)"></div>
+    <div class="arrow" style="left:calc(80% - 9px)"></div>
+  </div>
+  <div class="note">
+    <div class="n1"><b>Reviews reach the kitchen:</b> when recent reviews name an item with a freshness complaint (e.g. “basi”), the planner cuts tomorrow’s batch and states why.</div>
+    <div class="n2"><b>AI explains, rules decide:</b> a language model only rewords the explanation of a recommendation; it never chooses the action or invents a number.</div>
+  </div>
+</div></body></html>
