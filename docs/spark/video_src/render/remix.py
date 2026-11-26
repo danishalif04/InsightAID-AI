@@ -15,11 +15,12 @@ mus = decode(os.path.join(S, 'render', 'mix_music.wav'), ch=2)
 sfx = decode(os.path.join(S, 'render', 'mix_sfx.wav'), ch=2)
 N = len(mus)
 vo = np.zeros(N)
-face = decode(os.path.join(VIDEO_DIR, 'raw', 'WhatsApp Video 2026-11-26 at 16.58.40.mp4'), 'highpass=f=80,afftdn=nf=-30:tn=1,loudnorm=I=-16:TP=-1.5:LRA=11')
+VOD = sys.argv[6] if len(sys.argv) > 6 else 'processed'
+face = decode(os.path.join(VIDEO_DIR, VOD, 'face.wav')) if VOD != 'processed' else decode(os.path.join(VIDEO_DIR, 'raw', 'WhatsApp Video 2026-11-26 at 16.58.40.mp4'), 'highpass=f=80,afftdn=nf=-30:tn=1,loudnorm=I=-16:TP=-1.5:LRA=11')
 vo[:len(face)] += face[:N]
 for s in TL['scenes']:
     if s.get('kind') == 'vo':
-        a = decode(os.path.join(VIDEO_DIR, 'processed', f"scene{s['id']}.wav"))
+        a = decode(os.path.join(VIDEO_DIR, VOD, f"scene{s['id']}.wav"))
         i = int((s['start'] + s['voStart']) * SR); vo[i:i + len(a)] += a[:N - i]
 mix = mus * 10 ** (MUS_DB / 20) + sfx * 10 ** (SFX_DB / 20) + np.stack([vo, vo], 1)
 print('peak', round(float(np.abs(mix).max()), 3))
