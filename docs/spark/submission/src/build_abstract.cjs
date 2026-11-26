@@ -84,7 +84,7 @@ const abstract = `Campus cooperatives and small food outlets in Malaysia decide 
 const children = [
   C('**INSIGHTAID AI: An Intelligent Decision Support System for Data-Driven Business Analytics in Early-Stage Startups**', { run: { size: 28 }, after: 160 }),
   C('**Author(s):** Muhammad Danish Alif Bin Azrul¹'),
-  C('**Affiliation(s):** ¹Department of Computing, Universiti Teknologi PETRONAS, Malaysia'),
+  C('**Affiliation(s):** ¹Bachelor of Computer Science (Hons), Universiti Teknologi PETRONAS, Malaysia'),
   C('**Corresponding Author:** muhammad_22006390@utp.edu.my', { after: 240 }),
   C('**ABSTRACT**', { after: 120 }),
   P(abstract),
