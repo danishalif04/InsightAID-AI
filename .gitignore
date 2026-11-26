@@ -76,3 +76,4 @@ supabase/.branches/
 # SPARK video media (large files; kept out of git, back up separately)
 video/*
 !video/README.md
+docs/spark/video/

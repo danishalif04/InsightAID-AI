@@ -34,7 +34,7 @@ Numbers in ⟨ ⟩ are filled from `metrics/spark2026.json` at build time. Curre
 
 | # | Time | Chapter | Picture | Voice-over / on camera |
 |---|---|---|---|---|
-| 1 | 0:00 | **Introduction** | Danish on camera, mid shot. Lower third: name, UTP | "Hi, my name is Muhammad Danish Alif Bin Azrul from Universiti Teknologi PETRONAS, and this is INSIGHTAID AI." (mandatory, 10 to 15 s) |
+| 1 | 0:00 | **Introduction** | Danish on camera, mid shot. Lower third: name, UTP | "Hi, I am Muhammad Danish Alif Bin Azrul, I am from Universiti Teknologi PETRONAS, and this is INSIGHTAID AI." (mandatory, 10 to 15 s) |
 | 2 | 0:14 | Introduction | Logo reveal, exploded app cards fly in behind the wordmark | *(music rises)* Tagline: *Decisions, backed by evidence.* |
 | 3 | 0:22 | **Problem** | Stock: rice steaming, hands wrapping nasi lemak, tray on a counter (no identifiable faces) | "Six thirty in the morning. A koperasi manager has to decide how much nasi lemak to make today." |
 | 4 | 0:32 | Problem | Counter animates 40… 60… 80? Stock: food scraped into a bin | "Make too much, and it goes in the bin. Make too little, and students leave hungry." |

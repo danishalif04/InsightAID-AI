@@ -13,7 +13,7 @@ Read-aloud version of [VIDEO_PLAN.md](VIDEO_PLAN.md). Only Danish's spoken lines
 ---
 
 ### Scene 1 · Introduction · FACE ON CAMERA (10 to 15 s)
-> Hi, my name is Muhammad Danish Alif Bin Azrul / from Universiti Teknologi PETRONAS, / and this is INSIGHTAID AI.
+> Hi, I am Muhammad Danish Alif Bin Azrul, / I am from Universiti Teknologi PETRONAS, / and this is INSIGHTAID AI.
 
 ### Scene 2 · Introduction
 *(No voice. Music and logo.)*
