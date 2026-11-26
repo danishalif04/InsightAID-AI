@@ -1,0 +1,288 @@
+1
+00:00:00,000 --> 00:00:03,200
+Hi, I am Muhammad Danish Alif Bin Azrul,
+
+2
+00:00:03,240 --> 00:00:05,900
+I am from Universiti Teknologi PETRONAS,
+
+3
+00:00:05,940 --> 00:00:08,370
+and this is INSIGHTAID AI.
+
+4
+00:00:17,770 --> 00:00:19,340
+Six thirty in the morning.
+
+5
+00:00:19,380 --> 00:00:21,440
+A koperasi manager has to decide
+
+6
+00:00:21,480 --> 00:00:24,310
+how much nasi lemak to make today.
+
+7
+00:00:24,730 --> 00:00:28,190
+Make too much, and it goes in the bin.
+
+8
+00:00:28,230 --> 00:00:31,920
+Make too little, and students leave hungry.
+
+9
+00:00:32,340 --> 00:00:35,780
+And customers are already saying what went wrong,
+
+10
+00:00:35,820 --> 00:00:37,670
+in three languages.
+
+11
+00:00:38,090 --> 00:00:41,520
+Business intelligence tools are expensive,
+
+12
+00:00:41,730 --> 00:00:44,970
+feedback arrives in Bahasa Melayu, English and Mandarin,
+
+13
+00:00:45,010 --> 00:00:50,460
+and most owners only react after the damage is done.
+
+14
+00:00:53,420 --> 00:00:56,780
+INSIGHTAID AI turns sales and customer reviews
+
+15
+00:00:56,820 --> 00:01:01,330
+into daily decisions. You can try it right now:
+
+16
+00:01:01,580 --> 00:01:03,590
+no account, one click.
+
+17
+00:01:04,010 --> 00:01:09,000
+Every visitor gets a private copy of Koperasi Siswa Maju,
+
+18
+00:01:09,050 --> 00:01:11,760
+a fictional campus cooperative.
+
+19
+00:01:12,230 --> 00:01:15,700
+Its data is synthetic, and the app says so.
+
+20
+00:01:16,120 --> 00:01:19,390
+Sales and reviews go through the same pipeline
+
+21
+00:01:19,640 --> 00:01:23,450
+a real upload would. Nothing is pre-baked.
+
+22
+00:01:23,870 --> 00:01:27,830
+This is the Prep and Stock Planner. For tomorrow,
+
+23
+00:01:27,870 --> 00:01:31,000
+it says how much of each item to prepare.
+
+24
+00:01:31,420 --> 00:01:35,370
+Not a black box: every number shows its reason.
+
+25
+00:01:35,460 --> 00:01:39,950
+Expected sales come from the same weekday over four weeks,
+
+26
+00:01:40,180 --> 00:01:43,370
+plus a safety buffer the manager controls.
+
+27
+00:01:43,790 --> 00:01:47,620
+More buffer means fewer sold-out items,
+
+28
+00:01:47,870 --> 00:01:51,200
+but more risk of waste. He decides.
+
+29
+00:01:51,620 --> 00:01:55,470
+And this is where customer voice meets the kitchen.
+
+30
+00:01:55,660 --> 00:01:58,770
+Recent reviews called the karipap "basi",
+
+31
+00:01:58,880 --> 00:02:02,180
+so the planner flags it, cuts the batch,
+
+32
+00:02:02,220 --> 00:02:03,770
+and says why.
+
+33
+00:02:04,760 --> 00:02:06,850
+INSIGHTAID reads customer opinion
+
+34
+00:02:06,890 --> 00:02:10,230
+in Bahasa Melayu, English and Mandarin,
+
+35
+00:02:10,270 --> 00:02:12,500
+including mixed sentences.
+
+36
+00:02:12,920 --> 00:02:16,640
+When complaints suddenly rise, it raises an alert
+
+37
+00:02:16,680 --> 00:02:19,610
+and shows the evidence behind it.
+
+38
+00:02:20,030 --> 00:02:23,160
+Recommendations come from clear rules.
+
+39
+00:02:23,250 --> 00:02:27,080
+The AI only explains them in plain language.
+
+40
+00:02:29,400 --> 00:02:33,970
+Does it help? We replayed four weeks two ways.
+
+41
+00:02:34,020 --> 00:02:37,520
+Waste fell from nine hundred and fifty-one ringgit
+
+42
+00:02:37,560 --> 00:02:40,730
+to four hundred and ninety-nine ringgit,
+
+43
+00:02:40,770 --> 00:02:43,320
+forty-seven point six percent less,
+
+44
+00:02:43,360 --> 00:02:46,750
+in a simulation on synthetic data.
+
+45
+00:02:47,170 --> 00:02:49,660
+We show the trade-off too:
+
+46
+00:02:50,050 --> 00:02:52,520
+it ran out of stock more often.
+
+47
+00:02:52,830 --> 00:02:55,740
+The buffer is how he balances it.
+
+48
+00:02:56,160 --> 00:02:58,580
+We set our targets before building anything,
+
+49
+00:02:58,620 --> 00:03:02,310
+and we publish every result, including the misses.
+
+50
+00:03:02,730 --> 00:03:07,550
+Our multilingual model reached eighty-four point one percent accuracy
+
+51
+00:03:07,590 --> 00:03:10,150
+on over ten thousand test comments,
+
+52
+00:03:10,190 --> 00:03:13,080
+above target in all three languages.
+
+53
+00:03:13,500 --> 00:03:17,730
+Every analysis page loads in under three seconds.
+
+54
+00:03:18,120 --> 00:03:21,160
+Our sales forecast met its accuracy target
+
+55
+00:03:21,200 --> 00:03:25,310
+in one of three tests, and we say so.
+
+56
+00:03:27,630 --> 00:03:30,560
+The model is simple: free to start,
+
+57
+00:03:30,600 --> 00:03:33,310
+forty-nine ringgit a month for the full toolkit,
+
+58
+00:03:33,350 --> 00:03:36,150
+and plans for multi-outlet operators.
+
+59
+00:03:36,780 --> 00:03:40,850
+It runs on free-tier cloud and open-source models,
+
+60
+00:03:41,060 --> 00:03:42,740
+so it stays affordable,
+
+61
+00:03:42,780 --> 00:03:46,310
+and anyone can try it before signing up.
+
+62
+00:03:46,930 --> 00:03:51,030
+Our next step is a pilot with a real campus cooperative,
+
+63
+00:03:51,070 --> 00:03:54,340
+then koperasi networks across Malaysia.
+
+64
+00:03:55,030 --> 00:03:59,120
+INSIGHTAID AI won a Silver Award at AIMIX IID 2026,
+
+65
+00:03:59,160 --> 00:04:01,370
+and this is only the start.
+
+66
+00:04:03,690 --> 00:04:07,060
+The software is the author's own work,
+
+67
+00:04:07,210 --> 00:04:08,460
+all rights reserved.
+
+68
+00:04:08,880 --> 00:04:12,930
+A koperasi manager doesn't need a data scientist.
+
+69
+00:04:13,080 --> 00:04:16,910
+He needs to know what to cook tomorrow, and why.
+
+70
+00:04:17,020 --> 00:04:19,350
+That's what INSIGHTAID AI does.
+
+71
+00:04:19,770 --> 00:04:22,510
+Scan the code and try it yourself.
+
+72
+00:04:22,550 --> 00:04:24,000
+No sign-up needed.
+

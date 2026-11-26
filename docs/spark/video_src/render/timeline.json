@@ -1,0 +1,1144 @@
+{
+ "total": 271.85,
+ "fps": 30,
+ "scenes": [
+  {
+   "id": "1",
+   "start": 0.0,
+   "kind": "face",
+   "dur": 9.75,
+   "voStart": 0.0,
+   "phrases": [
+    {
+     "text": "Hi, I am Muhammad Danish Alif Bin Azrul,",
+     "s": 0.0,
+     "e": 2.91
+    },
+    {
+     "text": "I am from Universiti Teknologi PETRONAS,",
+     "s": 3.32,
+     "e": 5.7
+    },
+    {
+     "text": "and this is INSIGHTAID AI.",
+     "s": 6.02,
+     "e": 8.02
+    }
+   ]
+  },
+  {
+   "id": "2",
+   "start": 9.75,
+   "kind": "title",
+   "dur": 5.6
+  },
+  {
+   "id": "C2",
+   "start": 15.35,
+   "kind": "chapter",
+   "num": "02",
+   "name": "Problem",
+   "dur": 1.9
+  },
+  {
+   "id": "3",
+   "start": 17.25,
+   "kind": "vo",
+   "dur": 7.21,
+   "voStart": 0.35,
+   "voDur": 6.59,
+   "phrases": [
+    {
+     "text": "Six thirty in the morning.",
+     "s": 0.6,
+     "e": 1.75
+    },
+    {
+     "text": "A koperasi manager has to decide",
+     "s": 2.21,
+     "e": 4.31
+    },
+    {
+     "text": "how much nasi lemak to make today.",
+     "s": 4.31,
+     "e": 6.71
+    }
+   ]
+  },
+  {
+   "id": "4",
+   "start": 24.46,
+   "kind": "vo",
+   "dur": 7.61,
+   "voStart": 0.35,
+   "voDur": 6.99,
+   "phrases": [
+    {
+     "text": "Make too much,",
+     "s": 0.35,
+     "e": 1.59
+    },
+    {
+     "text": "and it goes in the bin.",
+     "s": 1.59,
+     "e": 3.45
+    },
+    {
+     "text": "Make too little,",
+     "s": 3.85,
+     "e": 5.07
+    },
+    {
+     "text": "and students leave hungry.",
+     "s": 5.07,
+     "e": 7.11
+    }
+   ]
+  },
+  {
+   "id": "5",
+   "start": 32.07,
+   "kind": "vo",
+   "dur": 5.75,
+   "voStart": 0.35,
+   "voDur": 5.38,
+   "phrases": [
+    {
+     "text": "And customers are already saying what went wrong,",
+     "s": 0.35,
+     "e": 3.83
+    },
+    {
+     "text": "in three languages.",
+     "s": 3.83,
+     "e": 5.25
+    }
+   ]
+  },
+  {
+   "id": "6",
+   "start": 37.82,
+   "kind": "vo",
+   "dur": 12.79,
+   "voStart": 0.35,
+   "voDur": 12.17,
+   "phrases": [
+    {
+     "text": "Business intelligence tools are expensive,",
+     "s": 0.35,
+     "e": 3.35
+    },
+    {
+     "text": "feedback arrives in Bahasa Melayu, English and Mandarin,",
+     "s": 3.99,
+     "e": 7.27
+    },
+    {
+     "text": "and most owners only react",
+     "s": 7.27,
+     "e": 9.91
+    },
+    {
+     "text": "after the damage is done.",
+     "s": 9.91,
+     "e": 12.29
+    }
+   ]
+  },
+  {
+   "id": "C3",
+   "start": 50.61,
+   "kind": "chapter",
+   "num": "03",
+   "name": "Solution",
+   "dur": 1.9
+  },
+  {
+   "id": "7",
+   "start": 52.51,
+   "kind": "vo",
+   "dur": 11.23,
+   "voStart": 0.35,
+   "voDur": 10.65,
+   "phrases": [
+    {
+     "text": "INSIGHTAID AI turns sales and customer reviews",
+     "s": 0.99,
+     "e": 4.39
+    },
+    {
+     "text": "into daily decisions.",
+     "s": 4.39,
+     "e": 6.35
+    },
+    {
+     "text": "You can try it right now:",
+     "s": 7.05,
+     "e": 8.47
+    },
+    {
+     "text": "no account,",
+     "s": 9.15,
+     "e": 9.85
+    },
+    {
+     "text": "one click.",
+     "s": 10.13,
+     "e": 10.73
+    }
+   ]
+  },
+  {
+   "id": "8",
+   "start": 63.74,
+   "kind": "vo",
+   "dur": 12.11,
+   "voStart": 0.35,
+   "voDur": 11.49,
+   "phrases": [
+    {
+     "text": "Every visitor gets a private copy of Koperasi Siswa Maju,",
+     "s": 0.35,
+     "e": 4.91
+    },
+    {
+     "text": "a fictional campus cooperative.",
+     "s": 5.39,
+     "e": 7.67
+    },
+    {
+     "text": "Its data is synthetic,",
+     "s": 8.57,
+     "e": 9.79
+    },
+    {
+     "text": "and the app says so.",
+     "s": 9.79,
+     "e": 11.61
+    }
+   ]
+  },
+  {
+   "id": "9",
+   "start": 75.85,
+   "kind": "vo",
+   "dur": 7.75,
+   "voStart": 0.35,
+   "voDur": 7.17,
+   "phrases": [
+    {
+     "text": "Sales and reviews go through the same pipeline",
+     "s": 0.35,
+     "e": 3.19
+    },
+    {
+     "text": "a real upload would.",
+     "s": 3.87,
+     "e": 5.11
+    },
+    {
+     "text": "Nothing is pre-baked.",
+     "s": 5.61,
+     "e": 7.25
+    }
+   ]
+  },
+  {
+   "id": "10",
+   "start": 83.6,
+   "kind": "vo",
+   "dur": 7.55,
+   "voStart": 0.35,
+   "voDur": 6.93,
+   "phrases": [
+    {
+     "text": "This is the Prep and Stock Planner.",
+     "s": 0.35,
+     "e": 2.71
+    },
+    {
+     "text": "For tomorrow,",
+     "s": 3.39,
+     "e": 3.97
+    },
+    {
+     "text": "it says how much of each item to prepare.",
+     "s": 4.35,
+     "e": 7.05
+    }
+   ]
+  },
+  {
+   "id": "11",
+   "start": 91.15,
+   "kind": "vo",
+   "dur": 12.37,
+   "voStart": 0.35,
+   "voDur": 11.79,
+   "phrases": [
+    {
+     "text": "Not a black box:",
+     "s": 0.35,
+     "e": 1.63
+    },
+    {
+     "text": "every number shows its reason.",
+     "s": 2.11,
+     "e": 3.87
+    },
+    {
+     "text": "Expected sales come from the same weekday over four weeks,",
+     "s": 4.39,
+     "e": 8.45
+    },
+    {
+     "text": "plus a safety buffer the manager controls.",
+     "s": 9.11,
+     "e": 11.87
+    }
+   ]
+  },
+  {
+   "id": "12",
+   "start": 103.52,
+   "kind": "vo",
+   "dur": 7.83,
+   "voStart": 0.35,
+   "voDur": 7.27,
+   "phrases": [
+    {
+     "text": "More buffer means fewer sold-out items,",
+     "s": 0.35,
+     "e": 3.75
+    },
+    {
+     "text": "but more risk of waste.",
+     "s": 4.43,
+     "e": 5.99
+    },
+    {
+     "text": "He decides.",
+     "s": 6.63,
+     "e": 7.33
+    }
+   ]
+  },
+  {
+   "id": "13",
+   "start": 111.35,
+   "kind": "vo",
+   "dur": 12.57,
+   "voStart": 0.35,
+   "voDur": 11.97,
+   "phrases": [
+    {
+     "text": "And this is where customer voice meets the kitchen.",
+     "s": 0.35,
+     "e": 3.77
+    },
+    {
+     "text": "Recent reviews called the karipap “basi”,",
+     "s": 4.39,
+     "e": 7.07
+    },
+    {
+     "text": "so the planner flags it,",
+     "s": 7.61,
+     "e": 9.41
+    },
+    {
+     "text": "cuts the batch,",
+     "s": 10.09,
+     "e": 10.95
+    },
+    {
+     "text": "and says why.",
+     "s": 10.95,
+     "e": 12.07
+    }
+   ]
+  },
+  {
+   "id": "14",
+   "start": 123.92,
+   "kind": "vo",
+   "dur": 8.73,
+   "voStart": 0.35,
+   "voDur": 8.13,
+   "phrases": [
+    {
+     "text": "INSIGHTAID reads customer opinion",
+     "s": 0.92,
+     "e": 3.05
+    },
+    {
+     "text": "in Bahasa Melayu, English and Mandarin,",
+     "s": 3.05,
+     "e": 6.01
+    },
+    {
+     "text": "including mixed sentences.",
+     "s": 6.43,
+     "e": 8.23
+    }
+   ]
+  },
+  {
+   "id": "15",
+   "start": 132.65,
+   "kind": "vo",
+   "dur": 7.11,
+   "voStart": 0.35,
+   "voDur": 6.49,
+   "phrases": [
+    {
+     "text": "When complaints suddenly rise,",
+     "s": 0.35,
+     "e": 2.53
+    },
+    {
+     "text": "it raises an alert",
+     "s": 2.91,
+     "e": 4.11
+    },
+    {
+     "text": "and shows the evidence behind it.",
+     "s": 4.11,
+     "e": 6.61
+    }
+   ]
+  },
+  {
+   "id": "16",
+   "start": 139.76,
+   "kind": "vo",
+   "dur": 7.47,
+   "voStart": 0.35,
+   "voDur": 6.87,
+   "phrases": [
+    {
+     "text": "Recommendations come from clear rules.",
+     "s": 0.35,
+     "e": 3.05
+    },
+    {
+     "text": "The AI only explains them",
+     "s": 3.57,
+     "e": 5.35
+    },
+    {
+     "text": "in plain language.",
+     "s": 5.35,
+     "e": 6.97
+    }
+   ]
+  },
+  {
+   "id": "C4",
+   "start": 147.23,
+   "kind": "chapter",
+   "num": "04",
+   "name": "Impacts",
+   "dur": 1.9
+  },
+  {
+   "id": "17",
+   "start": 149.13,
+   "kind": "vo",
+   "dur": 17.77,
+   "voStart": 0.35,
+   "voDur": 17.13,
+   "phrases": [
+    {
+     "text": "Does it help?",
+     "s": 0.35,
+     "e": 1.77
+    },
+    {
+     "text": "We replayed four weeks two ways.",
+     "s": 2.31,
+     "e": 4.49
+    },
+    {
+     "text": "Waste fell from nine hundred and fifty-one ringgit",
+     "s": 4.97,
+     "e": 8.51
+    },
+    {
+     "text": "to four hundred and ninety-nine ringgit,",
+     "s": 8.51,
+     "e": 11.29
+    },
+    {
+     "text": "forty-seven point six percent less,",
+     "s": 11.72,
+     "e": 14.31
+    },
+    {
+     "text": "in a simulation on synthetic data.",
+     "s": 14.31,
+     "e": 17.27
+    }
+   ]
+  },
+  {
+   "id": "18",
+   "start": 166.9,
+   "kind": "vo",
+   "dur": 8.99,
+   "voStart": 0.35,
+   "voDur": 8.37,
+   "phrases": [
+    {
+     "text": "We show the trade-off too:",
+     "s": 0.35,
+     "e": 2.41
+    },
+    {
+     "text": "it ran out of stock more often.",
+     "s": 3.23,
+     "e": 5.27
+    },
+    {
+     "text": "The buffer is how he balances it.",
+     "s": 6.01,
+     "e": 8.49
+    }
+   ]
+  },
+  {
+   "id": "19",
+   "start": 175.89,
+   "kind": "vo",
+   "dur": 6.57,
+   "voStart": 0.35,
+   "voDur": 5.97,
+   "phrases": [
+    {
+     "text": "We set our targets before building anything,",
+     "s": 0.35,
+     "e": 2.81
+    },
+    {
+     "text": "and we publish every result,",
+     "s": 2.81,
+     "e": 4.83
+    },
+    {
+     "text": "including the misses.",
+     "s": 4.83,
+     "e": 6.07
+    }
+   ]
+  },
+  {
+   "id": "20",
+   "start": 182.46,
+   "kind": "vo",
+   "dur": 10.77,
+   "voStart": 0.35,
+   "voDur": 10.23,
+   "phrases": [
+    {
+     "text": "Our multilingual model reached eighty-four point one percent accuracy",
+     "s": 0.35,
+     "e": 5.21
+    },
+    {
+     "text": "on over ten thousand test comments,",
+     "s": 5.21,
+     "e": 7.53
+    },
+    {
+     "text": "above target in all three languages.",
+     "s": 7.81,
+     "e": 10.27
+    }
+   ]
+  },
+  {
+   "id": "21",
+   "start": 193.23,
+   "kind": "vo",
+   "dur": 12.23,
+   "voStart": 0.35,
+   "voDur": 11.98,
+   "phrases": [
+    {
+     "text": "Every analysis page loads in under three seconds.",
+     "s": 0.35,
+     "e": 4.15
+    },
+    {
+     "text": "Our sales forecast met its accuracy target",
+     "s": 4.97,
+     "e": 8.05
+    },
+    {
+     "text": "in one of three tests,",
+     "s": 8.05,
+     "e": 10.29
+    },
+    {
+     "text": "and we say so.",
+     "s": 10.29,
+     "e": 11.73
+    }
+   ]
+  },
+  {
+   "id": "C5",
+   "start": 205.46,
+   "kind": "chapter",
+   "num": "05",
+   "name": "Commercialisation potential",
+   "dur": 1.9
+  },
+  {
+   "id": "22",
+   "start": 207.36,
+   "kind": "vo",
+   "dur": 9.15,
+   "voStart": 0.35,
+   "voDur": 8.53,
+   "phrases": [
+    {
+     "text": "The model is simple:",
+     "s": 0.35,
+     "e": 1.77
+    },
+    {
+     "text": "free to start,",
+     "s": 2.19,
+     "e": 3.03
+    },
+    {
+     "text": "forty-nine ringgit a month for the full toolkit,",
+     "s": 3.32,
+     "e": 6.07
+    },
+    {
+     "text": "and plans for multi-outlet operators.",
+     "s": 6.07,
+     "e": 8.44
+    }
+   ]
+  },
+  {
+   "id": "23",
+   "start": 216.51,
+   "kind": "vo",
+   "dur": 10.15,
+   "voStart": 0.35,
+   "voDur": 9.51,
+   "phrases": [
+    {
+     "text": "It runs on free-tier cloud and open-source models,",
+     "s": 0.35,
+     "e": 3.99
+    },
+    {
+     "text": "so it stays affordable,",
+     "s": 4.63,
+     "e": 6.35
+    },
+    {
+     "text": "and anyone can try it before signing up.",
+     "s": 6.35,
+     "e": 9.45
+    }
+   ]
+  },
+  {
+   "id": "24",
+   "start": 226.66,
+   "kind": "vo",
+   "dur": 7.83,
+   "voStart": 0.35,
+   "voDur": 7.25,
+   "phrases": [
+    {
+     "text": "Our next step is a pilot with a real campus cooperative,",
+     "s": 0.35,
+     "e": 4.49
+    },
+    {
+     "text": "then koperasi networks across Malaysia.",
+     "s": 4.49,
+     "e": 7.33
+    }
+   ]
+  },
+  {
+   "id": "25",
+   "start": 234.49,
+   "kind": "vo",
+   "dur": 7.03,
+   "voStart": 0.35,
+   "voDur": 6.42,
+   "phrases": [
+    {
+     "text": "INSIGHTAID AI won a Silver Award at AIMIX IID 2026,",
+     "s": 0.62,
+     "e": 4.75
+    },
+    {
+     "text": "and this is only the start.",
+     "s": 4.75,
+     "e": 6.53
+    }
+   ]
+  },
+  {
+   "id": "C6",
+   "start": 241.52,
+   "kind": "chapter",
+   "num": "06",
+   "name": "Copyright",
+   "dur": 1.9
+  },
+  {
+   "id": "27",
+   "start": 243.42,
+   "kind": "vo",
+   "dur": 5.19,
+   "voStart": 0.35,
+   "voDur": 4.61,
+   "phrases": [
+    {
+     "text": "The software is the author's own work,",
+     "s": 0.35,
+     "e": 3.29
+    },
+    {
+     "text": "all rights reserved.",
+     "s": 3.87,
+     "e": 4.69
+    }
+   ]
+  },
+  {
+   "id": "28",
+   "start": 248.61,
+   "kind": "vo",
+   "dur": 10.89,
+   "voStart": 0.35,
+   "voDur": 10.27,
+   "phrases": [
+    {
+     "text": "A koperasi manager doesn't need a data scientist.",
+     "s": 0.35,
+     "e": 3.97
+    },
+    {
+     "text": "He needs to know what to cook tomorrow,",
+     "s": 4.55,
+     "e": 6.83
+    },
+    {
+     "text": "and why.",
+     "s": 7.45,
+     "e": 7.95
+    },
+    {
+     "text": "That's what INSIGHTAID AI does.",
+     "s": 8.49,
+     "e": 10.39
+    }
+   ]
+  },
+  {
+   "id": "29",
+   "start": 259.5,
+   "kind": "vo",
+   "dur": 7.85,
+   "voStart": 0.35,
+   "voDur": 4.05,
+   "phrases": [
+    {
+     "text": "Scan the code",
+     "s": 0.35,
+     "e": 1.53
+    },
+    {
+     "text": "and try it yourself.",
+     "s": 1.53,
+     "e": 2.67
+    },
+    {
+     "text": "No sign-up needed.",
+     "s": 3.13,
+     "e": 4.15
+    }
+   ]
+  },
+  {
+   "id": "30",
+   "start": 267.35,
+   "kind": "outro",
+   "dur": 4.5
+  }
+ ],
+ "cues": [
+  {
+   "s": 0.0,
+   "e": 3.2,
+   "text": "Hi, I am Muhammad Danish Alif Bin Azrul,"
+  },
+  {
+   "s": 3.24,
+   "e": 5.9,
+   "text": "I am from Universiti Teknologi PETRONAS,"
+  },
+  {
+   "s": 5.94,
+   "e": 8.37,
+   "text": "and this is INSIGHTAID AI."
+  },
+  {
+   "s": 17.77,
+   "e": 19.34,
+   "text": "Six thirty in the morning."
+  },
+  {
+   "s": 19.38,
+   "e": 21.44,
+   "text": "A koperasi manager has to decide"
+  },
+  {
+   "s": 21.48,
+   "e": 24.31,
+   "text": "how much nasi lemak to make today."
+  },
+  {
+   "s": 24.73,
+   "e": 28.19,
+   "text": "Make too much, and it goes in the bin."
+  },
+  {
+   "s": 28.23,
+   "e": 31.92,
+   "text": "Make too little, and students leave hungry."
+  },
+  {
+   "s": 32.34,
+   "e": 35.78,
+   "text": "And customers are already saying what went wrong,"
+  },
+  {
+   "s": 35.82,
+   "e": 37.67,
+   "text": "in three languages."
+  },
+  {
+   "s": 38.09,
+   "e": 41.52,
+   "text": "Business intelligence tools are expensive,"
+  },
+  {
+   "s": 41.73,
+   "e": 44.97,
+   "text": "feedback arrives in Bahasa Melayu, English and Mandarin,"
+  },
+  {
+   "s": 45.01,
+   "e": 50.46,
+   "text": "and most owners only react after the damage is done."
+  },
+  {
+   "s": 53.42,
+   "e": 56.78,
+   "text": "INSIGHTAID AI turns sales and customer reviews"
+  },
+  {
+   "s": 56.82,
+   "e": 61.33,
+   "text": "into daily decisions. You can try it right now:"
+  },
+  {
+   "s": 61.58,
+   "e": 63.59,
+   "text": "no account, one click."
+  },
+  {
+   "s": 64.01,
+   "e": 69.0,
+   "text": "Every visitor gets a private copy of Koperasi Siswa Maju,"
+  },
+  {
+   "s": 69.05,
+   "e": 71.76,
+   "text": "a fictional campus cooperative."
+  },
+  {
+   "s": 72.23,
+   "e": 75.7,
+   "text": "Its data is synthetic, and the app says so."
+  },
+  {
+   "s": 76.12,
+   "e": 79.39,
+   "text": "Sales and reviews go through the same pipeline"
+  },
+  {
+   "s": 79.64,
+   "e": 83.45,
+   "text": "a real upload would. Nothing is pre-baked."
+  },
+  {
+   "s": 83.87,
+   "e": 87.83,
+   "text": "This is the Prep and Stock Planner. For tomorrow,"
+  },
+  {
+   "s": 87.87,
+   "e": 91.0,
+   "text": "it says how much of each item to prepare."
+  },
+  {
+   "s": 91.42,
+   "e": 95.37,
+   "text": "Not a black box: every number shows its reason."
+  },
+  {
+   "s": 95.46,
+   "e": 99.95,
+   "text": "Expected sales come from the same weekday over four weeks,"
+  },
+  {
+   "s": 100.18,
+   "e": 103.37,
+   "text": "plus a safety buffer the manager controls."
+  },
+  {
+   "s": 103.79,
+   "e": 107.62,
+   "text": "More buffer means fewer sold-out items,"
+  },
+  {
+   "s": 107.87,
+   "e": 111.2,
+   "text": "but more risk of waste. He decides."
+  },
+  {
+   "s": 111.62,
+   "e": 115.47,
+   "text": "And this is where customer voice meets the kitchen."
+  },
+  {
+   "s": 115.66,
+   "e": 118.77,
+   "text": "Recent reviews called the karipap \"basi\","
+  },
+  {
+   "s": 118.88,
+   "e": 122.18,
+   "text": "so the planner flags it, cuts the batch,"
+  },
+  {
+   "s": 122.22,
+   "e": 123.77,
+   "text": "and says why."
+  },
+  {
+   "s": 124.76,
+   "e": 126.85,
+   "text": "INSIGHTAID reads customer opinion"
+  },
+  {
+   "s": 126.89,
+   "e": 130.23,
+   "text": "in Bahasa Melayu, English and Mandarin,"
+  },
+  {
+   "s": 130.27,
+   "e": 132.5,
+   "text": "including mixed sentences."
+  },
+  {
+   "s": 132.92,
+   "e": 136.64,
+   "text": "When complaints suddenly rise, it raises an alert"
+  },
+  {
+   "s": 136.68,
+   "e": 139.61,
+   "text": "and shows the evidence behind it."
+  },
+  {
+   "s": 140.03,
+   "e": 143.16,
+   "text": "Recommendations come from clear rules."
+  },
+  {
+   "s": 143.25,
+   "e": 147.08,
+   "text": "The AI only explains them in plain language."
+  },
+  {
+   "s": 149.4,
+   "e": 153.97,
+   "text": "Does it help? We replayed four weeks two ways."
+  },
+  {
+   "s": 154.02,
+   "e": 157.52,
+   "text": "Waste fell from nine hundred and fifty-one ringgit"
+  },
+  {
+   "s": 157.56,
+   "e": 160.73,
+   "text": "to four hundred and ninety-nine ringgit,"
+  },
+  {
+   "s": 160.77,
+   "e": 163.32,
+   "text": "forty-seven point six percent less,"
+  },
+  {
+   "s": 163.36,
+   "e": 166.75,
+   "text": "in a simulation on synthetic data."
+  },
+  {
+   "s": 167.17,
+   "e": 169.66,
+   "text": "We show the trade-off too:"
+  },
+  {
+   "s": 170.05,
+   "e": 172.52,
+   "text": "it ran out of stock more often."
+  },
+  {
+   "s": 172.83,
+   "e": 175.74,
+   "text": "The buffer is how he balances it."
+  },
+  {
+   "s": 176.16,
+   "e": 178.58,
+   "text": "We set our targets before building anything,"
+  },
+  {
+   "s": 178.62,
+   "e": 182.31,
+   "text": "and we publish every result, including the misses."
+  },
+  {
+   "s": 182.73,
+   "e": 187.55,
+   "text": "Our multilingual model reached eighty-four point one percent accuracy"
+  },
+  {
+   "s": 187.59,
+   "e": 190.15,
+   "text": "on over ten thousand test comments,"
+  },
+  {
+   "s": 190.19,
+   "e": 193.08,
+   "text": "above target in all three languages."
+  },
+  {
+   "s": 193.5,
+   "e": 197.73,
+   "text": "Every analysis page loads in under three seconds."
+  },
+  {
+   "s": 198.12,
+   "e": 201.16,
+   "text": "Our sales forecast met its accuracy target"
+  },
+  {
+   "s": 201.2,
+   "e": 205.31,
+   "text": "in one of three tests, and we say so."
+  },
+  {
+   "s": 207.63,
+   "e": 210.56,
+   "text": "The model is simple: free to start,"
+  },
+  {
+   "s": 210.6,
+   "e": 213.31,
+   "text": "forty-nine ringgit a month for the full toolkit,"
+  },
+  {
+   "s": 213.35,
+   "e": 216.15,
+   "text": "and plans for multi-outlet operators."
+  },
+  {
+   "s": 216.78,
+   "e": 220.85,
+   "text": "It runs on free-tier cloud and open-source models,"
+  },
+  {
+   "s": 221.06,
+   "e": 222.74,
+   "text": "so it stays affordable,"
+  },
+  {
+   "s": 222.78,
+   "e": 226.31,
+   "text": "and anyone can try it before signing up."
+  },
+  {
+   "s": 226.93,
+   "e": 231.03,
+   "text": "Our next step is a pilot with a real campus cooperative,"
+  },
+  {
+   "s": 231.07,
+   "e": 234.34,
+   "text": "then koperasi networks across Malaysia."
+  },
+  {
+   "s": 235.03,
+   "e": 239.12,
+   "text": "INSIGHTAID AI won a Silver Award at AIMIX IID 2026,"
+  },
+  {
+   "s": 239.16,
+   "e": 241.37,
+   "text": "and this is only the start."
+  },
+  {
+   "s": 243.69,
+   "e": 247.06,
+   "text": "The software is the author's own work,"
+  },
+  {
+   "s": 247.21,
+   "e": 248.46,
+   "text": "all rights reserved."
+  },
+  {
+   "s": 248.88,
+   "e": 252.93,
+   "text": "A koperasi manager doesn't need a data scientist."
+  },
+  {
+   "s": 253.08,
+   "e": 256.91,
+   "text": "He needs to know what to cook tomorrow, and why."
+  },
+  {
+   "s": 257.02,
+   "e": 259.35,
+   "text": "That's what INSIGHTAID AI does."
+  },
+  {
+   "s": 259.77,
+   "e": 262.51,
+   "text": "Scan the code and try it yourself."
+  },
+  {
+   "s": 262.55,
+   "e": 264.0,
+   "text": "No sign-up needed."
+  }
+ ]
+}

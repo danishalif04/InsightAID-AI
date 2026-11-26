@@ -70,8 +70,21 @@ Fonts: **Manrope** (headings, as the app's UI font), **Inter** (text), **Instrum
 - Screen recordings: 7 clips at 1080p with a visible cursor (`docs/spark/video/screens/`).
 - Sources for all of this: `docs/spark/video_src/`.
 
-## Open before the render
+## Decisions (Danish, 26 Nov 2026)
+
+- Stills approved.
+- **Motion graphics only**: no stock footage. Scenes 3, 4 and 24 are kinetic type and graphics (the 40/80/25 portion counter in scene 4 is labelled "Illustration").
+- **Music: original**, synthesised in `video_src/render/audio.py` (D minor pad, sub bass, pluck arpeggio, soft pulse; no samples, no third-party music), ducked about 11 dB under the voice-over. Sound effects (whooshes, chapter hits, number ticks, the demo click) are synthesised the same way.
+- Publication chapter skipped (none yet); chapters are 01 Introduction, 02 Problem, 03 Solution, 04 Impacts, 05 Commercialisation potential, 06 Copyright.
+
+## Render (26 Nov 2026)
+
+- Length 4:32 (limit 6:30). 1920 × 1080, 30 fps, H.264 + AAC.
+- Captions burned in, and as a separate file for YouTube: [SPARK_VIDEO_CAPTIONS_EN.srt](SPARK_VIDEO_CAPTIONS_EN.srt). Caption **text is the script**; only the timing comes from the recording (Whisper word times), so small slips in the voice-over read correctly on screen.
+- Every number on screen is read from `metrics/spark2026.json` at build time; the build stops if O1 or the response-time verdict is no longer MET, because the narration would then be wrong.
+- The planner recording is cut before its replay table, which was captured at a 20% buffer and shows different totals from the 10% headline figures.
+- Pipeline (sources in `video_src/render/`): `vo_words.py` (word times) → `timeline.py` (scene lengths, captions, .srt) → `build_comp.mjs` (fills `comp.html`) → `render.mjs` (frame-exact Playwright capture into ffmpeg, 4 chunks in parallel) → `audio.py` (score, sound design, ducking; writes music and sfx stems) → `remix.py` (balance: music −7.5 dB, sfx −10 dB) → two-pass loudnorm to −14 LUFS, −1.5 dBTP → mux (H.264 CRF 15, AAC 320k). Output: `docs/spark/video/final/INSIGHTAID_AI_SPARK2026.mp4` (git-ignored, 139 MB).
+
+## Still open
 
 - The end-card QR points to `insightaid-ai.vercel.app/welcome`. The live site still runs `main`, which has no "Try the demo" button yet; `spark-2026` must be merged before the video is published.
-- Stock footage (scenes 3, 4, 24): shortlist from Pexels or Pixabay for approval, or replace these with motion graphics only.
-- Music: one royalty-free track (YouTube Audio Library or Pixabay Music), to be approved.
