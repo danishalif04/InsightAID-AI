@@ -72,3 +72,7 @@ supabase/.branches/
 
 # Word/Excel lock files created while a document is open
 ~$*
+
+# SPARK video media (large files; kept out of git, back up separately)
+video/*
+!video/README.md
