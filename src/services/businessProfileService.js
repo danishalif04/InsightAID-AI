@@ -1,5 +1,6 @@
 import { supabase } from '@/config/supabaseClient'
 import { splitByTable } from '@/utils/businessProfileSchema'
+import { shareInFlight } from '@/utils/shareInFlight'
 
 /**
  * Domain service for the business planning onboarding (FYP2.md §10, §23-27).
@@ -23,7 +24,7 @@ export async function extractProfile(description) {
 }
 
 /** Fetches the current user's profile + assumptions as one flat { values, provenance } shape, or nulls if none saved yet. */
-export async function getProfile() {
+async function readProfile() {
   const [{ data: profile, error: profileError }, { data: assumptions, error: assumptionsError }] = await Promise.all([
     supabase.from('business_profiles').select('*').maybeSingle(),
     supabase.from('business_assumptions').select('*').maybeSingle(),
@@ -47,6 +48,10 @@ export async function getProfile() {
     exists: true,
   }
 }
+
+// The Dashboard and the recommendation context both read the profile on
+// page load; share the request instead of sending it twice.
+export const getProfile = shareInFlight(readProfile)
 
 /** Upserts both tables from one flat { fieldId: value } object plus its provenance map. */
 export async function saveProfile({ values, provenance, dataAvailabilityPath }) {

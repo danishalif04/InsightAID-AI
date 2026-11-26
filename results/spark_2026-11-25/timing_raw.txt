@@ -1,0 +1,351 @@
+﻿SPARK Phase 0 re-measure, 25 Nov 2026, after commit fc82e59 and index migration 0018 applied.
+Production build (npm run build + vite preview), http://localhost:4173. Same spec and method as results/post_submission_2026-11.
+Run 1 is the pre-registered warm-up and is DISCARDED. Runs 2-6 are the five measured runs.
+
+Warm-up run (DISCARDED, not counted):-
+
+Running 1 test using 1 worker
+
+node.exe : (node:27680) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:27680) Wa... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+End-to-end response time (navigation start to network idle)
+  Measured against: http://localhost:4173
+  Dashboard                      1260 ms
+  Sentiment Analysis             1265 ms
+  Forecasting                    1311 ms
+  Crisis Detection               1686 ms
+  Recommendations                3557 ms
+  SLOWEST                        3557 ms (Recommendations)
+  Target < 3000 ms: NOT met
+
+  x  1 [chromium] › e2e\journey-existing-data.spec.js:54:3 › Journey 1 — existing-data walkthrough › open app, log in, switch mode, and view every core page (15.6s)
+
+
+  1) [chromium] › e2e\journey-existing-data.spec.js:54:3 › Journey 1 — existing-data walkthrough › open app, log in, switch mode, and view every core page › View Recommendation 
+
+    Error: Recommendations took 3557ms, target is <3000ms
+
+    expect(received).toBeLessThan(expected)
+
+    Expected: < 3000
+    Received:   3557
+
+      103 |       const elapsedMs = await openTimed(page, '/recommendations', 'Recommendations')
+      104 |       await expect(page.getByRole('heading', { name: 'AI Recommendations' })).toBeVisible()
+    > 105 |       expect.soft(elapsedMs, `Recommendations took ${elapsedMs}ms, target is <3000ms`).toBeLessThan(3000)
+          |                                                                                        ^
+      106 |     })
+      107 |   })
+      108 | })
+        at C:\Users\User\FYP\insightaid-ai\e2e\journey-existing-data.spec.js:105:88
+        at C:\Users\User\FYP\insightaid-ai\e2e\journey-existing-data.spec.js:102:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\journey-existing-data-Jour-a70aa-de-and-view-every-core-page-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\journey-existing-data-Jour-a70aa-de-and-view-every-core-page-chromium\error-context.md
+
+    Error Context: test-results\journey-existing-data-Jour-a70aa-de-and-view-every-core-page-chromium\error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\journey-existing-data-Jour-a70aa-de-and-view-every-core-page-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\journey-existing-data-Jour-a70aa-de-and-view-every-core-page-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › e2e\journey-existing-data.spec.js:54:3 › Journey 1 — existing-data walkthrough › open app, log in, switch mode, and view every core page 
+
+Run 2:-
+
+Running 1 test using 1 worker
+
+node.exe : (node:10784) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:10784) Wa... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+End-to-end response time (navigation start to network idle)
+  Measured against: http://localhost:4173
+  Dashboard                      1192 ms
+  Sentiment Analysis             1206 ms
+  Forecasting                    1313 ms
+  Crisis Detection               1595 ms
+  Recommendations                3527 ms
+  SLOWEST                        3527 ms (Recommendations)
+  Target < 3000 ms: NOT met
+
+  x  1 [chromium] › e2e\journey-existing-data.spec.js:54:3 › Journey 1 — existing-data walkthrough › open app, log in, switch mode, and view every core page (15.0s)
+
+
+  1) [chromium] › e2e\journey-existing-data.spec.js:54:3 › Journey 1 — existing-data walkthrough › open app, log in, switch mode, and view every core page › View Recommendation 
+
+    Error: Recommendations took 3527ms, target is <3000ms
+
+    expect(received).toBeLessThan(expected)
+
+    Expected: < 3000
+    Received:   3527
+
+      103 |       const elapsedMs = await openTimed(page, '/recommendations', 'Recommendations')
+      104 |       await expect(page.getByRole('heading', { name: 'AI Recommendations' })).toBeVisible()
+    > 105 |       expect.soft(elapsedMs, `Recommendations took ${elapsedMs}ms, target is <3000ms`).toBeLessThan(3000)
+          |                                                                                        ^
+      106 |     })
+      107 |   })
+      108 | })
+        at C:\Users\User\FYP\insightaid-ai\e2e\journey-existing-data.spec.js:105:88
+        at C:\Users\User\FYP\insightaid-ai\e2e\journey-existing-data.spec.js:102:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\journey-existing-data-Jour-a70aa-de-and-view-every-core-page-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\journey-existing-data-Jour-a70aa-de-and-view-every-core-page-chromium\error-context.md
+
+    Error Context: test-results\journey-existing-data-Jour-a70aa-de-and-view-every-core-page-chromium\error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\journey-existing-data-Jour-a70aa-de-and-view-every-core-page-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\journey-existing-data-Jour-a70aa-de-and-view-every-core-page-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › e2e\journey-existing-data.spec.js:54:3 › Journey 1 — existing-data walkthrough › open app, log in, switch mode, and view every core page 
+
+Run 3:-
+
+Running 1 test using 1 worker
+
+node.exe : (node:10592) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:10592) Wa... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+End-to-end response time (navigation start to network idle)
+  Measured against: http://localhost:4173
+  Dashboard                      1270 ms
+  Sentiment Analysis             1325 ms
+  Forecasting                    1316 ms
+  Crisis Detection               1522 ms
+  Recommendations                2699 ms
+  SLOWEST                        2699 ms (Recommendations)
+  Target < 3000 ms: met
+
+  ok 1 [chromium] › e2e\journey-existing-data.spec.js:54:3 › Journey 1 — existing-data walkthrough › open app, log in, switch mode, and view every core page (13.4s)
+
+  1 passed (16.5s)
+
+Run 4:-
+
+Running 1 test using 1 worker
+
+node.exe : (node:28152) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:28152) Wa... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+End-to-end response time (navigation start to network idle)
+  Measured against: http://localhost:4173
+  Dashboard                      1157 ms
+  Sentiment Analysis             1213 ms
+  Forecasting                    1331 ms
+  Crisis Detection               1860 ms
+  Recommendations                3429 ms
+  SLOWEST                        3429 ms (Recommendations)
+  Target < 3000 ms: NOT met
+
+  x  1 [chromium] › e2e\journey-existing-data.spec.js:54:3 › Journey 1 — existing-data walkthrough › open app, log in, switch mode, and view every core page (15.3s)
+
+
+  1) [chromium] › e2e\journey-existing-data.spec.js:54:3 › Journey 1 — existing-data walkthrough › open app, log in, switch mode, and view every core page › View Recommendation 
+
+    Error: Recommendations took 3429ms, target is <3000ms
+
+    expect(received).toBeLessThan(expected)
+
+    Expected: < 3000
+    Received:   3429
+
+      103 |       const elapsedMs = await openTimed(page, '/recommendations', 'Recommendations')
+      104 |       await expect(page.getByRole('heading', { name: 'AI Recommendations' })).toBeVisible()
+    > 105 |       expect.soft(elapsedMs, `Recommendations took ${elapsedMs}ms, target is <3000ms`).toBeLessThan(3000)
+          |                                                                                        ^
+      106 |     })
+      107 |   })
+      108 | })
+        at C:\Users\User\FYP\insightaid-ai\e2e\journey-existing-data.spec.js:105:88
+        at C:\Users\User\FYP\insightaid-ai\e2e\journey-existing-data.spec.js:102:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\journey-existing-data-Jour-a70aa-de-and-view-every-core-page-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\journey-existing-data-Jour-a70aa-de-and-view-every-core-page-chromium\error-context.md
+
+    Error Context: test-results\journey-existing-data-Jour-a70aa-de-and-view-every-core-page-chromium\error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\journey-existing-data-Jour-a70aa-de-and-view-every-core-page-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\journey-existing-data-Jour-a70aa-de-and-view-every-core-page-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › e2e\journey-existing-data.spec.js:54:3 › Journey 1 — existing-data walkthrough › open app, log in, switch mode, and view every core page 
+
+Run 5:-
+
+Running 1 test using 1 worker
+
+node.exe : (node:23912) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:23912) Wa... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+End-to-end response time (navigation start to network idle)
+  Measured against: http://localhost:4173
+  Dashboard                      1227 ms
+  Sentiment Analysis             1190 ms
+  Forecasting                    1295 ms
+  Crisis Detection               1548 ms
+  Recommendations                3739 ms
+  SLOWEST                        3739 ms (Recommendations)
+  Target < 3000 ms: NOT met
+
+  x  1 [chromium] › e2e\journey-existing-data.spec.js:54:3 › Journey 1 — existing-data walkthrough › open app, log in, switch mode, and view every core page (15.1s)
+
+
+  1) [chromium] › e2e\journey-existing-data.spec.js:54:3 › Journey 1 — existing-data walkthrough › open app, log in, switch mode, and view every core page › View Recommendation 
+
+    Error: Recommendations took 3739ms, target is <3000ms
+
+    expect(received).toBeLessThan(expected)
+
+    Expected: < 3000
+    Received:   3739
+
+      103 |       const elapsedMs = await openTimed(page, '/recommendations', 'Recommendations')
+      104 |       await expect(page.getByRole('heading', { name: 'AI Recommendations' })).toBeVisible()
+    > 105 |       expect.soft(elapsedMs, `Recommendations took ${elapsedMs}ms, target is <3000ms`).toBeLessThan(3000)
+          |                                                                                        ^
+      106 |     })
+      107 |   })
+      108 | })
+        at C:\Users\User\FYP\insightaid-ai\e2e\journey-existing-data.spec.js:105:88
+        at C:\Users\User\FYP\insightaid-ai\e2e\journey-existing-data.spec.js:102:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\journey-existing-data-Jour-a70aa-de-and-view-every-core-page-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\journey-existing-data-Jour-a70aa-de-and-view-every-core-page-chromium\error-context.md
+
+    Error Context: test-results\journey-existing-data-Jour-a70aa-de-and-view-every-core-page-chromium\error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\journey-existing-data-Jour-a70aa-de-and-view-every-core-page-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\journey-existing-data-Jour-a70aa-de-and-view-every-core-page-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › e2e\journey-existing-data.spec.js:54:3 › Journey 1 — existing-data walkthrough › open app, log in, switch mode, and view every core page 
+
+Run 6:-
+
+Running 1 test using 1 worker
+
+node.exe : (node:10064) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:10064) Wa... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+End-to-end response time (navigation start to network idle)
+  Measured against: http://localhost:4173
+  Dashboard                      1334 ms
+  Sentiment Analysis             1236 ms
+  Forecasting                    1251 ms
+  Crisis Detection               1434 ms
+  Recommendations                3172 ms
+  SLOWEST                        3172 ms (Recommendations)
+  Target < 3000 ms: NOT met
+
+  x  1 [chromium] › e2e\journey-existing-data.spec.js:54:3 › Journey 1 — existing-data walkthrough › open app, log in, switch mode, and view every core page (15.2s)
+
+
+  1) [chromium] › e2e\journey-existing-data.spec.js:54:3 › Journey 1 — existing-data walkthrough › open app, log in, switch mode, and view every core page › View Recommendation 
+
+    Error: Recommendations took 3172ms, target is <3000ms
+
+    expect(received).toBeLessThan(expected)
+
+    Expected: < 3000
+    Received:   3172
+
+      103 |       const elapsedMs = await openTimed(page, '/recommendations', 'Recommendations')
+      104 |       await expect(page.getByRole('heading', { name: 'AI Recommendations' })).toBeVisible()
+    > 105 |       expect.soft(elapsedMs, `Recommendations took ${elapsedMs}ms, target is <3000ms`).toBeLessThan(3000)
+          |                                                                                        ^
+      106 |     })
+      107 |   })
+      108 | })
+        at C:\Users\User\FYP\insightaid-ai\e2e\journey-existing-data.spec.js:105:88
+        at C:\Users\User\FYP\insightaid-ai\e2e\journey-existing-data.spec.js:102:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\journey-existing-data-Jour-a70aa-de-and-view-every-core-page-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\journey-existing-data-Jour-a70aa-de-and-view-every-core-page-chromium\error-context.md
+
+    Error Context: test-results\journey-existing-data-Jour-a70aa-de-and-view-every-core-page-chromium\error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\journey-existing-data-Jour-a70aa-de-and-view-every-core-page-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\journey-existing-data-Jour-a70aa-de-and-view-every-core-page-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › e2e\journey-existing-data.spec.js:54:3 › Journey 1 — existing-data walkthrough › open app, log in, switch mode, and view every core page 
+

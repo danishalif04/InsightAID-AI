@@ -20,6 +20,16 @@ const QRCode = createRequire(process.env.QRTOOL + '/package.json')('qrcode')
 
 const P = path.join(ROOT, 'poster')
 
+// Which poster: `node poster/build/build.mjs` builds AIMIX (unchanged);
+// `node poster/build/build.mjs spark` builds the SPARK 2026 poster.
+const EVENT = process.argv[2] ?? 'aimix'
+const EVENTS = {
+  aimix: { template: 'build/template.html', html: 'index.html', pdf: 'insightaid_poster.pdf', png: 'insightaid_poster_preview.png' },
+  spark: { template: 'build/template.spark.html', html: 'spark2026.html', pdf: 'insightaid_spark2026_poster.pdf', png: 'insightaid_spark2026_poster_preview.png' },
+}
+const OUT = EVENTS[EVENT]
+if (!OUT) throw new Error('unknown event: ' + EVENT)
+
 // ------------------------------------------------------------- real numbers
 const scorecard = fs.readFileSync(path.join(ROOT, 'ml/sentiment/results/O1_SCORECARD.md'), 'utf8')
 const sent = {}
@@ -101,12 +111,58 @@ async function qr(url, label) {
   const svg = await QRCode.toString(url, { type: 'svg', margin: 2, errorCorrectionLevel: 'M', color: { dark: '#052E16', light: '#FFFFFF' } })
   return `<div class="qr">${svg}</div><div class="qr-label">${label}</div>`
 }
-const qrVideo = await qr(links.video, 'Watch the demo video')
+const qrVideo = EVENT === 'spark' ? await qr(links.spark_video, 'Watch the SPARK video') : await qr(links.video, 'Watch the demo video')
 const qrGithub = await qr(links.github, 'Source code · GitHub')
-const qrApp = links.app ? await qr(links.app, 'Try the live app') : ''
+const qrApp = EVENT === 'spark'
+  ? await qr(links.app ? links.app + '/welcome' : '', 'Try the demo, no sign up')
+  : links.app ? await qr(links.app, 'Try the live app') : ''
+
+// SPARK only: the waste replay, read from metrics/spark2026.json (built by
+// node scripts/build-spark-metrics.mjs from the synthetic Koperasi data).
+const spark = JSON.parse(fs.readFileSync(path.join(ROOT, 'metrics/spark2026.json'), 'utf8'))
+const w = spark.waste
+if (EVENT === 'spark' && !w.synthetic) throw new Error('waste replay must come from the labelled synthetic dataset')
+
+// ------------------------------------------------------------- SPARK light charts
+// Same numbers, drawn for the light ISPARK template.
+function lightBars({ rows, max, target, targetLabel, unit = '%', w = 760, rowH = 74, labelW = 210, valueFmt = (v) => f2(v) + unit }) {
+  const h = rows.length * rowH + 56
+  const x = (v) => labelW + (v / max) * (w - labelW - 190)
+  let s = `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" font-family="Inter, Arial, sans-serif">`
+  rows.forEach((r, i) => {
+    const y = i * rowH + 8
+    s += `<text x="${labelW - 16}" y="${y + rowH / 2}" fill="#1E2F42" font-size="32" font-weight="700" text-anchor="end" dominant-baseline="middle">${r.label}</text>`
+    s += `<rect x="${labelW}" y="${y + 10}" width="${w - labelW - 190}" height="${rowH - 24}" rx="12" fill="#E3ECF7"/>`
+    s += `<rect x="${labelW}" y="${y + 10}" width="${Math.max(4, x(r.value) - labelW)}" height="${rowH - 24}" rx="12" fill="${r.color}"/>`
+    s += `<text x="${x(r.value) + 12}" y="${y + rowH / 2}" fill="#1E2F42" font-size="34" font-weight="800" dominant-baseline="middle">${valueFmt(r.value)}</text>`
+  })
+  if (target != null) {
+    const tx = x(target)
+    s += `<line x1="${tx}" x2="${tx}" y1="2" y2="${rows.length * rowH + 10}" stroke="#B45309" stroke-width="3" stroke-dasharray="8 7"/>`
+    s += `<text x="${tx}" y="${rows.length * rowH + 44}" fill="#B45309" font-size="27" font-weight="700" text-anchor="middle">${targetLabel}</text>`
+  }
+  return s + '</svg>'
+}
+const sparkMeta = JSON.parse(fs.readFileSync(path.join(P, 'spark_meta.json'), 'utf8'))
+const chartLangLight = lightBars({
+  rows: [
+    { label: 'English', value: sent.xlmr.en, color: '#22C55E' },
+    { label: 'B. Melayu', value: sent.xlmr.ms, color: '#16A34A' },
+    { label: '中文', value: sent.xlmr.zh, color: '#15803D' },
+  ],
+  max: 100, target: 75, targetLabel: 'target ≥ 75% each',
+})
+const wasteMax = Math.ceil(w.lastWeekHabit.wasteRM / 100) * 100
+const chartWasteLight = lightBars({
+  rows: [
+    { label: 'Last week', value: w.lastWeekHabit.wasteRM, color: '#94A3B8' },
+    { label: 'Forecast', value: w.forecastHabit.wasteRM, color: '#22C55E' },
+  ],
+  max: wasteMax, valueFmt: (v) => 'RM ' + f2(v), labelW: 200,
+})
 
 // ------------------------------------------------------------- fill template
-let html = fs.readFileSync(path.join(P, 'build/template.html'), 'utf8')
+let html = fs.readFileSync(path.join(P, OUT.template), 'utf8')
 const fill = {
   CHART_MODELS: chartModels,
   CHART_LANG: chartLang,
@@ -120,17 +176,35 @@ const fill = {
   RUN,
   DM_WINS: String(dmSignificantWins),
   N_DM: String(dm.length),
+  WASTE_BEFORE: f2(w.lastWeekHabit.wasteRM),
+  WASTE_AFTER: f2(w.forecastHabit.wasteRM),
+  WASTE_PCT: w.savingPct.toFixed(1),
+  SHORT_BEFORE: String(w.lastWeekHabit.stockoutUnits),
+  SHORT_AFTER: String(w.forecastHabit.stockoutUnits),
+  WASTE_DAYS: String(w.settings.replayDays),
+  WASTE_BUFFER: String(w.settings.bufferPct),
+  RT_PASS: String(spark.o3.responseTime.passing),
+  RT_PAGES: String(spark.o3.responseTime.pageCount),
+  XLMR_EN: f2(sent.xlmr.en) + '%',
+  XLMR_MS: f2(sent.xlmr.ms) + '%',
+  XLMR_ZH: f2(sent.xlmr.zh) + '%',
+  CHART_LANG_LIGHT: chartLangLight,
+  CHART_WASTE_LIGHT: chartWasteLight,
+  SUBTHEME: sparkMeta.subtheme,
+  CATEGORY: sparkMeta.category,
+  INSTITUTION: sparkMeta.institution,
+  PROJECT_ID: sparkMeta.projectId ? sparkMeta.projectId : '<span class="pending">PENDING: from registration</span>',
 }
 for (const [k, v] of Object.entries(fill)) html = html.replaceAll(`{{${k}}}`, v)
 const left = html.match(/\{\{[A-Z_]+\}\}/g)
 if (left) throw new Error('unfilled placeholders: ' + left.join(', '))
-fs.writeFileSync(path.join(P, 'index.html'), html)
+fs.writeFileSync(path.join(P, OUT.html), html)
 console.log('sentiment', sent.xlmr, '| MAPE best', best.map((b) => `${b.key}=${f2(b.mape)} (${b.model})`).join(', '), '| DM sig. wins', dmSignificantWins, '/', dm.length)
 
 // ------------------------------------------------------------- render
 const browser = await chromium.launch()
 const page = await browser.newPage({ viewport: { width: 2245, height: 3179 }, deviceScaleFactor: 2480 / 2245 })
-await page.goto('file:///' + path.join(P, 'index.html').replace(/\\/g, '/'))
+await page.goto('file:///' + path.join(P, OUT.html).replace(/\\/g, '/'))
 await page.waitForLoadState('networkidle')
 await page.evaluate(() => document.fonts.ready)
 // Fit: scale the whole layout so its natural height fills the frame exactly.
@@ -162,8 +236,8 @@ const over = await page.evaluate(() => {
   return { content: document.querySelector('.content').scrollHeight, frame: document.querySelector('.content').clientHeight, out }
 })
 console.log('layout', JSON.stringify(over))
-await page.screenshot({ path: path.join(P, 'insightaid_poster_preview.png'), clip: { x: 0, y: 0, width: 2245, height: 3179 } })
-await page.pdf({ path: path.join(P, 'insightaid_poster.pdf'), width: '594mm', height: '841mm', printBackground: true, pageRanges: '1' })
+await page.screenshot({ path: path.join(P, OUT.png), clip: { x: 0, y: 0, width: 2245, height: 3179 } })
+await page.pdf({ path: path.join(P, OUT.pdf), width: '594mm', height: '841mm', printBackground: true, pageRanges: '1' })
 await browser.close()
 const mb = (f) => (fs.statSync(path.join(P, f)).size / 1048576).toFixed(2) + ' MB'
-console.log('wrote insightaid_poster.pdf', mb('insightaid_poster.pdf'), '| preview', mb('insightaid_poster_preview.png'))
+console.log('wrote', OUT.pdf, mb(OUT.pdf), '| preview', mb(OUT.png))

@@ -1,0 +1,673 @@
+<!doctype html>
+<html><head><meta charset="utf-8" />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@1&family=Noto+Sans+SC:wght@500;700&display=block" rel="stylesheet" />
+<style>
+  /* Colours = the app's own dark-glow tokens (src/styles/index.css). */
+  :root { --bg:#050807; --surface:#0a100d; --elev:#0f1713; --border:rgba(255,255,255,.09); --text:#f2f5f3; --muted:#9aa8a1;
+          --brand:#22c55e; --emerald:#10b981; --mint:#6ee7b7; --amber:#cf7b0f; --amberT:#f5b04a; --red:#dc2626; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html, body { background:#000; width:1920px; height:1080px; overflow:hidden; }
+  body { font-family:Inter, sans-serif; color:var(--text); }
+  #root { position:relative; width:1920px; height:1080px; overflow:hidden; background:var(--bg); }
+  #bgglow { position:absolute; inset:-200px; background: radial-gradient(900px 620px at 72% 30%, rgba(34,197,94,.19), transparent 70%), radial-gradient(800px 520px at 12% 96%, rgba(16,185,129,.12), transparent 70%); }
+  #bgdots { position:absolute; inset:-80px; background-image: radial-gradient(rgba(255,255,255,.05) 1.2px, transparent 1.2px); background-size:36px 36px; }
+  .scene { position:absolute; inset:0; display:none; transform-origin:50% 50%; }
+  .chapter { position:absolute; left:80px; top:58px; display:flex; gap:14px; align-items:center; font-family:Manrope; font-weight:800; font-size:22px; letter-spacing:.18em; color:var(--mint); z-index:5; }
+  .chapter i { font-style:normal; color:var(--muted); }
+  .tagbox { position:absolute; right:80px; top:50px; z-index:5; }
+  .tag { display:inline-flex; align-items:center; gap:10px; padding:8px 16px; border-radius:999px; font-size:18px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; white-space:nowrap; }
+  .tag.real { color:var(--mint); background:rgba(16,185,129,.12); border:1px solid rgba(110,231,183,.35); }
+  .tag.sim { color:var(--amberT); background:rgba(207,123,15,.14); border:1px solid rgba(207,123,15,.55); }
+  .tag.met { color:var(--mint); background:rgba(16,185,129,.12); border:1px solid rgba(110,231,183,.45); }
+  .tag.part { color:var(--amberT); background:rgba(207,123,15,.14); border:1px solid rgba(207,123,15,.55); }
+  .kin { font-family:Manrope; font-weight:800; letter-spacing:-.03em; line-height:1.04; }
+  .kin em, em.g { font-style:normal; background:linear-gradient(100deg,var(--mint),var(--brand) 55%,#a3e635); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .serif { font-family:'Instrument Serif'; font-style:italic; }
+  .stage3d { position:absolute; inset:0; perspective:2200px; perspective-origin:50% 45%; }
+  .panel { position:absolute; border-radius:18px; overflow:hidden; border:1px solid rgba(255,255,255,.12); box-shadow:0 50px 120px rgba(0,0,0,.65), 0 0 0 1px rgba(34,197,94,.08); background:#050807; }
+  .panel img { display:block; width:100%; }
+  .card { position:absolute; background:rgba(15,23,19,.93); border:1px solid var(--border); border-radius:22px; padding:26px 30px; box-shadow:0 40px 90px rgba(0,0,0,.6); }
+  .review .who { font-size:18px; color:var(--muted); font-weight:600; display:flex; gap:10px; align-items:center; }
+  .review .who b { color:#fca5a5; font-weight:700; }
+  .review p { font-size:30px; font-weight:600; margin-top:10px; line-height:1.3; }
+  .zh { font-family:'Noto Sans SC', Inter, sans-serif; }
+  .stars { color:var(--amberT); letter-spacing:2px; }
+  .ico { width:64px; height:64px; border-radius:18px; display:flex; align-items:center; justify-content:center; background:rgba(34,197,94,.12); border:1px solid rgba(110,231,183,.3); color:var(--mint); }
+  .ico svg { width:34px; height:34px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .ico.amb { background:rgba(207,123,15,.14); border-color:rgba(207,123,15,.5); color:var(--amberT); }
+  .ico.red { background:rgba(220,38,38,.12); border-color:rgba(220,38,38,.45); color:#fca5a5; }
+  .muted { color:var(--muted); }
+  .foot { position:absolute; left:110px; right:110px; bottom:132px; font-size:20px; color:#7d8b84; text-align:center; }
+  /* screen recording panel */
+  .scr { position:absolute; left:50%; top:50%; width:1920px; height:1080px; margin:-540px 0 0 -960px; border-radius:22px; overflow:hidden;
+         border:1px solid rgba(255,255,255,.14); box-shadow:0 60px 160px rgba(0,0,0,.75), 0 0 0 1px rgba(34,197,94,.10), 0 0 120px rgba(34,197,94,.10); background:#050807; }
+  .scr .in { position:absolute; left:0; top:0; width:1920px; height:1080px; transform-origin:0 0; }
+  .scr img { display:block; width:1920px; height:1080px; }
+  #cap { position:absolute; left:50%; bottom:46px; transform:translateX(-50%); max-width:1560px; text-align:center; z-index:50;
+         font-family:Inter; font-weight:600; font-size:40px; line-height:1.28; color:#fff; padding:10px 28px 12px; border-radius:14px;
+         background:rgba(5,8,7,.74); box-shadow:0 0 0 1px rgba(255,255,255,.06); text-shadow:0 2px 6px rgba(0,0,0,.5); }
+  #black { position:absolute; inset:0; background:#000; z-index:100; opacity:0; }
+  .bar { height:22px; border-radius:11px; background:rgba(255,255,255,.07); position:relative; overflow:hidden; }
+  .bar > i { position:absolute; left:0; top:0; bottom:0; border-radius:11px; }
+  .node { position:absolute; width:250px; padding:20px 22px; border-radius:18px; background:rgba(15,23,19,.95); border:1px solid var(--border); text-align:center; font-family:Manrope; font-weight:700; font-size:24px; }
+  .node small { display:block; font-family:Inter; font-weight:500; font-size:17px; color:var(--muted); margin-top:6px; }
+</style></head>
+<body>
+<div id="root">
+  <div id="bgglow"></div><div id="bgdots"></div>
+
+  <!-- 1 INTRODUCTION: mandatory face clip -->
+  <section class="scene" id="sc-1">
+    <img id="face" style="position:absolute;inset:0;width:1920px;height:1080px;object-fit:cover" />
+    <div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(5,8,7,.72) 0%,rgba(5,8,7,.1) 45%,transparent 70%),linear-gradient(0deg,rgba(5,8,7,.6),transparent 42%)"></div>
+    <div class="chapter" id="c1">01 <i>·</i> INTRODUCTION</div>
+    <div id="lower" style="position:absolute;left:80px;bottom:170px;display:flex;gap:22px;align-items:stretch">
+      <div id="lowerbar" style="width:8px;border-radius:4px;background:linear-gradient(var(--mint),var(--brand))"></div>
+      <div>
+        <div class="l1" style="font-family:Manrope;font-weight:800;font-size:52px;letter-spacing:-.02em">Muhammad Danish Alif Bin Azrul</div>
+        <div class="l2" style="font-size:28px;color:var(--mint);font-weight:600;margin-top:6px">Founder &amp; Developer, INSIGHTAID AI</div>
+        <div class="l3" style="font-size:24px;color:#cbd5cf;margin-top:4px">Universiti Teknologi PETRONAS</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 TITLE -->
+  <section class="scene" id="sc-2">
+    <div class="stage3d">
+      <div class="panel" id="t-p1" style="width:1180px;right:-220px;top:120px"><img src="img/dashboard.png" /></div>
+      <div class="panel" id="t-p2" style="width:900px;right:120px;top:540px"><img src="img/plan_table.png" /></div>
+      <div class="panel" id="t-p3" style="width:640px;right:80px;top:170px"><img src="img/before_after.png" /></div>
+    </div>
+    <div style="position:absolute;left:110px;top:330px">
+      <div style="display:flex;align-items:center;gap:28px"><img id="t-glyph" src="img/glyph.png" style="height:150px" />
+        <div class="kin" style="font-size:150px;display:flex;gap:34px"><span id="t-w1">INSIGHTAID</span><em id="t-w2">AI</em></div></div>
+      <div id="t-tag" class="serif" style="font-size:64px;color:#f5d38a;margin-top:18px">Decisions, backed by evidence.</div>
+    </div>
+  </section>
+
+  <!-- CHAPTER CARD (shared) -->
+  <section class="scene" id="sc-chapter">
+    <div style="position:absolute;left:160px;top:330px">
+      <div id="ch-small" style="font-family:Manrope;font-weight:800;font-size:24px;letter-spacing:.3em;color:var(--muted)">CHAPTER</div>
+      <div style="display:flex;align-items:flex-end;gap:44px;margin-top:10px">
+        <div id="ch-num" class="kin" style="font-size:240px;color:transparent;-webkit-text-stroke:2.5px var(--mint);line-height:.9">02</div>
+        <div id="ch-name" class="kin" style="font-size:118px;padding-bottom:18px;max-width:1300px">Problem</div>
+      </div>
+      <div id="ch-line" style="height:6px;border-radius:3px;margin-top:34px;background:linear-gradient(90deg,var(--mint),var(--brand),transparent);width:0"></div>
+    </div>
+  </section>
+
+  <!-- 3 PROBLEM: 6:30 am -->
+  <section class="scene" id="sc-3">
+    <div class="chapter">02 <i>·</i> PROBLEM</div>
+    <div style="position:absolute;left:0;right:0;bottom:0;height:520px;background:radial-gradient(1100px 380px at 50% 100%, rgba(245,176,74,.16), transparent 70%)" id="dawn"></div>
+    <div style="position:absolute;left:0;right:0;top:220px;text-align:center">
+      <div class="kin" style="font-size:300px;letter-spacing:-.04em"><span id="clock">06:30</span><span style="font-size:110px;color:var(--mint);margin-left:24px">AM</span></div>
+      <div id="p3a" class="kin" style="font-size:62px;color:#cbd5cf;margin-top:10px">A koperasi manager has to decide</div>
+      <div id="p3b" class="kin" style="font-size:84px;margin-top:14px">how much <em>nasi lemak</em> to make today.</div>
+    </div>
+  </section>
+
+  <!-- 4 PROBLEM: too much / too little -->
+  <section class="scene" id="sc-4">
+    <div class="chapter">02 <i>·</i> PROBLEM</div>
+    <div class="tagbox"><span class="tag sim" style="color:#cbd5cf;border-color:rgba(255,255,255,.2);background:rgba(255,255,255,.05)">Illustration</span></div>
+    <div style="position:absolute;left:0;right:0;top:170px;text-align:center">
+      <div style="font-family:Manrope;font-weight:800;font-size:26px;letter-spacing:.22em;color:var(--muted)">PORTIONS TO COOK TODAY</div>
+      <div id="cnt" class="kin" style="font-size:270px;margin-top:6px">40</div>
+    </div>
+    <div class="card" id="c4a" style="left:200px;top:640px;width:700px;display:flex;gap:26px;align-items:center">
+      <div class="ico red"><svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></div>
+      <div><div class="kin" style="font-size:48px">Too much</div><div style="font-size:28px;color:#fca5a5;margin-top:6px">It goes in the bin.</div></div>
+    </div>
+    <div class="card" id="c4b" style="left:1020px;top:640px;width:700px;display:flex;gap:26px;align-items:center">
+      <div class="ico amb"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+      <div><div class="kin" style="font-size:48px">Too little</div><div style="font-size:28px;color:var(--amberT);margin-top:6px">Students leave hungry.</div></div>
+    </div>
+  </section>
+
+  <!-- 5 PROBLEM: multilingual reviews -->
+  <section class="scene" id="sc-5">
+    <div class="chapter">02 <i>·</i> PROBLEM</div>
+    <div class="tagbox"><span class="tag sim">Synthetic demo reviews</span></div>
+    <div style="position:absolute;left:110px;top:330px;max-width:900px">
+      <div id="p5a" class="kin" style="font-size:104px">Feedback in three languages.</div>
+      <div id="p5b" class="kin" style="font-size:104px"><em>Read too late.</em></div>
+    </div>
+    <div class="stage3d">
+      <div class="card review" id="r5a" style="left:1080px;top:170px;width:700px"><div class="who"><span class="stars">{{STARS_MS}}</span> Google Reviews · <b>BM</b></div><p>{{REV_MS}}</p></div>
+      <div class="card review" id="r5b" style="left:1180px;top:430px;width:640px"><div class="who"><span class="stars">{{STARS_ZH}}</span> Google Reviews · <b>中文</b></div><p class="zh">{{REV_ZH}}</p></div>
+      <div class="card review" id="r5c" style="left:1040px;top:670px;width:720px"><div class="who"><span class="stars">{{STARS_EN}}</span> Google Reviews · <b>EN</b></div><p>{{REV_EN}}</p></div>
+    </div>
+  </section>
+
+  <!-- 6 PROBLEM: three gaps -->
+  <section class="scene" id="sc-6">
+    <div class="chapter">02 <i>·</i> PROBLEM</div>
+    <div class="stage3d">
+      <div class="card" id="g1" style="left:150px;top:300px;width:500px;height:420px;padding:44px 40px">
+        <div class="ico amb"><svg viewBox="0 0 24 24"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg></div>
+        <div class="kin" style="font-size:64px;margin-top:34px">Unaffordable</div>
+        <div style="font-size:28px;color:#cbd5cf;margin-top:16px;line-height:1.35">Business intelligence tools are expensive.</div></div>
+      <div class="card" id="g2" style="left:710px;top:300px;width:500px;height:420px;padding:44px 40px">
+        <div class="ico amb"><svg viewBox="0 0 24 24"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg></div>
+        <div class="kin" style="font-size:64px;margin-top:34px">Multilingual</div>
+        <div style="font-size:28px;color:#cbd5cf;margin-top:16px;line-height:1.35">Feedback arrives in Bahasa Melayu, English and <span class="zh">中文</span>.</div></div>
+      <div class="card" id="g3" style="left:1270px;top:300px;width:500px;height:420px;padding:44px 40px">
+        <div class="ico red"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <div class="kin" style="font-size:64px;margin-top:34px">Too late</div>
+        <div style="font-size:28px;color:#cbd5cf;margin-top:16px;line-height:1.35">Most owners react after the damage is done.</div></div>
+    </div>
+  </section>
+
+  <!-- screen recording scenes share one template each -->
+  {{SCREEN_SCENES}}
+
+  <!-- 9 SOLUTION: same pipeline -->
+  <section class="scene" id="sc-9">
+    <div class="chapter">03 <i>·</i> SOLUTION</div>
+    <div class="tagbox"><span class="tag real">Same code as a real upload</span></div>
+    <div class="stage3d"><div class="panel" id="p9bg" style="width:1500px;left:210px;top:130px;filter:blur(3px) brightness(.32)"><img src="img/dashboard.png" /></div></div>
+    <div class="node" id="n0" style="left:110px;top:330px;width:290px;text-align:left">Sales <small>{{SALES_ROWS}} rows · synthetic</small></div>
+    <div class="node" id="n1" style="left:110px;top:500px;width:290px;text-align:left">Reviews <small>{{REVIEW_ROWS}} rows · synthetic</small></div>
+    <svg id="pipe" style="position:absolute;left:0;top:0" width="1920" height="1080"></svg>
+    <div class="node" id="n2" style="left:520px;top:410px">Validate<small>template checks</small></div>
+    <div class="node" id="n3" style="left:830px;top:410px">Clean text<small>and features</small></div>
+    <div class="node" id="n4" style="left:1140px;top:410px">Sentiment<small>rating-based</small></div>
+    <div class="node" id="n5" style="left:1450px;top:410px;border-color:rgba(110,231,183,.5)">Dashboard<small>and planner</small></div>
+    <div id="p9k" class="kin" style="position:absolute;left:0;right:0;top:680px;text-align:center;font-size:96px">Nothing is <em>pre-baked.</em></div>
+  </section>
+
+  <!-- 13 SOLUTION: karipap lifts out -->
+  <section class="scene" id="sc-13">
+    <div class="chapter">03 <i>·</i> SOLUTION</div>
+    <div class="tagbox"><span class="tag real">Real app screen · synthetic demo data</span></div>
+    <div class="stage3d">
+      <div class="panel" id="k-tab" style="width:1500px;left:300px;top:250px"><img src="img/plan_table.png" /></div>
+      <div class="panel" id="k-row" style="width:1560px;left:180px;top:560px"><img src="img/karipap_row.png" /></div>
+      <div class="card review" id="k-r1" style="left:1150px;top:150px;width:620px"><div class="who"><span class="stars">{{STARS_KZH}}</span> Review · <b>中文</b></div><p class="zh" style="font-size:28px">{{KAR_ZH}}</p></div>
+      <div class="card review" id="k-r2" style="left:1210px;top:320px;width:600px"><div class="who"><span class="stars">{{STARS_KEN}}</span> Review · <b>EN</b></div><p style="font-size:28px">{{KAR_EN}}</p></div>
+    </div>
+    <div id="k-h" class="kin" style="position:absolute;left:110px;top:130px;font-size:92px;max-width:960px">Reviews reach <em>the kitchen.</em></div>
+    <div id="k-s" style="position:absolute;left:110px;top:335px;font-size:30px;color:#cbd5cf;max-width:860px;line-height:1.35">“Basi” complaints flag the karipap. Tomorrow’s batch is cut by {{FLAG_CUT}}%, and the reason is shown.</div>
+    <div id="k-b" class="kin" style="position:absolute;left:110px;top:432px;font-size:54px;color:#fca5a5">−{{FLAG_CUT}}% batch</div>
+  </section>
+
+  <!-- 17 IMPACTS: waste before / after -->
+  <section class="scene" id="sc-17">
+    <div class="chapter">04 <i>·</i> IMPACTS</div>
+    <div style="position:absolute;left:0;right:0;top:132px;text-align:center"><span class="tag sim">Simulation on synthetic data · {{WASTE_DAYS}} days · {{WASTE_BUFFER}}% buffer</span></div>
+    <div id="q17" style="position:absolute;left:0;right:0;top:340px;text-align:center">
+      <div class="kin" style="font-size:150px">Does it <em>help?</em></div>
+      <div style="font-size:36px;color:#cbd5cf;margin-top:20px">Four weeks replayed two ways: order like last week, or order with INSIGHTAID.</div>
+    </div>
+    <div class="stage3d">
+      <div class="card" id="w-b" style="left:170px;top:250px;width:660px;padding:40px 44px">
+        <div style="font-size:22px;letter-spacing:.14em;color:var(--muted);font-weight:700">ORDER LIKE LAST WEEK</div>
+        <div class="kin" style="font-size:110px;margin-top:14px;color:#e5e7eb">RM <span id="wbv">0.00</span></div>
+        <div style="font-size:28px;color:var(--muted);margin-top:8px">wasted · {{UNITS_BEFORE}} units</div>
+      </div>
+      <div class="card" id="w-a" style="left:1090px;top:250px;width:660px;padding:40px 44px;border:2px solid rgba(34,197,94,.55);box-shadow:0 40px 90px rgba(0,0,0,.6),0 0 90px rgba(34,197,94,.25)">
+        <div style="font-size:22px;letter-spacing:.14em;color:var(--mint);font-weight:700">ORDER WITH INSIGHTAID</div>
+        <div class="kin" style="font-size:110px;margin-top:14px;color:var(--brand)">RM <span id="wav">0.00</span></div>
+        <div style="font-size:28px;color:var(--muted);margin-top:8px">wasted · {{UNITS_AFTER}} units</div>
+      </div>
+    </div>
+    <div style="position:absolute;left:0;right:0;top:640px;text-align:center">
+      <div id="w-p" class="kin" style="font-size:124px"><em><span id="wpv">0.0</span>%</em> less waste</div>
+      <div id="w-t" style="font-size:30px;color:var(--amberT);margin-top:16px;font-weight:600">Trade-off, shown in the app: units short {{SHORT_BEFORE}} → {{SHORT_AFTER}}</div>
+    </div>
+  </section>
+
+  <!-- 18 IMPACTS: the trade-off -->
+  <section class="scene" id="sc-18">
+    <div class="chapter">04 <i>·</i> IMPACTS</div>
+    <div class="tagbox"><span class="tag sim">Simulation on synthetic data</span></div>
+    <div id="t18h" class="kin" style="position:absolute;left:150px;top:170px;font-size:96px">The trade-off, <em>shown.</em></div>
+    <div class="card" id="t18c" style="left:150px;top:360px;width:1620px;padding:40px 48px">
+      <div style="font-size:24px;letter-spacing:.14em;color:var(--muted);font-weight:700">UNITS SHORT (CUSTOMERS WHO FOUND IT SOLD OUT), {{WASTE_DAYS}} DAYS</div>
+      <div style="display:grid;grid-template-columns:420px 1fr 160px;gap:24px;align-items:center;margin-top:34px;font-size:30px;font-weight:600">
+        <div class="muted">Order like last week</div><div class="bar"><i id="b18a" style="background:#9aa8a1"></i></div><div class="kin" style="font-size:52px;text-align:right" id="v18a">0</div>
+        <div style="color:var(--amberT)">Order with INSIGHTAID</div><div class="bar"><i id="b18b" style="background:var(--amber)"></i></div><div class="kin" style="font-size:52px;text-align:right;color:var(--amberT)" id="v18b">0</div>
+      </div>
+    </div>
+    <div class="card" id="t18s" style="left:150px;top:690px;width:1620px;padding:30px 48px">
+      <div style="display:flex;justify-content:space-between;font-size:26px;font-weight:600"><span style="color:var(--brand)">Less waste</span><span class="muted">Safety buffer <b id="buf18" style="color:#fff">10%</b></span><span style="color:var(--amberT)">Fewer sold-out items</span></div>
+      <div style="position:relative;height:12px;border-radius:6px;background:rgba(255,255,255,.1);margin-top:22px">
+        <div id="tr18" style="position:absolute;left:0;top:0;bottom:0;border-radius:6px;background:linear-gradient(90deg,var(--brand),var(--amber))"></div>
+        <div id="kn18" style="position:absolute;top:-12px;width:36px;height:36px;margin-left:-18px;border-radius:50%;background:#fff;box-shadow:0 0 0 6px rgba(34,197,94,.3)"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 20 IMPACTS: accuracy -->
+  <section class="scene" id="sc-20">
+    <div class="chapter">04 <i>·</i> IMPACTS</div>
+    <div class="tagbox"><span class="tag met">Measured · target met</span></div>
+    <svg id="ring" style="position:absolute;left:150px;top:200px" width="560" height="560" viewBox="0 0 560 560">
+      <circle cx="280" cy="280" r="236" stroke="rgba(255,255,255,.08)" stroke-width="34" fill="none"/>
+      <circle id="ringarc" cx="280" cy="280" r="236" stroke="url(#rg)" stroke-width="34" fill="none" stroke-linecap="round" transform="rotate(-90 280 280)" stroke-dasharray="0 2000"/>
+      <line id="ringtgt" x1="280" y1="26" x2="280" y2="78" stroke="#f2f5f3" stroke-width="5" transform="rotate({{RING_TGT_DEG}} 280 280)"/>
+      <defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6ee7b7"/><stop offset=".6" stop-color="#22c55e"/><stop offset="1" stop-color="#a3e635"/></linearGradient></defs>
+    </svg>
+    <div style="position:absolute;left:150px;top:200px;width:560px;height:560px;display:flex;flex-direction:column;align-items:center;justify-content:center">
+      <div class="kin" style="font-size:132px"><span id="accv">0.0</span><span style="font-size:70px">%</span></div>
+      <div style="font-size:26px;color:var(--muted);font-weight:600;margin-top:4px">overall accuracy</div>
+      <div style="font-size:22px;color:#cbd5cf;margin-top:6px">target {{O1_TARGET}}% (white mark)</div>
+    </div>
+    <div id="n20" style="position:absolute;left:150px;top:800px;width:560px;text-align:center;font-size:30px;font-weight:600"><span class="kin" style="font-size:46px">{{TEST_N}}</span> test comments</div>
+    <div class="card" id="bars20" style="left:820px;top:230px;width:950px;padding:44px 50px">
+      <div style="font-size:24px;letter-spacing:.14em;color:var(--muted);font-weight:700">ACCURACY BY LANGUAGE · TARGET ≥ {{LANG_TARGET}}%</div>
+      <div style="position:relative;margin-top:34px">
+        {{LANG_BARS}}
+        <div id="tline" style="position:absolute;top:-14px;bottom:-14px;left:calc(230px + (100% - 230px - 130px) * {{LANG_TARGET}} / 100);border-left:3px dashed rgba(242,245,243,.7)"></div>
+      </div>
+      <div style="font-size:22px;color:#7d8b84;margin-top:30px;line-height:1.4">XLM-RoBERTa, offline evaluation in the original language. The live demo scores sentiment from star ratings.</div>
+    </div>
+  </section>
+
+  <!-- 21 IMPACTS: response time + forecast -->
+  <section class="scene" id="sc-21">
+    <div class="chapter">04 <i>·</i> IMPACTS</div>
+    <div class="stage3d">
+      <div class="card" id="rt21" style="left:150px;top:200px;width:780px;height:640px;padding:44px 48px;border:2px solid rgba(34,197,94,.45)">
+        <div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:24px;letter-spacing:.14em;color:var(--mint);font-weight:700">RESPONSE TIME</div><span class="tag met">{{RT_VERDICT}}</span></div>
+        <div class="kin" style="font-size:120px;margin-top:20px">{{RT_PASS}} <span style="color:var(--muted)">of</span> {{RT_PAGES}}</div>
+        <div style="font-size:30px;color:#cbd5cf;margin-top:4px">analysis pages under 3 seconds</div>
+        <div style="margin-top:30px;display:grid;grid-template-columns:250px 1fr 110px;gap:12px 18px;align-items:center;font-size:21px">{{RT_ROWS}}</div>
+      </div>
+      <div class="card" id="fc21" style="left:990px;top:200px;width:780px;height:640px;padding:44px 48px;border:2px solid rgba(207,123,15,.55)">
+        <div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:24px;letter-spacing:.14em;color:var(--amberT);font-weight:700">SALES FORECAST ACCURACY</div><span class="tag part">{{MAPE_VERDICT}}</span></div>
+        <div class="kin" style="font-size:120px;margin-top:20px">{{MAPE_MET}} <span style="color:var(--muted)">of</span> {{MAPE_N}}</div>
+        <div style="font-size:30px;color:#cbd5cf;margin-top:4px">tests met the target, MAPE under 15%</div>
+        <div style="font-size:26px;color:#cbd5cf;margin-top:44px;line-height:1.45">Rolling-origin evaluation on public e-commerce data. The result is published as measured, <span style="color:var(--amberT)">including the misses.</span></div>
+      </div>
+    </div>
+    <div class="foot" id="f21" style="bottom:150px">Response time: {{RT_NOTE}}</div>
+  </section>
+
+  <!-- 23 COMMERCIALISATION: affordable -->
+  <section class="scene" id="sc-23">
+    <div class="chapter">05 <i>·</i> COMMERCIALISATION POTENTIAL</div>
+    <div id="h23" class="kin" style="position:absolute;left:0;right:0;top:170px;text-align:center;font-size:100px">Built to stay <em>affordable.</em></div>
+    <div class="stage3d">
+      <div class="card" id="a1" style="left:150px;top:380px;width:500px;height:330px;padding:44px 40px">
+        <div class="ico"><svg viewBox="0 0 24 24"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg></div>
+        <div class="kin" style="font-size:52px;margin-top:30px">Free-tier cloud</div><div style="font-size:26px;color:#cbd5cf;margin-top:12px">Hosting and database on free tiers.</div></div>
+      <div class="card" id="a2" style="left:710px;top:380px;width:500px;height:330px;padding:44px 40px">
+        <div class="ico"><svg viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
+        <div class="kin" style="font-size:52px;margin-top:30px">Open-source models</div><div style="font-size:26px;color:#cbd5cf;margin-top:12px">No paid AI licence to run it.</div></div>
+      <div class="card" id="a3" style="left:1270px;top:380px;width:500px;height:330px;padding:44px 40px;border-color:rgba(110,231,183,.45)">
+        <div class="ico"><svg viewBox="0 0 24 24"><path d="m9 9 5 12 1.8-5.2L21 14Z"/><path d="M7.2 2.2 8 5.1"/><path d="m5.1 8-2.9-.8"/><path d="M14 4.1 12 6"/><path d="m6 12-1.9 2"/></svg></div>
+        <div class="kin" style="font-size:52px;margin-top:30px">One-click demo</div><div style="font-size:26px;color:#cbd5cf;margin-top:12px">Try it before signing up.</div></div>
+    </div>
+  </section>
+
+  <!-- 24 COMMERCIALISATION: pilot -> network -->
+  <section class="scene" id="sc-24">
+    <div class="chapter">05 <i>·</i> COMMERCIALISATION POTENTIAL</div>
+    <div class="tagbox"><span class="tag sim">Planned</span></div>
+    <svg id="net" style="position:absolute;left:0;top:0" width="1920" height="1080"></svg>
+    <div id="h24a" class="kin" style="position:absolute;left:110px;top:300px;font-size:78px;max-width:760px">Next: a pilot with a real <em>campus cooperative.</em></div>
+    <div id="h24b" class="kin" style="position:absolute;left:110px;top:560px;font-size:60px;max-width:760px;color:#cbd5cf">Then koperasi networks across Malaysia.</div>
+  </section>
+
+  <!-- 25 COMMERCIALISATION: award + roadmap -->
+  <section class="scene" id="sc-25">
+    <div class="chapter">05 <i>·</i> COMMERCIALISATION POTENTIAL</div>
+    <div class="stage3d">
+      <div id="medal" style="position:absolute;left:180px;top:190px;width:330px;height:330px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffffff,#d7dde3 30%,#9aa4ad 62%,#6b747c);box-shadow:0 0 0 10px rgba(255,255,255,.08),0 40px 100px rgba(0,0,0,.6),0 0 120px rgba(220,230,240,.18);display:flex;align-items:center;justify-content:center;flex-direction:column;color:#1f2933">
+        <svg viewBox="0 0 24 24" style="width:96px;height:96px;fill:none;stroke:#1f2933;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+        <div style="font-family:Manrope;font-weight:800;font-size:44px;letter-spacing:.12em;margin-top:6px">SILVER</div>
+      </div>
+    </div>
+    <div id="aw" style="position:absolute;left:580px;top:240px">
+      <div class="kin" style="font-size:84px">Silver Award</div>
+      <div style="font-size:34px;color:#cbd5cf;margin-top:12px">AIMIX: IID 2026 · Category B · 21 November 2026</div>
+    </div>
+    <div id="road" style="position:absolute;left:180px;right:150px;top:600px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:30px">
+      <div class="card" style="position:relative" id="rd1"><div class="kin" style="font-size:44px;color:var(--mint)">2026</div><div style="font-size:26px;margin-top:8px">Working prototype, Silver Award</div></div>
+      <div class="card" style="position:relative;border-color:rgba(207,123,15,.45)" id="rd2"><div class="kin" style="font-size:44px;color:var(--amberT)">2027 <span class="tag sim" style="font-size:14px;vertical-align:middle">Planned</span></div><div style="font-size:26px;margin-top:8px">Pilot with a real campus cooperative</div></div>
+      <div class="card" style="position:relative;border-color:rgba(207,123,15,.45)" id="rd3"><div class="kin" style="font-size:44px;color:var(--amberT)">2028 <span class="tag sim" style="font-size:14px;vertical-align:middle">Planned</span></div><div style="font-size:26px;margin-top:8px">Koperasi networks across Malaysia</div></div>
+    </div>
+  </section>
+
+  <!-- 27 COPYRIGHT -->
+  <section class="scene" id="sc-27">
+    <div class="chapter">06 <i>·</i> COPYRIGHT</div>
+    <div id="cp" style="position:absolute;left:0;right:0;top:300px;text-align:center">
+      <div class="kin" style="font-size:200px;color:var(--mint);line-height:1">©</div>
+      <div class="kin" style="font-size:64px;margin-top:20px">2026 Muhammad Danish Alif Bin Azrul</div>
+      <div style="font-size:36px;color:#cbd5cf;margin-top:18px">INSIGHTAID AI software: the author's own work. All rights reserved.</div>
+    </div>
+  </section>
+
+  <!-- 28 CLOSE -->
+  <section class="scene" id="sc-28">
+    <div class="stage3d">
+      <div class="panel" id="c28a" style="width:1100px;left:760px;top:250px"><img src="img/karipap_row.png" /></div>
+      <div class="panel" id="c28b" style="width:900px;left:860px;top:470px"><img src="img/before_after.png" /></div>
+    </div>
+    <div id="h28a" class="kin" style="position:absolute;left:110px;top:250px;font-size:70px;max-width:700px;color:#cbd5cf">A koperasi manager doesn’t need a data scientist.</div>
+    <div id="h28b" class="kin" style="position:absolute;left:110px;top:500px;font-size:92px;max-width:760px">What to cook tomorrow, <em>and why.</em></div>
+  </section>
+
+  <!-- 29 END CARD -->
+  <section class="scene" id="sc-29">
+    <div style="position:absolute;left:110px;top:290px" id="e-l">
+      <div style="display:flex;align-items:center;gap:24px"><img src="img/glyph.png" style="height:120px" /><div class="kin" style="font-size:120px">INSIGHTAID <em>AI</em></div></div>
+      <div class="serif" style="font-size:56px;color:#f5d38a;margin-top:14px">Decisions, backed by evidence.</div>
+      <div id="e-cta" class="kin" style="font-size:64px;margin-top:64px">Scan, click, <em>no sign-up.</em></div>
+      <div id="e-url" style="font-size:32px;color:var(--muted);margin-top:14px">{{DEMO_URL_SHORT}}</div>
+    </div>
+    <div class="stage3d"><div id="e-qr" style="position:absolute;right:170px;top:260px;text-align:center">
+      <div style="width:420px;height:420px;padding:22px;background:#fff;border-radius:28px;box-shadow:0 0 0 10px rgba(34,197,94,.25),0 40px 100px rgba(0,0,0,.6)">{{QR}}</div>
+      <div style="font-size:28px;font-weight:700;margin-top:22px">Try the demo</div>
+    </div></div>
+  </section>
+
+  <!-- 30 OUTRO -->
+  <section class="scene" id="sc-30">
+    <div style="position:absolute;left:0;right:0;top:360px;text-align:center" id="o1">
+      <div style="display:inline-flex;align-items:center;gap:20px"><img src="img/glyph.png" style="height:84px" /><div class="kin" style="font-size:84px">INSIGHTAID <em>AI</em></div></div>
+      <div style="font-size:26px;color:#9aa8a1;margin-top:40px;line-height:1.7">Koperasi Siswa Maju is fictional; its data is synthetic.<br/>Every number shown is computed by a re-runnable script in the project repository.<br/>Music and sound: original, made for this video. No stock footage was used.<br/>© 2026 Muhammad Danish Alif Bin Azrul. All rights reserved.</div>
+    </div>
+  </section>
+
+  <div id="cap" style="opacity:0"></div>
+  <div id="black"></div>
+</div>
+
+<script>
+const TL = {{TIMELINE}};
+const MAXF = {{MAXF}};
+const M = {{M}};
+const EXIT = 0.45;
+const $ = (id) => document.getElementById(id);
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const lerp = (a, b, x) => a + (b - a) * x;
+const eo = (x) => 1 - Math.pow(1 - clamp(x), 3);
+const eio = (x) => { x = clamp(x); return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+const prog = (t, t0, d) => clamp((t - t0) / d);
+const P = (sc, i) => sc.phrases[Math.min(i, sc.phrases.length - 1)].s;
+const PE = (sc, i) => sc.phrases[Math.min(i, sc.phrases.length - 1)].e;
+// element entrance: fade + rise + de-blur
+function rise(el, t, t0, d = 0.6, dy = 40, extra = '') {
+  const p = eo(prog(t, t0, d));
+  el.style.opacity = p; el.style.transform = `translateY(${(1 - p) * dy}px) ${extra}`; el.style.filter = p < 1 ? `blur(${(1 - p) * 8}px)` : 'none';
+  return p;
+}
+function fly(el, t, t0, d, from, to) { // 3D fly-in. from/to: [x, y, z, rx, ry, rz, s]
+  const p = eo(prog(t, t0, d));
+  const v = from.map((f, i) => lerp(f, to[i], p));
+  el.style.opacity = clamp(p * 1.6);
+  el.style.transform = `translate3d(${v[0]}px,${v[1]}px,${v[2]}px) rotateX(${v[3]}deg) rotateY(${v[4]}deg) rotateZ(${v[5]}deg) scale(${v[6]})`;
+  return p;
+}
+function pw(keys, t) { // piecewise linear [[t, v], ...]
+  if (t <= keys[0][0]) return keys[0][1];
+  for (let i = 1; i < keys.length; i++) if (t <= keys[i][0]) { const [t0, v0] = keys[i - 1], [t1, v1] = keys[i]; return t1 === t0 ? v1 : lerp(v0, v1, (t - t0) / (t1 - t0)); }
+  return keys[keys.length - 1][1];
+}
+function pwe(keys, t) { // piecewise eased, values are arrays
+  if (t <= keys[0][0]) return keys[0].slice(1);
+  for (let i = 1; i < keys.length; i++) if (t <= keys[i][0]) { const a = keys[i - 1], b = keys[i]; const x = eio((t - a[0]) / Math.max(1e-6, b[0] - a[0])); return a.slice(1).map((v, j) => lerp(v, b[j + 1], x)); }
+  return keys[keys.length - 1].slice(1);
+}
+const pad = (n) => String(n).padStart(5, '0');
+const fmt = (v, d) => v.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+
+async function setFrame(img, dir, idx) {
+  idx = Math.max(1, Math.min(MAXF[dir], Math.round(idx)));
+  const src = `src/${dir}/${pad(idx)}.jpg`;
+  if (img.dataset.src !== src) { img.dataset.src = src; img.src = src; await img.decode().catch(() => {}); }
+}
+// Screen recording on a 3D stage. cfg: dir, map [[t, frameIdx]], cam [[t, s, x, y]], tilt [[t, rx, ry, k]]
+async function screen(sc, el, t, cfg) {
+  const scr = el.querySelector('.scr'), inner = scr.querySelector('.in'), img = inner.querySelector('img');
+  await setFrame(img, cfg.dir, pw(cfg.map, t));
+  let [s, x, y] = pwe(cfg.cam, t);
+  const hw = 960 / s, hh = 540 / s; x = clamp(x, hw, 1920 - hw); y = clamp(y, hh, 1080 - hh);
+  inner.style.transform = `translate(${960 - x * s}px, ${540 - y * s}px) scale(${s})`;
+  const [rx, ry, k] = pwe(cfg.tilt, t);
+  scr.style.transform = `translateY(18px) rotateX(${rx}deg) rotateY(${ry}deg) scale(${k})`;
+}
+
+const SCREEN = {
+  '7': (sc) => { const c = P(sc, 4) + 0.05; return { dir: 'r01',
+      map: [[0, 1], [c - 1.45, 118], [c, 157], [sc.dur + EXIT, Math.min(284, 157 + (sc.dur + EXIT - c) * 30)]],
+      cam: [[0, 1, 960, 540], [P(sc, 2) - 0.2, 1, 960, 540], [P(sc, 2) + 1.4, 1.5, 960, 420], [sc.dur, 1.62, 960, 410]],
+      tilt: [[0, 14, -16, .72], [2.6, 0, 0, .78], [sc.dur, 0, 0, .80]] }; },
+  '8': (sc) => ({ dir: 'r01', map: [[0, 330], [sc.dur + EXIT, 420]],
+      cam: [[0, 1.12, 960, 330], [P(sc, 0) + 1.6, 1.12, 960, 330], [P(sc, 0) + 3.0, 1.6, 1500, 290], [P(sc, 2) - 0.3, 1.6, 1500, 290], [P(sc, 2) + 1.0, 1.75, 700, 150], [PE(sc, 3) - 0.2, 1.75, 700, 150], [sc.dur + EXIT, 1.2, 960, 560]],
+      tilt: [[0, 8, 10, .74], [2.0, 0, 0, .78], [sc.dur, 0, 0, .79]] }),
+  '10': (sc) => ({ dir: 'r02', map: [[0, 1], [2.8, 1], [sc.dur + EXIT, 150]],
+      cam: [[0, 1, 960, 540], [sc.dur, 1.12, 960, 600]],
+      tilt: [[0, 18, -12, .70], [2.6, 0, 0, .78], [sc.dur, 0, 0, .79]] }),
+  '11': (sc) => ({ dir: 'r02', map: [[0, 150], [sc.dur + EXIT, 405]],
+      cam: [[0, 1.1, 960, 560], [P(sc, 1) - 0.3, 1.1, 960, 560], [P(sc, 1) + 1.0, 1.8, 1310, 530], [P(sc, 3) - 0.4, 1.8, 1310, 530], [P(sc, 3) + 0.9, 1.8, 600, 160], [sc.dur + EXIT, 1.8, 600, 160]],
+      tilt: [[0, 0, 0, .79], [sc.dur, 0, 0, .79]] }),
+  '12': (sc) => ({ dir: 'r02', map: [[0, 478], [sc.dur + EXIT, Math.min(736, 478 + (sc.dur + EXIT) * 30)]],
+      cam: [[0, 1.15, 960, 560], [0.9, 1.65, 640, 490], [P(sc, 1) - 0.1, 1.65, 640, 490], [P(sc, 1) + 1.0, 1.5, 760, 780], [P(sc, 2) - 0.2, 1.5, 760, 780], [sc.dur + EXIT, 1.1, 960, 600]],
+      tilt: [[0, 0, 0, .79], [sc.dur, 0, 0, .79]] }),
+  '14': (sc) => ({ dir: 'r03', map: [[0, 90], [3.6, 190], [3.6001, 440], [sc.dur + EXIT, 588]],
+      cam: [[0, 1.05, 960, 540], [3.6, 1.15, 960, 500], [3.6001, 1.3, 960, 800], [sc.dur + EXIT, 1.38, 960, 820]],
+      tilt: [[0, 10, 12, .74], [2.2, 0, 0, .79], [sc.dur, 0, 0, .79]] }),
+  '15': (sc) => ({ dir: 'r04', map: [[0, 60], [2.7, 140], [2.7001, 270], [sc.dur + EXIT, 430]],
+      cam: [[0, 1.2, 960, 560], [2.7, 1.28, 960, 560], [2.7001, 1.1, 960, 500], [sc.dur + EXIT, 1.25, 960, 560]],
+      tilt: [[0, 0, 0, .79], [sc.dur, 0, 0, .79]] }),
+  '16': (sc) => ({ dir: 'r05', map: [[0, 60], [sc.dur + EXIT, 290]],
+      cam: [[0, 1.05, 960, 540], [0.6, 1.05, 960, 540], [2.0, 1.75, 600, 700], [sc.dur + EXIT, 1.8, 600, 710]],
+      tilt: [[0, 12, -12, .72], [2.0, 0, 0, .79], [sc.dur, 0, 0, .79]] }),
+  '19': (sc) => ({ dir: 'r06', map: [[0, 30], [2.6, 90], [sc.dur + EXIT, 250]],
+      cam: [[0, 1.05, 960, 560], [2.4, 1.15, 960, 600], [sc.dur + EXIT, 1.18, 960, 620]],
+      tilt: [[0, 14, 14, .72], [2.4, 0, 0, .79], [sc.dur, 0, 0, .79]] }),
+  '22': (sc) => ({ dir: 'r07', map: [[0, 1], [9, 1]],
+      cam: [[0, 1.1, 960, 760], [P(sc, 1) - 0.2, 1.3, 960, 800], [P(sc, 1) + 0.6, 1.62, 615, 880], [P(sc, 2) - 0.2, 1.62, 615, 880], [P(sc, 2) + 0.6, 1.62, 960, 880], [P(sc, 3) - 0.1, 1.62, 960, 880], [P(sc, 3) + 0.7, 1.62, 1305, 880], [sc.dur + EXIT, 1.62, 1305, 880]],
+      tilt: [[0, 14, -14, .72], [2.0, 4, -4, .78], [sc.dur, 0, 0, .79]] }),
+};
+const SCREEN_CH = { '7': '03 <i>·</i> SOLUTION', '8': '03 <i>·</i> SOLUTION', '10': '03 <i>·</i> SOLUTION', '11': '03 <i>·</i> SOLUTION', '12': '03 <i>·</i> SOLUTION',
+  '14': '03 <i>·</i> SOLUTION', '15': '03 <i>·</i> SOLUTION', '16': '03 <i>·</i> SOLUTION', '19': '04 <i>·</i> IMPACTS', '22': '05 <i>·</i> COMMERCIALISATION POTENTIAL' };
+const cfgCache = {};
+
+const DRAW = {
+  async '1'(t, sc, el) {
+    await setFrame($('face'), 'face', t * 30 + 1);
+    rise($('c1'), t, 0.3);
+    const p = eo(prog(t, 0.7, 0.7)), q = eo(prog(t, sc.dur - 1.0, 0.6));
+    $('lower').style.opacity = p * (1 - q); $('lower').style.transform = `translateX(${(1 - p) * -60}px)`;
+    $('lowerbar').style.transform = `scaleY(${p})`;
+  },
+  async '2'(t) {
+    const fin = [[0, 0, -420, 8, -24, 0, 1], [0, 0, -120, 6, -20, 0, 1], [0, 0, 80, 5, -18, 0, 1]];
+    ['t-p1', 't-p2', 't-p3'].forEach((id, i) => {
+      const f = fin[i], drift = t * 5;
+      const p = fly($(id), t, 0.05 + i * 0.22, 1.7, [700, 120, -1600, 20, -60, 0, 1], [f[0] - drift, f[1], f[2], f[3], f[4] + t * .4, f[5], f[6]]);
+      $(id).style.filter = i === 0 ? 'blur(2.5px) brightness(.55)' : i === 1 ? 'brightness(.8)' : 'none';
+      if (p < 1) $(id).style.opacity = p;
+    });
+    const g = eo(prog(t, 0.45, 0.7)); $('t-glyph').style.opacity = g; $('t-glyph').style.transform = `scale(${lerp(.6, 1, g)}) rotate(${(1 - g) * -20}deg)`;
+    rise($('t-w1'), t, 0.6, 0.7, 70); rise($('t-w2'), t, 0.85, 0.7, 70);
+    const s = eo(prog(t, 1.7, 1.0)); $('t-tag').style.opacity = s; $('t-tag').style.letterSpacing = `${(1 - s) * 0.2}em`;
+  },
+  async chapter(t, sc) {
+    $('ch-num').textContent = sc.num; $('ch-name').textContent = sc.name;
+    rise($('ch-small'), t, 0.05, 0.5, 20);
+    const a = eo(prog(t, 0.0, 0.7)); $('ch-num').style.opacity = a; $('ch-num').style.transform = `translateX(${(1 - a) * -120}px)`;
+    rise($('ch-name'), t, 0.18, 0.6, 60);
+    $('ch-line').style.width = `${eo(prog(t, 0.3, 1.0)) * 900}px`;
+  },
+  async '3'(t, sc) {
+    const m = Math.round(lerp(26, 30, eo(prog(t, 0.1, 1.5))));
+    $('clock').textContent = `06:${String(m).padStart(2, '0')}`;
+    rise($('clock').parentElement, t, 0, 0.6, 30);
+    rise($('p3a'), t, P(sc, 1) - 0.1); rise($('p3b'), t, P(sc, 2) - 0.1);
+    $('dawn').style.opacity = eo(prog(t, 0, 3));
+  },
+  async '4'(t, sc) {
+    const up = eo(prog(t, P(sc, 0) - 0.1, 1.4)), down = eo(prog(t, P(sc, 2) - 0.1, 1.3));
+    const v = Math.round(lerp(lerp(40, 80, up), 25, down));
+    $('cnt').textContent = v;
+    $('cnt').style.color = down > 0.5 ? 'var(--amberT)' : up > 0.6 ? '#fca5a5' : 'var(--text)';
+    rise($('c4a'), t, P(sc, 1) - 0.1); rise($('c4b'), t, P(sc, 3) - 0.1);
+    const d = down > 0 ? 1 - down * 0.5 : 1; $('c4a').style.opacity = Math.min(+$('c4a').style.opacity, d);
+  },
+  async '5'(t, sc) {
+    rise($('p5a'), t, 0.1); rise($('p5b'), t, P(sc, 1) - 0.1);
+    const cards = [['r5a', [-14, -2, 0]], ['r5b', [-14, 1.5, 60]], ['r5c', [-14, -1, 0]]];
+    cards.forEach(([id, r], i) => fly($(id), t, 0.4 + i * 0.45, 1.0, [260, 40, -600, 0, -40, r[1], 1], [-t * 4, 0, r[2] + t * 6, 0, r[0], r[1], 1]));
+  },
+  async '6'(t, sc) {
+    ['g1', 'g2', 'g3'].forEach((id, i) => fly($(id), t, P(sc, i === 2 ? 2 : i) - 0.15, 0.8, [0, 120, -500, 30, 0, 0, 1], [0, Math.sin(t * .8 + i) * 6, 0, 0, (i - 1) * -8, 0, 1]));
+  },
+  async '9'(t, sc) {
+    fly($('p9bg'), t, 0, 1.2, [0, 0, -500, 22, 0, 0, 1], [0, 0, -200 + t * 10, 18, 0, 0, 1]);
+    rise($('n0'), t, 0.2); rise($('n1'), t, 0.45);
+    const steps = ['n2', 'n3', 'n4', 'n5']; const span = PE(sc, 1) - 0.4;
+    steps.forEach((id, i) => { const p = rise($(id), t, 0.6 + i * (span - 0.6) / 4, 0.5, 30); $(id).style.boxShadow = p >= 1 ? '0 0 0 1px rgba(110,231,183,.35), 0 0 50px rgba(34,197,94,.18)' : 'none'; });
+    // flowing dots along the pipe
+    const svg = $('pipe'); const y = 455; let h = '';
+    h += `<path d="M400 370 C 460 370 460 ${y} 520 ${y} M400 540 C 460 540 460 ${y} 520 ${y} M770 ${y} H830 M1080 ${y} H1140 M1390 ${y} H1450" stroke="rgba(110,231,183,.35)" stroke-width="3" fill="none"/>`;
+    const reach = clamp((t - 0.6) / Math.max(0.1, span - 0.6)) * 1450;
+    for (let k = 0; k < 14; k++) { const x = 400 + ((t * 260 + k * 82) % 1050); if (x < reach) h += `<circle cx="${x + (x > 770 ? 0 : 0)}" cy="${y}" r="5" fill="#6ee7b7" opacity="${x > 520 ? .9 : 0}"/>`; }
+    svg.innerHTML = h;
+    rise($('p9k'), t, P(sc, 2) - 0.1, 0.6, 50);
+  },
+  async '13'(t, sc) {
+    rise($('k-h'), t, 0.1);
+    fly($('k-tab'), t, 0, 1.0, [0, 0, -700, 24, -8, 0, 1], [-t * 4, 0, -260, 18, -6, 0, 1]);
+    $('k-tab').style.filter = `blur(${lerp(0, 1.8, prog(t, 1.0, 1.0))}px) brightness(${lerp(.85, .5, prog(t, 1.0, 1.0))})`;
+    const lift = eo(prog(t, P(sc, 0) + 0.6, 1.1));
+    $('k-row').style.opacity = clamp(prog(t, 0.3, 0.6));
+    $('k-row').style.transform = `rotateX(${lerp(18, 10, lift)}deg) rotateY(${lerp(-6, -4, lift)}deg) translateZ(${lerp(-200, 140, lift)}px) translateY(${lerp(-120, 0, lift)}px)`;
+    const glow = 0.55 + 0.25 * Math.sin(t * 3);
+    $('k-row').style.boxShadow = lift > .3 ? `0 60px 140px rgba(0,0,0,.8),0 0 0 2px rgba(220,38,38,${glow}),0 0 80px rgba(220,38,38,${glow * .45})` : '';
+    fly($('k-r1'), t, P(sc, 1) - 0.1, 0.8, [200, -40, -300, 0, -30, 0, 1], [0, 0, 200, 0, -12, 0, 1]);
+    fly($('k-r2'), t, P(sc, 1) + 0.35, 0.8, [200, -40, -300, 0, -30, 0, 1], [0, 0, 240, 0, -12, 0, 1]);
+    rise($('k-s'), t, P(sc, 2) - 0.1); rise($('k-b'), t, P(sc, 3) - 0.1, 0.5, 30);
+  },
+  async '16'(t, sc, el) {
+    const p = rise($('q16'), t, P(sc, 1) - 0.2, 0.7, 40);
+    el.querySelector('.scr').style.filter = p > 0 ? `brightness(${1 - 0.6 * p}) blur(${3 * p}px)` : 'none';
+  },
+  async '17'(t, sc) {
+    const a = P(sc, 2) - 0.3, b = P(sc, 3) - 0.2, c = P(sc, 4) - 0.2;
+    const q = rise($('q17'), t, 0.1); if (t > a - 0.6) $('q17').style.opacity = 1 - eo(prog(t, a - 0.6, 0.5));
+    fly($('w-b'), t, a, 0.9, [-200, 60, -500, 0, 40, 0, 1], [0, 0, 0, 0, 16, 0, 1]);
+    fly($('w-a'), t, b, 0.9, [200, 60, -500, 0, -40, 0, 1], [0, 0, 0, 0, -16, 0, 1]);
+    $('wbv').textContent = fmt(M.wasteBefore * eo(prog(t, a + 0.1, 1.3)), 2);
+    $('wav').textContent = fmt(M.wasteAfter * eo(prog(t, b + 0.1, 1.3)), 2);
+    rise($('w-p'), t, c); $('wpv').textContent = fmt(M.pct * eo(prog(t, c + 0.1, 1.2)), 1);
+    rise($('w-t'), t, P(sc, 5) - 0.2);
+  },
+  async '18'(t, sc) {
+    rise($('t18h'), t, 0.1); rise($('t18c'), t, 0.3);
+    const g = eo(prog(t, P(sc, 1) - 0.4, 1.4)), mx = Math.max(M.shortBefore, M.shortAfter);
+    $('b18a').style.width = `${g * M.shortBefore / mx * 100}%`; $('b18b').style.width = `${g * M.shortAfter / mx * 100}%`;
+    $('v18a').textContent = Math.round(g * M.shortBefore); $('v18b').textContent = Math.round(g * M.shortAfter);
+    rise($('t18s'), t, P(sc, 2) - 0.3);
+    const k = 10 + 10 * eio(prog(t, P(sc, 2) + 0.4, 1.6)) - 6 * eio(prog(t, P(sc, 2) + 2.2, 1.2));
+    $('kn18').style.left = `${k / 50 * 100}%`; $('tr18').style.width = `${k / 50 * 100}%`; $('buf18').textContent = `${Math.round(k)}%`;
+  },
+  async '20'(t, sc) {
+    const a = P(sc, 0) + 0.3; const g = eo(prog(t, a, 1.8));
+    $('ring').style.opacity = clamp(prog(t, 0, .5)); $('ringarc').setAttribute('stroke-dasharray', `${2 * Math.PI * 236 * M.acc / 100 * g} 2000`);
+    $('accv').textContent = fmt(M.acc * g, 1);
+    rise($('n20'), t, P(sc, 1) - 0.1);
+    rise($('bars20'), t, 0.4);
+    M.langs.forEach((l, i) => { const p = eo(prog(t, P(sc, 2) - 0.4 + i * 0.25, 1.0)); $('lb' + i).style.width = `${p * l.acc}%`; $('lv' + i).textContent = fmt(l.acc * p, 1) + '%'; });
+    $('tline').style.opacity = clamp(prog(t, P(sc, 2) - 0.6, .4));
+  },
+  async '21'(t, sc) {
+    fly($('rt21'), t, P(sc, 0) - 0.2, 0.9, [-100, 80, -500, 0, 30, 0, 1], [0, 0, 0, 0, 8, 0, 1]);
+    M.pages.forEach((p, i) => { $('rb' + i).style.width = `${eo(prog(t, P(sc, 0) + 0.5 + i * .15, .8)) * p.ms / 3000 * 100}%`; });
+    fly($('fc21'), t, P(sc, 1) - 0.2, 0.9, [100, 80, -500, 0, -30, 0, 1], [0, 0, 0, 0, -8, 0, 1]);
+    rise($('f21'), t, P(sc, 0) + 1.0, 0.6, 10);
+    const h = eo(prog(t, P(sc, 3) - 0.1, .6)) * (0.6 + 0.4 * Math.sin(t * 4));
+    $('fc21').style.boxShadow = `0 40px 90px rgba(0,0,0,.6), 0 0 ${80 * h}px rgba(207,123,15,${.35 * h})`;
+  },
+  async '23'(t, sc) {
+    rise($('h23'), t, P(sc, 1) - 0.2);
+    fly($('a1'), t, P(sc, 0) - 0.1, 0.8, [0, 100, -400, 25, 0, 0, 1], [0, Math.sin(t) * 5, 0, 0, 8, 0, 1]);
+    fly($('a2'), t, P(sc, 0) + 1.3, 0.8, [0, 100, -400, 25, 0, 0, 1], [0, Math.sin(t + 1) * 5, 0, 0, 0, 0, 1]);
+    fly($('a3'), t, P(sc, 2) - 0.1, 0.8, [0, 100, -400, 25, 0, 0, 1], [0, Math.sin(t + 2) * 5, 0, 0, -8, 0, 1]);
+  },
+  async '24'(t, sc) {
+    rise($('h24a'), t, P(sc, 0) - 0.1); rise($('h24b'), t, P(sc, 1) - 0.1);
+    const cx = 1350, cy = 520, svg = $('net'); let h = '';
+    const pts = NET; const grow = eo(prog(t, P(sc, 1) - 0.2, 2.2));
+    pts.forEach((p, i) => { const d = (i + 1) / pts.length; if (grow < d * .95) return; const k = clamp((grow - d * .95) / .1);
+      const x = cx + p[0] * 470, y = cy + p[1] * 330;
+      h += `<line x1="${cx}" y1="${cy}" x2="${lerp(cx, x, k)}" y2="${lerp(cy, y, k)}" stroke="rgba(110,231,183,.28)" stroke-width="2"/>`;
+      if (p[2] >= 0) { const q = pts[p[2]]; h += `<line x1="${cx + q[0] * 470}" y1="${cy + q[1] * 330}" x2="${x}" y2="${y}" stroke="rgba(110,231,183,${.18 * k})" stroke-width="2"/>`; }
+      h += `<circle cx="${x}" cy="${y}" r="${10 * k}" fill="#0f1713" stroke="#6ee7b7" stroke-width="3"/>`; });
+    const a = eo(prog(t, 0.2, 0.8)), pulse = 1 + 0.06 * Math.sin(t * 3);
+    h += `<circle cx="${cx}" cy="${cy}" r="${110 * a * pulse}" fill="rgba(207,123,15,.10)" stroke="rgba(207,123,15,.6)" stroke-width="3"/>`;
+    h += `<circle cx="${cx}" cy="${cy}" r="${70 * a}" fill="#0f1713" stroke="#f5b04a" stroke-width="4"/>`;
+    h += `<text x="${cx}" y="${cy + 10}" text-anchor="middle" font-family="Manrope" font-weight="800" font-size="28" fill="#f5b04a" opacity="${a}">PILOT</text>`;
+    svg.innerHTML = h;
+  },
+  async '25'(t, sc) {
+    const m = eo(prog(t, 0.2, 1.2)); $('medal').style.opacity = m;
+    $('medal').style.transform = `rotateY(${(1 - m) * 160 + Math.sin(t * 1.2) * 8}deg) scale(${lerp(.6, 1, m)})`;
+    rise($('aw'), t, 0.6);
+    ['rd1', 'rd2', 'rd3'].forEach((id, i) => rise($(id), t, P(sc, 1) - 0.4 + i * 0.3, 0.6, 50));
+  },
+  async '27'(t) { rise($('cp'), t, 0.1, 0.8, 50); },
+  async '28'(t, sc) {
+    const pull = eio(prog(t, 0, sc.dur + EXIT));
+    fly($('c28a'), t, 0.1, 1.2, [300, 0, -800, 0, -40, 0, 1], [0, 0, lerp(80, -260, pull), 6, -16, 0, 1]);
+    fly($('c28b'), t, 0.5, 1.2, [300, 100, -800, 0, -40, 0, 1], [0, 0, lerp(200, -140, pull), 4, -14, 0, 1]);
+    rise($('h28a'), t, P(sc, 0) - 0.1); rise($('h28b'), t, P(sc, 1) - 0.1);
+  },
+  async '29'(t, sc) {
+    rise($('e-l'), t, 0.05, 0.8, 40);
+    rise($('e-cta'), t, P(sc, 0) - 0.2); rise($('e-url'), t, P(sc, 2) - 0.2, 0.5, 20);
+    fly($('e-qr'), t, 0.4, 1.1, [0, 0, -600, 0, 90, 0, .7], [0, 0, 0, 0, Math.sin(t * .8) * 4, 0, 1]);
+  },
+  async '30'(t, sc) { rise($('o1'), t, 0.1, 0.8, 20); },
+};
+// network node layout (deterministic)
+const NET = (() => { let s = 7; const r = () => (s = (s * 16807) % 2147483647) / 2147483647; const out = [];
+  for (let i = 0; i < 16; i++) { const a = i * 2.39996 + r() * .4, d = .35 + .65 * Math.sqrt((i + 1) / 16); out.push([Math.cos(a) * d, Math.sin(a) * d * .95, i > 2 ? Math.floor(r() * i) : -1]); }
+  return out; })();
+
+let last = null;
+window.renderFrame = async function (t) {
+  const T = TL.total;
+  $('bgglow').style.transform = `translate(${Math.sin(t * .05) * 60}px, ${Math.cos(t * .043) * 40}px)`;
+  $('bgdots').style.transform = `translate(${(t * 6) % 36}px, ${(t * 3) % 36}px)`;
+  const active = TL.scenes.map((s, i) => ({ s, i })).filter(({ s }) => t >= s.start && t < s.start + s.dur + EXIT);
+  for (const el of document.querySelectorAll('.scene')) el.style.display = 'none';
+  for (const { s, i } of active) {
+    const isCh = s.kind === 'chapter';
+    const el = isCh ? $('sc-chapter') : $('sc-' + s.id);
+    if (!el) continue;
+    const lt = t - s.start;
+    el.style.display = 'block'; el.style.zIndex = i;
+    const inP = i === 0 ? 1 : eo(lt / 0.45), outP = lt > s.dur ? eio((lt - s.dur) / EXIT) : 0;
+    el.style.opacity = Math.min(inP, 1 - outP);
+    const sc = lerp(1.035, 1, inP) * (1 + outP * 0.07);
+    el.style.transform = `scale(${sc})`;
+    el.style.filter = (inP < 1 || outP > 0) ? `blur(${(1 - inP) * 10 + outP * 10}px)` : 'none';
+    if (SCREEN[s.id]) {
+      cfgCache[s.id] ??= SCREEN[s.id](s);
+      const tag = el.querySelector('.tagbox'), ch = el.querySelector('.chapter');
+      if (ch) rise(ch, lt, 0.2, 0.5, 20);
+      if (tag) rise(tag, lt, 0.5, 0.5, 20);
+      await screen(s, el, lt, cfgCache[s.id]);
+      if (DRAW[s.id]) await DRAW[s.id](lt, s, el);
+    } else if (isCh) await DRAW.chapter(lt, s, el);
+    else await DRAW[s.id](lt, s, el);
+  }
+  // captions
+  const cue = TL.cues.find((c) => t >= c.s && t < c.e);
+  const cap = $('cap');
+  if (cue) { if (cap.textContent !== cue.text) cap.textContent = cue.text; cap.style.opacity = Math.min(1, (t - cue.s) / 0.12, (cue.e - t) / 0.12); }
+  else cap.style.opacity = 0;
+  // fade in from black at the start, out at the end
+  $('black').style.opacity = Math.max(1 - t / 0.35, clamp((t - (T - 1.4)) / 1.2));
+};
+window.ready = (async () => { await document.fonts.ready; return true; })();
+</script>
+</body></html>

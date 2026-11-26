@@ -13,6 +13,15 @@ function getInitialMode() {
 
 export default function ModeProvider({ children }) {
   const [mode, setModeState] = useState(getInitialMode)
+  // True once the saved mode is known: immediately when this browser already
+  // stored one, otherwise after the preferences read settles. Pages that run
+  // expensive loads keyed on `mode` wait for it, so a first visit does not
+  // load everything twice (default mode, then the saved one).
+  const [modeReady, setModeReady] = useState(() => {
+    if (typeof window === 'undefined') return true
+    const stored = window.localStorage.getItem(STORAGE_KEY)
+    return Boolean(stored && MODES[stored])
+  })
 
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, mode)
@@ -35,6 +44,9 @@ export default function ModeProvider({ children }) {
         if (remoteMode && MODES[remoteMode]) setModeState(remoteMode)
       })
       .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setModeReady(true)
+      })
     return () => {
       cancelled = true
     }
@@ -43,6 +55,7 @@ export default function ModeProvider({ children }) {
   const value = useMemo(
     () => ({
       mode,
+      modeReady,
       modeConfig: MODES[mode],
       setMode: (next) => {
         const resolved = MODES[next] ? next : DEFAULT_MODE
@@ -53,7 +66,7 @@ export default function ModeProvider({ children }) {
         savePreferences({ workspace_mode: resolved }).catch(() => {})
       },
     }),
-    [mode]
+    [mode, modeReady]
   )
 
   return <ModeContext.Provider value={value}>{children}</ModeContext.Provider>

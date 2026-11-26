@@ -1,0 +1,128 @@
+<!doctype html>
+<html><head><meta charset="utf-8" />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@1&family=Noto+Sans+SC:wght@500;700&display=block" rel="stylesheet" />
+<style>
+  /* Colours = the app's own dark-glow tokens (src/styles/index.css). */
+  :root { --bg:#050807; --surface:#0a100d; --elev:#0f1713; --border:rgba(255,255,255,.08); --text:#f2f5f3; --muted:#9aa8a1;
+          --brand:#22c55e; --emerald:#10b981; --mint:#6ee7b7; --amber:#cf7b0f; --red:#dc2626; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:#000; font-family:Inter, sans-serif; color:var(--text); }
+  .frame { position:relative; width:1920px; height:1080px; overflow:hidden; background:var(--bg); }
+  .glow { position:absolute; inset:0; background: radial-gradient(900px 600px at 72% 30%, rgba(34,197,94,.20), transparent 70%), radial-gradient(800px 500px at 10% 100%, rgba(16,185,129,.12), transparent 70%); }
+  .dots { position:absolute; inset:0; background-image: radial-gradient(rgba(255,255,255,.05) 1.2px, transparent 1.2px); background-size: 36px 36px; }
+  .chapter { position:absolute; left:80px; top:64px; display:flex; gap:14px; align-items:center; font-family:Manrope; font-weight:800; font-size:22px; letter-spacing:.18em; color:var(--mint); }
+  .chapter i { font-style:normal; color:var(--muted); }
+  .stage { position:absolute; inset:0; perspective:2200px; }
+  .panel { position:absolute; border-radius:18px; overflow:hidden; border:1px solid rgba(255,255,255,.12); box-shadow: 0 50px 120px rgba(0,0,0,.65), 0 0 0 1px rgba(34,197,94,.08); }
+  .panel img { display:block; width:100%; }
+  .kin { font-family:Manrope; font-weight:800; letter-spacing:-.03em; line-height:1.02; }
+  .kin em { font-style:normal; background:linear-gradient(100deg,var(--mint),var(--brand) 55%,#a3e635); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .tag { display:inline-flex; align-items:center; gap:10px; padding:8px 16px; border-radius:999px; font-size:18px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; }
+  .tag.real { color:var(--mint); background:rgba(16,185,129,.12); border:1px solid rgba(110,231,183,.35); }
+  .tag.sim { color:#f5b04a; background:rgba(207,123,15,.14); border:1px solid rgba(207,123,15,.55); }
+  .card { position:absolute; background:rgba(15,23,19,.92); border:1px solid var(--border); border-radius:22px; padding:26px 30px; box-shadow:0 40px 90px rgba(0,0,0,.6); backdrop-filter: blur(6px); }
+  .review .who { font-size:18px; color:var(--muted); font-weight:600; display:flex; gap:10px; align-items:center; }
+  .review .who b { color:#fca5a5; font-weight:700; }
+  .review p { font-size:30px; font-weight:600; margin-top:10px; line-height:1.3; }
+  .zh { font-family:'Noto Sans SC', Inter, sans-serif; }
+  .stars { color:#f5b04a; letter-spacing:2px; }
+</style></head>
+<body>
+
+<!-- 1. INTRODUCTION: mandatory face clip + lower third -->
+<section class="frame" id="s1">
+  <img src="img/face.png" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:saturate(.95) contrast(1.03)" />
+  <div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(5,8,7,.75) 0%,rgba(5,8,7,.1) 45%,transparent 70%),linear-gradient(0deg,rgba(5,8,7,.65),transparent 40%)"></div>
+  <div class="chapter">01 <i>·</i> INTRODUCTION</div>
+  <div style="position:absolute;left:80px;bottom:110px;display:flex;gap:22px;align-items:stretch">
+    <div style="width:8px;border-radius:4px;background:linear-gradient(var(--mint),var(--brand))"></div>
+    <div>
+      <div style="font-family:Manrope;font-weight:800;font-size:52px;letter-spacing:-.02em">Muhammad Danish Alif Bin Azrul</div>
+      <div style="font-size:28px;color:var(--mint);font-weight:600;margin-top:6px">Founder &amp; Developer, INSIGHTAID AI</div>
+      <div style="font-size:24px;color:#cbd5cf;margin-top:4px">Universiti Teknologi PETRONAS</div>
+    </div>
+  </div>
+</section>
+
+<!-- 2. TITLE: exploded app panels behind the wordmark -->
+<section class="frame" id="s2">
+  <div class="glow"></div><div class="dots"></div>
+  <div class="stage">
+    <div class="panel" style="width:1180px;right:-220px;top:120px;transform:rotateY(-24deg) rotateX(8deg) translateZ(-420px);filter:blur(2.5px) brightness(.55)"><img src="img/dashboard.png" /></div>
+    <div class="panel" style="width:900px;right:120px;top:520px;transform:rotateY(-20deg) rotateX(6deg) translateZ(-120px);filter:brightness(.8)"><img src="img/plan_table.png" /></div>
+    <div class="panel" style="width:640px;right:80px;top:150px;transform:rotateY(-18deg) rotateX(5deg) translateZ(80px)"><img src="img/before_after.png" /></div>
+  </div>
+  <div style="position:absolute;left:110px;top:330px">
+    <div style="display:flex;align-items:center;gap:28px"><img src="img/glyph.png" style="height:150px" />
+      <div class="kin" style="font-size:150px">INSIGHTAID <em>AI</em></div></div>
+    <div style="font-family:'Instrument Serif';font-style:italic;font-size:64px;color:#f5d38a;margin-top:18px">Decisions, backed by evidence.</div>
+  </div>
+</section>
+
+<!-- 3. PROBLEM: kinetic type + floating multilingual reviews -->
+<section class="frame" id="s3">
+  <div class="glow" style="opacity:.6"></div><div class="dots"></div>
+  <div class="chapter">02 <i>·</i> PROBLEM</div>
+  <div class="kin" style="position:absolute;left:110px;top:360px;font-size:104px;max-width:900px">Feedback in three languages. <em>Read too late.</em></div>
+  <div class="stage">
+    <div class="card review" style="left:1080px;top:170px;width:700px;transform:rotateY(-14deg) rotateZ(-2deg)"><div class="who"><span class="stars">{{STARS_MS}}</span> Google Reviews · <b>BM</b></div><p>{{REV_MS}}</p></div>
+    <div class="card review" style="left:1180px;top:440px;width:640px;transform:rotateY(-14deg) rotateZ(1.5deg) translateZ(60px)"><div class="who"><span class="stars">{{STARS_ZH}}</span> Google Reviews · <b>中文</b></div><p class="zh">{{REV_ZH}}</p></div>
+    <div class="card review" style="left:1040px;top:700px;width:720px;transform:rotateY(-14deg) rotateZ(-1deg)"><div class="who"><span class="stars">{{STARS_EN}}</span> Google Reviews · <b>EN</b></div><p>{{REV_EN}}</p></div>
+  </div>
+  <div style="position:absolute;left:110px;bottom:70px"><span class="tag sim">Synthetic demo reviews</span></div>
+</section>
+
+<!-- 4. SOLUTION hero: planner, the flagged row lifts out with its reviews -->
+<section class="frame" id="s4">
+  <div class="glow"></div><div class="dots"></div>
+  <div class="chapter">03 <i>·</i> SOLUTION</div>
+  <div class="stage">
+    <div class="panel" style="width:1500px;left:300px;top:250px;transform:rotateX(18deg) rotateY(-6deg) translateZ(-260px);filter:blur(1.8px) brightness(.5)"><img src="img/plan_table.png" /></div>
+    <div class="panel" style="width:1560px;left:180px;top:520px;transform:rotateX(10deg) rotateY(-4deg) translateZ(140px);box-shadow:0 60px 140px rgba(0,0,0,.8),0 0 0 2px rgba(220,38,38,.55),0 0 80px rgba(220,38,38,.25)"><img src="img/karipap_row.png" /></div>
+    <div class="card review" style="left:1150px;top:170px;width:620px;transform:rotateY(-12deg) translateZ(200px)"><div class="who"><span class="stars">{{STARS_KZH}}</span> Review · <b>中文</b></div><p class="zh" style="font-size:28px">{{KAR_ZH}}</p></div>
+    <div class="card review" style="left:1210px;top:340px;width:600px;transform:rotateY(-12deg) translateZ(240px)"><div class="who"><span class="stars">{{STARS_KEN}}</span> Review · <b>EN</b></div><p style="font-size:28px">{{KAR_EN}}</p></div>
+  </div>
+  <div class="kin" style="position:absolute;left:110px;top:150px;font-size:92px;max-width:960px">Reviews reach <em>the kitchen.</em></div>
+  <div style="position:absolute;left:110px;top:370px;font-size:30px;color:#cbd5cf;max-width:860px;line-height:1.35">“Basi” complaints flag the karipap. Tomorrow’s batch is cut by 20%, and the reason is shown.</div>
+  <div style="position:absolute;left:110px;bottom:70px"><span class="tag real">Real app screen · synthetic demo data</span></div>
+</section>
+
+<!-- 5. IMPACT: before / after split, simulated tag, trade-off visible -->
+<section class="frame" id="s5">
+  <div class="glow"></div><div class="dots"></div>
+  <div class="chapter">04 <i>·</i> IMPACTS</div>
+  <div style="position:absolute;left:0;right:0;top:150px;text-align:center"><span class="tag sim">Simulation on synthetic data · {{WASTE_DAYS}} days · {{WASTE_BUFFER}}% buffer</span></div>
+  <div class="stage">
+    <div class="card" style="left:170px;top:300px;width:640px;transform:rotateY(16deg);padding:40px 44px">
+      <div style="font-size:22px;letter-spacing:.14em;color:var(--muted);font-weight:700">ORDER LIKE LAST WEEK</div>
+      <div class="kin" style="font-size:110px;margin-top:14px;color:#e5e7eb">RM {{WASTE_BEFORE}}</div>
+      <div style="font-size:28px;color:var(--muted);margin-top:8px">wasted · {{UNITS_BEFORE}} units</div>
+    </div>
+    <div class="card" style="left:1110px;top:300px;width:640px;transform:rotateY(-16deg);padding:40px 44px;border:2px solid rgba(34,197,94,.55);box-shadow:0 40px 90px rgba(0,0,0,.6),0 0 90px rgba(34,197,94,.25)">
+      <div style="font-size:22px;letter-spacing:.14em;color:var(--mint);font-weight:700">ORDER WITH INSIGHTAID</div>
+      <div class="kin" style="font-size:110px;margin-top:14px;color:var(--brand)">RM {{WASTE_AFTER}}</div>
+      <div style="font-size:28px;color:var(--muted);margin-top:8px">wasted · {{UNITS_AFTER}} units</div>
+    </div>
+  </div>
+  <div style="position:absolute;left:0;right:0;top:700px;text-align:center">
+    <div class="kin" style="font-size:120px"><em>{{WASTE_PCT}}%</em> less waste</div>
+    <div style="font-size:30px;color:#f5b04a;margin-top:18px;font-weight:600">Trade-off, shown in the app: units short {{SHORT_BEFORE}} → {{SHORT_AFTER}}</div>
+  </div>
+</section>
+
+<!-- 6. END CARD: wordmark + QR to the live demo -->
+<section class="frame" id="s6">
+  <div class="glow"></div><div class="dots"></div>
+  <div style="position:absolute;left:110px;top:300px">
+    <div style="display:flex;align-items:center;gap:24px"><img src="img/glyph.png" style="height:120px" /><div class="kin" style="font-size:120px">INSIGHTAID <em>AI</em></div></div>
+    <div style="font-family:'Instrument Serif';font-style:italic;font-size:56px;color:#f5d38a;margin-top:14px">Decisions, backed by evidence.</div>
+    <div class="kin" style="font-size:64px;margin-top:70px">Scan, click, <em>no sign-up.</em></div>
+    <div style="font-size:30px;color:var(--muted);margin-top:14px">insightaid-ai.vercel.app</div>
+  </div>
+  <div style="position:absolute;right:170px;top:290px;text-align:center">
+    <div style="width:420px;height:420px;padding:22px;background:#fff;border-radius:28px;box-shadow:0 0 0 10px rgba(34,197,94,.25),0 40px 100px rgba(0,0,0,.6)">{{QR}}</div>
+    <div style="font-size:28px;font-weight:700;margin-top:22px">Try the demo</div>
+  </div>
+  <div style="position:absolute;left:110px;bottom:60px;font-size:20px;color:#6b7a73">Koperasi Siswa Maju is fictional; its data is synthetic. © 2026 Muhammad Danish Alif Bin Azrul. All rights reserved.</div>
+</section>
+</body></html>

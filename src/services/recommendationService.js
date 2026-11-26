@@ -3,6 +3,7 @@ import { getProfile } from './businessProfileService'
 import { runCrisisDetection } from './crisisService'
 import { calculateReadiness } from '@/utils/dataReadiness'
 import { buildBusinessContextFactors, generateRecommendations } from '@/utils/recommendationRules'
+import { explanationCacheKey, explanationInput, splitCached } from '@/utils/explanationCache'
 
 /**
  * Assembles real context (business profile, crisis signals, data
@@ -27,19 +28,12 @@ async function countRows(templateId) {
 }
 
 async function countHistoricalMonths() {
-  const { data, error } = await supabase
-    .from('processed_data')
-    .select('published_at, collected_at')
-    .order('collected_at', { ascending: true })
-    .limit(1)
+  // Earliest and latest rows are independent reads; run them together.
+  const dateRow = (ascending) =>
+    supabase.from('processed_data').select('published_at, collected_at').order('collected_at', { ascending }).limit(1)
+  const [{ data, error }, { data: latest, error: latestError }] = await Promise.all([dateRow(true), dateRow(false)])
   if (error) throw error
   if (!data?.length) return 0
-
-  const { data: latest, error: latestError } = await supabase
-    .from('processed_data')
-    .select('published_at, collected_at')
-    .order('collected_at', { ascending: false })
-    .limit(1)
   if (latestError) throw latestError
 
   const earliest = new Date(data[0].published_at ?? data[0].collected_at)
@@ -72,20 +66,49 @@ export async function buildContext(mode) {
   return { mode, profile, crisis, dataReadiness }
 }
 
+/** Stored AI wording for these keys. Any failure (including the table not
+ * existing yet) reads as an empty cache, so the AI is simply asked. */
+async function readExplanationCache(keys) {
+  try {
+    const { data, error } = await supabase
+      .from('recommendation_explanations')
+      .select('cache_key, rationale, context')
+      .in('cache_key', keys)
+    return error ? [] : (data ?? [])
+  } catch {
+    return []
+  }
+}
+
 /** Calls Layer 2. Never throws — returns {} on any failure so the caller
- * can fall back to rule-only recommendations, per FYP2.md §55. */
-async function fetchExplanations(recommendations, businessContext) {
+ * can fall back to rule-only recommendations, per FYP2.md §55.
+ *
+ * SPARK item 7: wording already produced for the exact same inputs
+ * (src/utils/explanationCache.js) is reused, so only new or changed
+ * recommendations wait for the AI. New wording is stored without blocking. */
+export async function fetchExplanations(recommendations, businessContext) {
   if (recommendations.length === 0) return { explanations: {}, unavailable: false }
 
+  const keys = await Promise.all(recommendations.map((rec) => explanationCacheKey(rec, businessContext)))
+  const { cached, missing } = splitCached(recommendations, keys, await readExplanationCache(keys))
+  if (missing.length === 0) return { explanations: cached, unavailable: false }
+
   const { data, error } = await supabase.functions.invoke('explain-recommendations', {
-    body: {
-      recommendations: recommendations.map(({ id, category, priority, title, evidence }) => ({ id, category, priority, title, evidence })),
-      businessContext,
-    },
+    body: { recommendations: missing.map(explanationInput), businessContext },
   })
 
-  if (error || data?.error) return { explanations: {}, unavailable: true }
-  return { explanations: data?.explanations ?? {}, unavailable: false }
+  if (error || data?.error) return { explanations: cached, unavailable: Object.keys(cached).length === 0 }
+  const fresh = data?.explanations ?? {}
+
+  const keyById = new Map(recommendations.map((rec, i) => [rec.id, keys[i]]))
+  const rows = Object.entries(fresh)
+    .filter(([id, e]) => keyById.has(id) && e?.rationale && e?.context)
+    .map(([id, e]) => ({ cache_key: keyById.get(id), rule_id: id, rationale: e.rationale, context: e.context }))
+  if (rows.length > 0) {
+    Promise.resolve(supabase.from('recommendation_explanations').upsert(rows, { onConflict: 'user_id,cache_key' })).catch(() => {})
+  }
+
+  return { explanations: { ...cached, ...fresh }, unavailable: false }
 }
 
 /**

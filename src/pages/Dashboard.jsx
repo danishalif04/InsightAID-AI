@@ -26,6 +26,7 @@ import {
   X,
 } from 'lucide-react'
 import Badge from '@/components/ui/Badge'
+import ImpactCard from '@/components/common/ImpactCard'
 import Chip from '@/components/ui/Chip'
 import Button from '@/components/ui/Button'
 import ChartTooltip from '@/components/ui/ChartTooltip'
@@ -263,6 +264,8 @@ function DashboardBody({ data, granularity, onGranularityChange }) {
           )}
         </div>
       )}
+
+      <ImpactCard impact={data.impact} />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <ChartCard

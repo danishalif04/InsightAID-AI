@@ -52,9 +52,11 @@ const NAV_GROUPS = [
     label: 'Intelligence',
     items: [
       { label: 'Forecasting', path: PATHS.forecasting },
+      { label: 'Prep & Stock Planner', path: PATHS.prepPlanner },
       { label: 'Financial Planning', path: PATHS.financialPlanning },
       { label: 'AI Recommendations', path: PATHS.recommendations },
       { label: 'Model Performance', path: PATHS.modelPerformance },
+      { label: 'Model & Evidence', path: PATHS.modelEvidence },
       { label: 'Agent Orchestrator', path: PATHS.agentOrchestrator },
     ],
   },

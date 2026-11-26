@@ -11,6 +11,7 @@ import {
   Sparkles,
 } from 'lucide-react'
 import Button from '@/components/ui/Button'
+import TryDemoButton from '@/components/common/TryDemoButton'
 import Badge from '@/components/ui/Badge'
 import AccordionRow from '@/components/ui/AccordionRow'
 import { PATHS } from '@/routes/paths'
@@ -178,12 +179,8 @@ export default function Welcome() {
             startups, multilingual sentiment, sales forecasting, crisis detection, and explainable
             recommendations, built around Malaysian SMEs and every number traceable back to real data.
           </p>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Link to={PATHS.login}>
-              <Button variant="glowBrand" size="md">
-                Try the demo
-              </Button>
-            </Link>
+          <TryDemoButton variant="glowBrand" className="mx-auto mt-8 max-w-sm" />
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
             <a href="#guide">
               <Button variant="glowSecondary" size="md">
                 How to use
@@ -287,13 +284,7 @@ export default function Welcome() {
         {/* Final CTA */}
         <section className="rounded-3xl border border-glow-border bg-glow-surface-elevated p-8 text-center sm:p-10">
           <p className="text-lg font-semibold text-glow-text">Ready to see it with your own data?</p>
-          <div className="mt-5">
-            <Link to={PATHS.login}>
-              <Button variant="glowBrand" size="md">
-                Try the demo
-              </Button>
-            </Link>
-          </div>
+          <TryDemoButton variant="glowBrand" className="mx-auto mt-5 max-w-sm" />
         </section>
       </main>
     </div>

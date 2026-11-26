@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>INSIGHTAID AI · SPARK 2026 Poster</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@600;700&display=block" rel="stylesheet" />
+<style>
+  /* Follows the official ISPARK 2026 A1 template (594 x 841 mm): organiser
+     strip, event lines, navy title band, Sub-theme / Category / Project ID
+     lines, then the ten sections in the template's order, and the navy
+     footer. Template colours: navy #062D7B, heading blue #0752A0, body
+     #25394D, visual boxes #EEF5FC. InsightAid's emerald marks measured
+     results; amber marks simulated or pending items. */
+  @page { size: 594mm 841mm; margin: 0; }
+  :root {
+    --navy: #062D7B; --blue: #0752A0; --ink: #1E2F42; --body: #33475B; --muted: #5E7189;
+    --box: #EEF5FC; --line: #D5E3F2; --emerald: #15803D; --emerald-l: #22C55E; --amber: #B45309; --amber-bg: #FEF3C7;
+    --pad: 70px; --gap: 22px; --r: 22px;
+    --t-sec: 44px; --t-body: 30px; --t-small: 25px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 2245px; height: 3179px; background: #fff; }
+  body { font-family: Inter, Arial, sans-serif; color: var(--body); font-size: var(--t-body); line-height: 1.38; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .zh { font-family: 'Noto Sans SC', Inter, sans-serif; }
+  .poster { position: relative; width: 2245px; height: 3179px; overflow: hidden;
+    background: radial-gradient(1400px 900px at 100% 0%, #E8F1FC 0%, transparent 60%), radial-gradient(1200px 800px at 0% 100%, #EEF7F1 0%, transparent 60%), #FFFFFF; }
+  .content { position: absolute; inset: var(--pad); display: flex; flex-direction: column; gap: var(--gap); }
+  .content > * { flex-shrink: 0; }
+  b, strong { color: var(--ink); }
+
+  /* Header, as in the template */
+  .top { display: flex; justify-content: space-between; align-items: center; }
+  .organisers { height: 168px; border-radius: 14px; }
+  .inst { height: 120px; }
+  .event h1 { font-family: 'Plus Jakarta Sans', Arial, sans-serif; font-size: 118px; font-weight: 800; color: var(--navy); letter-spacing: -.02em; line-height: 1; }
+  .event .sub { font-size: 46px; font-weight: 700; color: var(--blue); margin-top: 10px; }
+  .event .when { font-size: 34px; color: var(--ink); margin-top: 8px; }
+  .event .when span { color: var(--muted); margin: 0 14px; }
+
+  .band { position: relative; overflow: hidden; background: var(--navy); border-radius: var(--r); padding: 30px 44px; color: #fff; display: flex; align-items: center; gap: 30px; }
+  .band::after { content: ''; position: absolute; right: -120px; top: -160px; width: 620px; height: 620px; border-radius: 50%; background: radial-gradient(circle, rgba(34,197,94,.35), transparent 65%); }
+  .band img { height: 118px; position: relative; z-index: 1; }
+  .band h2 { font-family: 'Plus Jakarta Sans', Arial, sans-serif; font-size: 92px; font-weight: 800; letter-spacing: -.02em; line-height: 1; color: #fff; }
+  .band h2 em { font-style: normal; color: #4ADE80; }
+  .band p { font-size: 36px; font-weight: 600; color: #D6E4F7; margin-top: 10px; }
+  .band > div { position: relative; z-index: 1; }
+
+  .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 40px; font-size: 32px; color: var(--ink); padding: 0 6px; }
+  .meta b { color: var(--navy); }
+  .pending { display: inline-block; padding: 0 14px; border: 3px dashed var(--amber); border-radius: 8px; color: var(--amber); font-weight: 800; font-size: 26px; vertical-align: middle; }
+
+  /* Two columns, rows paired as in the template */
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 44px; flex: 1 1 auto; flex-shrink: 1; }
+  .col { display: flex; flex-direction: column; justify-content: space-between; gap: 26px; }
+  .sec h3 { display: flex; align-items: center; gap: 16px; font-family: 'Plus Jakarta Sans', Arial, sans-serif; font-size: var(--t-sec); font-weight: 800; color: var(--blue); letter-spacing: .04em; text-transform: uppercase; margin-bottom: 12px; }
+  .sec h3::after { content: ''; flex: 1; height: 3px; background: linear-gradient(90deg, var(--line), transparent); }
+  .sec p + p { margin-top: 10px; }
+  ul.dots { list-style: none; }
+  ul.dots li { position: relative; padding-left: 34px; margin-top: 8px; }
+  ul.dots li::before { content: ''; position: absolute; left: 6px; top: 15px; width: 12px; height: 12px; border-radius: 50%; background: var(--emerald-l); }
+  .tag { display: inline-block; font-size: 21px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; padding: 3px 12px; border-radius: 999px; vertical-align: middle; }
+  .tag.real { color: var(--emerald); background: #DCFCE7; }
+  .tag.sim { color: var(--amber); background: var(--amber-bg); }
+
+  .vbox { background: var(--box); border: 1px solid var(--line); border-radius: var(--r); padding: 26px 26px 20px; }
+  .cap { font-size: var(--t-small); color: var(--muted); margin-top: 14px; line-height: 1.32; }
+
+  /* Product visual: the real planner screen, tilted like a floating panel */
+  .stage { perspective: 1800px; padding: 10px 0 6px; }
+  .tilt { position: relative; transform: rotateY(-6deg) rotateX(4deg); transform-origin: 40% 50%; border-radius: 16px; overflow: visible;
+    box-shadow: 0 40px 70px -20px rgba(6,45,123,.45), 0 12px 24px rgba(6,45,123,.18); }
+  .tilt img { display: block; width: 100%; border-radius: 16px; border: 2px solid #0F1B15; }
+  .co { position: absolute; width: 50px; height: 50px; border-radius: 50%; background: #F59E0B; color: #1F1300; font-family: 'Plus Jakarta Sans'; font-weight: 800; font-size: 28px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 5px rgba(245,158,11,.35); transform: translate(-50%, -50%); }
+  .legend { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 22px; margin-top: 18px; font-size: var(--t-small); line-height: 1.28; color: var(--ink); }
+  .legend div { display: flex; gap: 10px; }
+  .legend i { flex-shrink: 0; width: 34px; height: 34px; border-radius: 50%; background: #F59E0B; color: #1F1300; font-style: normal; font-weight: 800; font-size: 20px; display: flex; align-items: center; justify-content: center; }
+
+  /* Impact: achieved vs expected kept apart, as the template asks */
+  .impact { display: grid; gap: 14px; }
+  .imp-head { font-size: 22px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+  .imp-head.ok { color: var(--emerald); } .imp-head.exp { color: var(--amber); }
+  .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .kpi { background: #fff; border: 1px solid var(--line); border-radius: 18px; padding: 14px 18px; box-shadow: 0 6px 18px rgba(6,45,123,.06); }
+  .kpi b { display: block; font-family: 'Plus Jakarta Sans'; font-size: 54px; font-weight: 800; line-height: 1.05; color: var(--emerald); }
+  .kpi span { font-size: 23px; line-height: 1.25; display: block; margin-top: 4px; color: var(--body); }
+  .kpi.warn b { color: var(--amber); }
+  .expected { border: 2px dashed #F3C77A; background: #FFFBEB; border-radius: 18px; padding: 14px 20px; font-size: 26px; }
+
+  /* Supporting visual: key results drawn from the result files */
+  .keys { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  .keys h4 { font-family: 'Plus Jakarta Sans'; font-size: 28px; font-weight: 800; color: var(--ink); }
+  .keys .s { font-size: 21px; color: var(--muted); margin: 2px 0 8px; }
+  .keys svg { width: 100%; height: auto; display: block; }
+
+  .award { display: flex; gap: 22px; align-items: center; background: linear-gradient(120deg, #FFF7E0, #FFFFFF); border: 2px solid #F3C77A; border-radius: 18px; padding: 18px 22px; }
+  .medal { width: 96px; height: 96px; border-radius: 50%; flex-shrink: 0; background: radial-gradient(circle at 35% 30%, #FFFFFF, #A7B4C4 70%); border: 4px solid #CBD5E1; display: flex; align-items: center; justify-content: center; font-family: 'Plus Jakarta Sans'; font-weight: 800; font-size: 18px; color: #334155; letter-spacing: .06em; box-shadow: 0 8px 18px rgba(0,0,0,.12); }
+  .award b { font-family: 'Plus Jakarta Sans'; font-size: 34px; color: #92400E; display: block; }
+  .award span { font-size: 27px; color: var(--ink); }
+
+  .qrs { display: flex; gap: 22px; margin-top: 16px; align-items: flex-start; }
+  .qrbox { text-align: center; }
+  .qr { width: 190px; height: 190px; padding: 8px; border-radius: 14px; background: #fff; border: 2px solid var(--line); }
+  .qr svg { width: 100%; height: 100%; display: block; }
+  .qr.pending { border: 3px dashed var(--amber); display: flex; align-items: center; justify-content: center; }
+  .qr-pending { color: var(--amber); font-weight: 800; font-size: 24px; text-align: center; }
+  .qr-label { font-size: 21px; font-weight: 700; margin-top: 8px; color: var(--ink); width: 190px; line-height: 1.2; }
+  .try { flex: 1; font-size: 26px; padding-top: 6px; }
+
+  .author { display: flex; gap: 22px; align-items: center; }
+  .author img { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; object-position: top; background: linear-gradient(#DCEBFB, #F5F9FE); border: 4px solid #fff; box-shadow: 0 8px 20px rgba(6,45,123,.18); }
+  .author b { font-family: 'Plus Jakarta Sans'; font-size: 34px; color: var(--navy); display: block; line-height: 1.15; }
+  .author span { font-size: 26px; display: block; line-height: 1.3; }
+
+  .foot { background: var(--navy); color: #fff; border-radius: 14px; padding: 14px 30px; display: flex; justify-content: space-between; align-items: center; font-size: 26px; }
+  .foot small { font-size: 20px; color: #B9CCE8; }
+</style>
+</head>
+<body>
+<div class="poster">
+  <div class="content">
+
+    <div class="top">
+      <img class="organisers" src="assets/spark-organisers.png" alt="UMK, GERIC and I-CERI" />
+      <img class="inst" src="assets/utp.png" alt="Universiti Teknologi PETRONAS" />
+    </div>
+
+    <div class="event">
+      <h1>ISPARK 2026</h1>
+      <div class="sub">International Innovation and Commercialisation Challenge</div>
+      <div class="when">22 to 23 December 2026<span>·</span>UMK City Campus<span>·</span>Hybrid</div>
+    </div>
+
+    <div class="band">
+      <img src="assets/glyph.png" alt="" />
+      <div>
+        <h2>INSIGHTAID <em>AI</em></h2>
+        <p>Multilingual customer insight and daily prep planning for cooperatives and small food businesses</p>
+      </div>
+    </div>
+
+    <div class="meta">
+      <div><b>Sub-theme:</b> {{SUBTHEME}}</div><div><b>Category:</b> {{CATEGORY}}</div>
+      <div><b>Project ID:</b> {{PROJECT_ID}}</div><div><b>Institution:</b> {{INSTITUTION}}</div>
+    </div>
+
+    <div class="grid">
+    <div class="col">
+      <section class="sec">
+        <h3>Abstract</h3>
+        <p>Cooperative cafés and small food outlets decide every morning how much to prepare, while customer feedback arrives in Bahasa Melayu, English and Mandarin and is read too late. <b>INSIGHTAID AI</b> is a web decision support system that combines sales history with multilingual reviews. It detects complaint spikes early, forecasts demand and turns both into explainable actions, including a new <b>Prep &amp; Stock Planner</b> that recommends daily quantities and cuts items customers call “basi”. Our XLM-RoBERTa model reached <b>{{XLMR}}%</b> sentiment accuracy; in a replay on a synthetic cooperative dataset, forecast-based ordering cut simulated waste by <b>{{WASTE_PCT}}%</b>.</p>
+      </section>
+      <section class="vbox">
+        <div class="stage">
+          <div class="tilt">
+            <img src="assets/s-planner-flag.jpg" alt="Prep and Stock Planner plan table" />
+            <div class="co" style="left:18%; top:55%">1</div>
+            <div class="co" style="left:34%; top:55%">2</div>
+            <div class="co" style="left:61%; top:55%">3</div>
+            <div class="co" style="left:100.5%; top:55%">4</div>
+          </div>
+        </div>
+        <div class="legend">
+          <div><i>1</i>Expected sales: same weekday, last 4 weeks</div>
+          <div><i>2</i>Quantity to prepare, with a safety buffer</div>
+          <div><i>3</i>“Basi” reviews flag the item; the batch is cut</div>
+          <div><i>4</i>The reason behind every number</div>
+        </div>
+        <div class="cap"><span class="tag real">Real app screen</span> Prep &amp; Stock Planner on the synthetic Koperasi Siswa Maju demo data.</div>
+      </section>
+      <section class="sec">
+        <h3>Objectives</h3>
+        <p><b>Purpose:</b> help small businesses and cooperatives make daily decisions from their own sales and multilingual customer feedback.</p>
+        <ul class="dots">
+          <li><b>O1.</b> Multilingual sentiment analysis (BM, EN, <span class="zh">中文</span>, code-mixed) with XLM-RoBERTa.</li>
+          <li><b>O2.</b> Sales forecasting with and without sentiment, tested against a sales-only baseline.</li>
+          <li><b>O3.</b> An integrated decision support system: crisis detection, explainable recommendations and prep &amp; stock planning.</li>
+        </ul>
+      </section>
+      <section class="vbox">
+        <div class="keys">
+          <div><h4>Sentiment accuracy by language</h4><div class="s">XLM-RoBERTa, 10,769 held-out comments</div>{{CHART_LANG_LIGHT}}</div>
+          <div><h4>Waste: last week vs forecast ordering</h4><div class="s">replay, {{WASTE_DAYS}} days, {{WASTE_BUFFER}}% buffer</div>{{CHART_WASTE_LIGHT}}</div>
+        </div>
+        <div class="cap">Every figure is read from the project’s result files by the build script (metrics/spark2026.json), never typed in. Sentiment was evaluated offline; the live app scores sentiment with a rating heuristic.</div>
+      </section>
+      <section class="sec">
+        <h3>Authors and Affiliations</h3>
+        <div class="author">
+          <img src="assets/danish.png" alt="Danish Alif" />
+          <div><b>Muhammad Danish Alif Bin Azrul</b><span>Lead author (solo entry), Bachelor of Computer Science (Hons)<br/>Universiti Teknologi PETRONAS<br/>muhammad_22006390@utp.edu.my</span></div>
+        </div>
+      </section>
+    </div>
+    <div class="col">
+      <section class="sec">
+        <h3>Value Added</h3>
+        <ul class="dots">
+          <li><b>One view of customer voice</b> in BM, English, <span class="zh">中文</span> and mixed BM-English.</li>
+          <li><b>Reviews reach the kitchen:</b> a freshness complaint lowers tomorrow’s prep quantity, with the reason shown.</li>
+          <li><b>Explainable by design:</b> rules and evidence decide; AI only words the explanation.</li>
+          <li><b>Affordable:</b> runs on free-tier cloud and open-source models; anyone can try it with no sign-up.</li>
+        </ul>
+      </section>
+      <section class="sec">
+        <h3>Usefulness</h3>
+        <p><b>Problem:</b> food prepared by guesswork is wasted or sells out, and complaints in three languages surface too late.</p>
+        <p><b>Target users:</b> cooperative (koperasi) cafés and mini marts first; also kedai runcit, kopitiam and early-stage online sellers.</p>
+        <p><b>How it is used:</b> upload POS sales and reviews as CSV, open the planner each evening for tomorrow’s quantities, act on crisis alerts and evidence-backed recommendations, and track waste on the Before vs After card.</p>
+        <div class="qrs">
+          <div class="qrbox">{{QR_APP}}</div>
+          <div class="qrbox">{{QR_VIDEO}}</div>
+          <div class="try"><b>Try it now.</b> One click gives every visitor a private demo cooperative. No sign-up.<br/><span style="font-size:22px;color:var(--muted)">Proposed pricing: Free · RM 49/month · multi-outlet plan. No billing yet.</span></div>
+        </div>
+      </section>
+      <section class="sec">
+        <h3>Impact</h3>
+        <div class="impact">
+          <div class="imp-head ok">Achieved (measured)</div>
+          <div class="kpis">
+            <div class="kpi"><b>{{XLMR}}%</b><span>sentiment accuracy (target ≥ 80%); EN {{XLMR_EN}} · BM {{XLMR_MS}} · ZH {{XLMR_ZH}}</span></div>
+            <div class="kpi"><b>{{RT_PASS}} of {{RT_PAGES}}</b><span>analysis pages load in under 3 seconds on every run</span></div>
+            <div class="kpi warn"><b>{{MET_MAPE}} of {{N_PROTO}}</b><span>forecast tests met MAPE &lt; 15%; sentiment gave no significant gain</span></div>
+          </div>
+          <div class="kpis" style="grid-template-columns: 1.4fr 1fr;">
+            <div class="kpi"><b>{{WASTE_PCT}}% <span style="display:inline;font-size:28px;color:var(--ink)">less waste</span></b><span>RM {{WASTE_BEFORE}} → RM {{WASTE_AFTER}} over {{WASTE_DAYS}} days. <span class="tag sim">Simulated, synthetic data</span></span></div>
+            <div class="kpi warn"><b>{{SHORT_BEFORE}} → {{SHORT_AFTER}}</b><span>units short: the trade-off, shown in the app; the buffer balances it</span></div>
+          </div>
+          <div class="imp-head exp">Expected (not yet measured)</div>
+          <div class="expected">Less food waste and fewer sold-out items at pilot cooperatives (2027 pilot with real sales), and faster response to customer complaints. Supports SDG 8, 9 and 12.</div>
+        </div>
+      </section>
+      <section class="sec">
+        <h3>Recognition</h3>
+        <div class="award">
+          <div class="medal">SILVER</div>
+          <div><b>Silver Award (Anugerah Perak)</b><span>AIMIX: IID 2026, Category B, 21 November 2026</span></div>
+        </div>
+        <p style="margin-top:16px"><b>Software:</b> © 2026 Muhammad Danish Alif Bin Azrul. All rights reserved. No intellectual property registration yet.</p>
+      </section>
+      <section class="sec">
+        <h3>Acknowledgement</h3>
+        <p>Supervisor <b>Ts. Ahmad Izuddin Bin Zainal Abidin</b>, Universiti Teknologi PETRONAS. Public datasets: Shopee Malaysia reviews, Mesolitica Malay sentiment, ChineseNlpCorpus, Amazon Reviews 2023 and Olist. Koperasi Siswa Maju is fictional and its data is synthetic.</p>
+      </section>
+    </div>
+    </div>
+
+    <div class="foot"><span>ICERI × GERIC, Universiti Malaysia Kelantan</span><small>INSIGHTAID AI · Decisions, backed by evidence.</small></div>
+  </div>
+</div>
+</body>
+</html>
